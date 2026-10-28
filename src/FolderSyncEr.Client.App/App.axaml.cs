@@ -31,6 +31,7 @@ public partial class App : Application
                 DataContext = mainVm
             };
             desktop.MainWindow = mainWindow;
+            mainWindow.Show();
 
             // Load application icon
             WindowIcon? icon = null;
@@ -49,12 +50,25 @@ public partial class App : Application
                 Console.Error.WriteLine($"[ICON WARNING] Could not load app icon: {ex.Message}");
             }
 
+            // Track explicit shutdown to prevent recursive Closing -> Shutdown -> Close -> Closing loop
+            var isShuttingDown = false;
+
+            desktop.ShutdownRequested += (_, _) =>
+            {
+                isShuttingDown = true;
+            };
+
             // Setup System Tray icon
-            SetupSystemTray(desktop, mainVm, icon);
+            SetupSystemTray(desktop, mainVm, icon, () => isShuttingDown = true);
 
             // Handle close behavior (close-to-tray or quit)
             mainWindow.Closing += (s, e) =>
             {
+                if (isShuttingDown)
+                {
+                    return;
+                }
+
                 if (mainVm.Settings.CloseToTray)
                 {
                     e.Cancel = true;
@@ -62,6 +76,7 @@ public partial class App : Application
                 }
                 else
                 {
+                    isShuttingDown = true;
                     mainVm.Dispose();
                     desktop.Shutdown();
                 }
@@ -71,7 +86,11 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
-    private void SetupSystemTray(IClassicDesktopStyleApplicationLifetime desktop, MainWindowViewModel mainVm, WindowIcon? icon)
+    private void SetupSystemTray(
+        IClassicDesktopStyleApplicationLifetime desktop,
+        MainWindowViewModel mainVm,
+        WindowIcon? icon,
+        Action onQuit)
     {
         try
         {
@@ -89,9 +108,7 @@ public partial class App : Application
             {
                 if (desktop.MainWindow != null)
                 {
-                    desktop.MainWindow.Show();
-                    desktop.MainWindow.WindowState = WindowState.Normal;
-                    desktop.MainWindow.Activate();
+                    BringWindowToForeground(desktop.MainWindow);
                 }
             };
 
@@ -110,6 +127,7 @@ public partial class App : Application
             var quitItem = new NativeMenuItem("Quit");
             quitItem.Click += (_, _) =>
             {
+                onQuit();
                 mainVm.Dispose();
                 desktop.Shutdown();
             };
@@ -125,16 +143,7 @@ public partial class App : Application
             {
                 if (desktop.MainWindow != null)
                 {
-                    if (desktop.MainWindow.IsVisible)
-                    {
-                        desktop.MainWindow.Activate();
-                    }
-                    else
-                    {
-                        desktop.MainWindow.Show();
-                        desktop.MainWindow.WindowState = WindowState.Normal;
-                        desktop.MainWindow.Activate();
-                    }
+                    BringWindowToForeground(desktop.MainWindow);
                 }
             };
 
@@ -145,5 +154,25 @@ public partial class App : Application
         {
             Console.Error.WriteLine($"[TRAY WARNING] System tray could not be initialized: {ex.Message}");
         }
+    }
+
+    private static void BringWindowToForeground(Window window)
+    {
+        if (!window.IsVisible)
+        {
+            window.Show();
+        }
+
+        if (window.WindowState == WindowState.Minimized)
+        {
+            window.WindowState = WindowState.Normal;
+        }
+
+        // Toggling Topmost forces native window managers (X11/Wayland Mutter/KWin, Windows DWM)
+        // to bypass focus-stealing prevention and raise the window to the foreground
+        window.Topmost = true;
+        window.Activate();
+        window.Topmost = false;
+        window.Focus();
     }
 }

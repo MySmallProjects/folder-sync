@@ -124,12 +124,27 @@ public sealed class SyncCoordinator : IDisposable
         _currentSnapshot = new RemoteSnapshot();
         _guardedDb = new GuardedSyncDatabase(rawDb, _failureRegistry, _currentSnapshot, _loggerFactory.CreateLogger<GuardedSyncDatabase>());
         _localStorage = new SafeLocalStorage(_localFolderPath, _loggerFactory.CreateLogger<SafeLocalStorage>());
-        _remoteStorage = new RestRemoteStorage(_api, _currentSnapshot, _failureRegistry, _loggerFactory.CreateLogger<RestRemoteStorage>());
+        _remoteStorage = new RestRemoteStorage(
+            _api,
+            _currentSnapshot,
+            _failureRegistry,
+            path =>
+            {
+                var fullPath = Path.Combine(_localFolderPath, path.Replace('/', Path.DirectorySeparatorChar));
+                return File.Exists(fullPath) ? File.GetLastWriteTimeUtc(fullPath) : null;
+            },
+            _loggerFactory.CreateLogger<RestRemoteStorage>());
         _conflictResolver = new PolicyConflictResolver(_localFolderPath, _deviceId, policy, _promptHandler, _loggerFactory.CreateLogger<PolicyConflictResolver>());
 
         var filter = new SyncFilter();
         filter.AddExclusionPattern(".foldersyncer/**");
         filter.AddExclusionPattern(".foldersyncer");
+        filter.AddExclusionPattern("* (conflict *");
+        filter.AddExclusionPattern("~*");
+        filter.AddExclusionPattern("*.tmp");
+        filter.AddExclusionPattern("*.swp");
+        filter.AddExclusionPattern("*.crswap");
+        filter.AddExclusionPattern(".#*");
 
         var engineLogger = _loggerFactory.CreateLogger<SyncEngine>();
 
@@ -207,7 +222,7 @@ public sealed class SyncCoordinator : IDisposable
 
                 // 2. Fetch fresh remote snapshot (Mitigating Risk R2)
                 var remoteFiles = await _api.ListFilesAsync(includeDeleted: false, limit: 10000, ct: cancellationToken);
-                _currentSnapshot = new RemoteSnapshot(remoteFiles.Items, remoteFiles.SnapshotSeq, remoteFiles.ServerTimeUtc);
+                _currentSnapshot!.Load(remoteFiles.Items, remoteFiles.SnapshotSeq, remoteFiles.ServerTimeUtc);
 
                 // 3. Pre-sync seeding pass (Mitigating Risk R8: both-new untracked files)
                 await ExecuteSeedingPassAsync(cancellationToken);
@@ -224,7 +239,24 @@ public sealed class SyncCoordinator : IDisposable
                     Verbose = true
                 };
 
-                var syncResult = await _engine!.SynchronizeAsync(options, cancellationToken);
+                // Temporarily pause watcher so sync engine downloads don't trigger self-loop sync events
+                if (_watcher != null)
+                {
+                    _watcher.EnableRaisingEvents = false;
+                }
+
+                SyncResult syncResult;
+                try
+                {
+                    syncResult = await _engine!.SynchronizeAsync(options, cancellationToken);
+                }
+                finally
+                {
+                    if (_watcher != null && !_isDisposed)
+                    {
+                        _watcher.EnableRaisingEvents = true;
+                    }
+                }
 
                 LastSyncTimeUtc = DateTime.UtcNow;
                 LastError = null;
@@ -281,33 +313,32 @@ public sealed class SyncCoordinator : IDisposable
             if (!File.Exists(localFullPath))
                 continue;
 
-            var existingState = await _guardedDb.GetSyncStateAsync(normPath, cancellationToken);
-            if (existingState != null)
-                continue; // Already tracked by database
-
-            // Untracked on both sides!
             var localHash = await _localStorage.ComputeHashAsync(normPath, cancellationToken);
             var remoteHash = HashConverter.HexToBase64(remote.Sha256) ?? string.Empty;
 
             if (string.Equals(localHash, remoteHash, StringComparison.OrdinalIgnoreCase))
             {
-                _logger.LogInformation("Seeding pass: matched both-new identical file '{Path}'", normPath);
-                var seeded = new SyncState
+                var existingState = await _guardedDb.GetSyncStateAsync(normPath, cancellationToken);
+                if (existingState == null || existingState.Status != SyncStatus.Synced)
                 {
-                    Path = normPath,
-                    IsDirectory = false,
-                    LocalHash = localHash,
-                    RemoteHash = remoteHash,
-                    LocalSize = new FileInfo(localFullPath).Length,
-                    RemoteSize = remote.Size,
-                    LocalModified = File.GetLastWriteTimeUtc(localFullPath),
-                    RemoteModified = remote.LastModifiedUtc,
-                    LastSyncTime = DateTime.UtcNow,
-                    Status = SyncStatus.Synced,
-                    ETag = remote.Version.ToString()
-                };
+                    _logger.LogInformation("Seeding pass: matched identical file '{Path}'", normPath);
+                    var seeded = new SyncState
+                    {
+                        Path = normPath,
+                        IsDirectory = false,
+                        LocalHash = localHash,
+                        RemoteHash = remoteHash,
+                        LocalSize = new FileInfo(localFullPath).Length,
+                        RemoteSize = remote.Size,
+                        LocalModified = File.GetLastWriteTimeUtc(localFullPath),
+                        RemoteModified = remote.LastModifiedUtc,
+                        LastSyncTime = DateTime.UtcNow,
+                        Status = SyncStatus.Synced,
+                        ETag = remote.Version.ToString()
+                    };
 
-                await _guardedDb.UpdateSyncStateAsync(seeded, cancellationToken);
+                    await _guardedDb.UpdateSyncStateAsync(seeded, cancellationToken);
+                }
             }
         }
     }
@@ -367,6 +398,15 @@ public sealed class SyncCoordinator : IDisposable
         if (e.FullPath.Contains(".foldersyncer"))
             return;
 
+        // Ignore temporary editor files
+        var name = e.Name ?? string.Empty;
+        if (name.StartsWith("~") || name.StartsWith(".#") || name.EndsWith(".tmp") || name.EndsWith(".swp") || name.EndsWith(".crswap"))
+            return;
+
+        // Ignore conflict files created by resolver
+        if (name.Contains("(conflict "))
+            return;
+
         _debounceTimer?.Dispose();
         _debounceTimer = new Timer(async _ =>
         {
@@ -379,7 +419,7 @@ public sealed class SyncCoordinator : IDisposable
             {
                 _pendingSyncRequested = true;
             }
-        }, null, 500, Timeout.Infinite);
+        }, null, 1200, Timeout.Infinite);
     }
 
     public async Task PauseAsync()

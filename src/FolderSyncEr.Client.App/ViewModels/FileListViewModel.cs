@@ -65,6 +65,8 @@ public partial class FileListViewModel : ViewModelBase
         }
 
         IsLoading = true;
+        var items = new List<FileItemViewModel>();
+
         try
         {
             // 1. Scan local files
@@ -99,8 +101,6 @@ public partial class FileListViewModel : ViewModelBase
             var allPaths = new SortedSet<string>(localEntries.Keys, StringComparer.OrdinalIgnoreCase);
             foreach (var k in remoteDict.Keys)
                 allPaths.Add(k);
-
-            _allFiles.Clear();
 
             foreach (var path in allPaths)
             {
@@ -159,14 +159,38 @@ public partial class FileListViewModel : ViewModelBase
                     vm.StatusColor = "#8B5CF6";
                 }
 
-                _allFiles.Add(vm);
+                items.Add(vm);
             }
 
-            ApplyFilter();
+            void UpdateUI()
+            {
+                _allFiles.Clear();
+                foreach (var it in items)
+                {
+                    _allFiles.Add(it);
+                }
+                ApplyFilter();
+            }
+
+            if (Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
+            {
+                UpdateUI();
+            }
+            else
+            {
+                Avalonia.Threading.Dispatcher.UIThread.Post(UpdateUI);
+            }
         }
         finally
         {
-            IsLoading = false;
+            if (Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
+            {
+                IsLoading = false;
+            }
+            else
+            {
+                Avalonia.Threading.Dispatcher.UIThread.Post(() => IsLoading = false);
+            }
         }
     }
 

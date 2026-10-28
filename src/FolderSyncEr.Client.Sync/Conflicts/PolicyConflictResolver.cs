@@ -44,10 +44,41 @@ public sealed class PolicyConflictResolver : IConflictResolver
 
         _logger.LogInformation("Conflict detected on '{Path}': Type={ConflictType}", conflict.Path, conflict.ConflictType);
 
-        // Identical hashes mean identical content; no need to overwrite
-        if (!string.IsNullOrEmpty(conflict.LocalItem?.Hash) &&
-            !string.IsNullOrEmpty(conflict.RemoteItem?.Hash) &&
-            string.Equals(conflict.LocalItem.Hash, conflict.RemoteItem.Hash, StringComparison.OrdinalIgnoreCase))
+        var localHash = conflict.LocalItem?.Hash;
+        var remoteHash = conflict.RemoteItem?.Hash;
+
+        // If local hash is missing, compute it directly from disk
+        if (string.IsNullOrEmpty(localHash))
+        {
+            var relativePath = conflict.Path.Replace('/', Path.DirectorySeparatorChar);
+            var localFullPath = Path.Combine(_localRootPath, relativePath);
+            if (File.Exists(localFullPath))
+            {
+                try
+                {
+                    using var stream = new FileStream(localFullPath, FileMode.Open, FileAccess.Read, FileShare.Read, 81920, useAsync: true);
+                    using var sha256 = System.Security.Cryptography.SHA256.Create();
+                    var hashBytes = await sha256.ComputeHashAsync(stream, cancellationToken);
+                    localHash = Convert.ToBase64String(hashBytes);
+                }
+                catch { }
+            }
+        }
+
+        // Normalize if either hash is in hex format (64 chars)
+        if (!string.IsNullOrEmpty(localHash) && localHash.Length == 64 && !localHash.EndsWith("="))
+        {
+            localHash = Common.HashConverter.HexToBase64(localHash) ?? localHash;
+        }
+        if (!string.IsNullOrEmpty(remoteHash) && remoteHash.Length == 64 && !remoteHash.EndsWith("="))
+        {
+            remoteHash = Common.HashConverter.HexToBase64(remoteHash) ?? remoteHash;
+        }
+
+        // Identical hashes mean identical content; no need to overwrite or create conflict files
+        if (!string.IsNullOrEmpty(localHash) &&
+            !string.IsNullOrEmpty(remoteHash) &&
+            string.Equals(localHash, remoteHash, StringComparison.OrdinalIgnoreCase))
         {
             _logger.LogInformation("Conflict on '{Path}' resolved automatically as Skip (hashes match)", conflict.Path);
             return ConflictResolution.Skip;
@@ -56,19 +87,26 @@ public sealed class PolicyConflictResolver : IConflictResolver
         switch (Policy)
         {
             case ConflictPolicy.NewestWins:
-                return ResolveNewestWins(conflict);
+                return ResolveNewestWins(conflict, localHash, remoteHash);
 
             case ConflictPolicy.Prompt when _promptHandler != null:
-                return await ResolvePromptAsync(conflict, cancellationToken);
+                return await ResolvePromptAsync(conflict, localHash, remoteHash, cancellationToken);
 
             case ConflictPolicy.KeepBoth:
             default:
-                return ResolveKeepBoth(conflict);
+                return ResolveKeepBoth(conflict, localHash, remoteHash);
         }
     }
 
-    private ConflictResolution ResolveNewestWins(FileConflictEventArgs conflict)
+    private ConflictResolution ResolveNewestWins(FileConflictEventArgs conflict, string? localHash, string? remoteHash)
     {
+        if (!string.IsNullOrEmpty(localHash) &&
+            !string.IsNullOrEmpty(remoteHash) &&
+            string.Equals(localHash, remoteHash, StringComparison.OrdinalIgnoreCase))
+        {
+            return ConflictResolution.Skip;
+        }
+
         var localMtime = conflict.LocalItem?.LastModified ?? DateTime.MinValue;
         var remoteMtime = conflict.RemoteItem?.LastModified ?? DateTime.MinValue;
 
@@ -86,16 +124,20 @@ public sealed class PolicyConflictResolver : IConflictResolver
         }
     }
 
-    private async Task<ConflictResolution> ResolvePromptAsync(FileConflictEventArgs conflict, CancellationToken cancellationToken)
+    private async Task<ConflictResolution> ResolvePromptAsync(
+        FileConflictEventArgs conflict,
+        string? localHash,
+        string? remoteHash,
+        CancellationToken cancellationToken)
     {
         var info = new ConflictPromptInfo(
             Path: conflict.Path,
             LocalSize: conflict.LocalItem?.Size ?? 0,
             LocalModifiedUtc: conflict.LocalItem?.LastModified ?? DateTime.MinValue,
-            LocalHash: conflict.LocalItem?.Hash,
+            LocalHash: localHash,
             RemoteSize: conflict.RemoteItem?.Size ?? 0,
             RemoteModifiedUtc: conflict.RemoteItem?.LastModified ?? DateTime.MinValue,
-            RemoteHash: conflict.RemoteItem?.Hash,
+            RemoteHash: remoteHash,
             DeviceName: _deviceId
         );
 
@@ -104,17 +146,26 @@ public sealed class PolicyConflictResolver : IConflictResolver
         {
             ConflictResolutionChoice.KeepLocal => ConflictResolution.UseLocal,
             ConflictResolutionChoice.KeepServer => ConflictResolution.UseRemote,
-            ConflictResolutionChoice.KeepBoth => ResolveKeepBoth(conflict),
+            ConflictResolutionChoice.KeepBoth => ResolveKeepBoth(conflict, localHash, remoteHash),
             _ => ConflictResolution.Skip
         };
     }
 
-    private ConflictResolution ResolveKeepBoth(FileConflictEventArgs conflict)
+    private ConflictResolution ResolveKeepBoth(FileConflictEventArgs conflict, string? localHash, string? remoteHash)
     {
         try
         {
             var relativePath = conflict.Path.Replace('/', Path.DirectorySeparatorChar);
             var localFullPath = Path.Combine(_localRootPath, relativePath);
+
+            // Double check if local content is identical to remote before creating any conflict files
+            if (!string.IsNullOrEmpty(localHash) &&
+                !string.IsNullOrEmpty(remoteHash) &&
+                string.Equals(localHash, remoteHash, StringComparison.OrdinalIgnoreCase))
+            {
+                _logger.LogInformation("KeepBoth: Content is identical for '{Path}'; skipping conflict creation.", conflict.Path);
+                return ConflictResolution.Skip;
+            }
 
             if (File.Exists(localFullPath))
             {

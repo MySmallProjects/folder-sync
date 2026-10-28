@@ -4,7 +4,8 @@ public record StatusResponse(
     string Status,
     string Version,
     DateTime ServerTimeUtc,
-    bool DbReachable
+    bool DbReachable,
+    DateTime? CompiledUtc = null
 );
 
 public record LoginRequest(

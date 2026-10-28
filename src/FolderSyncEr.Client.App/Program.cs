@@ -41,6 +41,7 @@ internal class Program
             });
 
             // Platform & Secrets
+            services.AddSingleton<ClientSettingsManager>();
             services.AddSingleton<ISecretStore>(sp =>
             {
                 var logger = sp.GetService<ILogger<ISecretStore>>();
@@ -51,8 +52,34 @@ internal class Program
             services.AddSingleton<AuthTokenManager>();
             services.AddTransient<AuthHeaderHandler>();
 
-            services.AddHttpClient<IFileSyncApi, FileSyncApiClient>()
+            services.AddHttpClient("FileSyncApi")
                 .AddHttpMessageHandler<AuthHeaderHandler>();
+
+            services.AddSingleton<IFileSyncApi>(sp =>
+            {
+                var factory = sp.GetRequiredService<System.Net.Http.IHttpClientFactory>();
+                var httpClient = factory.CreateClient("FileSyncApi");
+                var tokenManager = sp.GetRequiredService<AuthTokenManager>();
+                var logger = sp.GetRequiredService<ILogger<FileSyncApiClient>>();
+                var settingsManager = sp.GetService<ClientSettingsManager>();
+
+                var client = new FileSyncApiClient(httpClient, tokenManager, logger);
+
+                if (settingsManager != null)
+                {
+                    try
+                    {
+                        var settings = settingsManager.LoadSettings();
+                        if (!string.IsNullOrWhiteSpace(settings.ServerUrl))
+                        {
+                            client.ServerUrl = settings.ServerUrl;
+                        }
+                    }
+                    catch { }
+                }
+
+                return client;
+            });
 
             // ViewModels
             services.AddTransient<ConnectionCheckViewModel>();

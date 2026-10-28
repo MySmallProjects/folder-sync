@@ -1,17 +1,29 @@
+using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace FolderSyncEr.Client.Platform;
 
 public class LinuxSecretServiceSecretStore : ISecretStore
 {
-    public SecretStoreType StoreType => SecretStoreType.LinuxSecretService;
-    public bool IsInsecureFallback => false;
-    public string Description => "GNOME Secret Service (libsecret)";
+    public SecretStoreType StoreType => _usedFallback ? SecretStoreType.EncryptedFileFallback : SecretStoreType.LinuxSecretService;
+    public bool IsInsecureFallback => _usedFallback;
+    public string Description => _usedFallback
+        ? "Encrypted file fallback (~/.config/foldersyncer/secrets.enc.bin)"
+        : "GNOME Secret Service (libsecret)";
 
     private const string LibSecret = "libsecret-1.so.0";
     private static IntPtr _schemaPtr = IntPtr.Zero;
     private static readonly object _schemaLock = new();
+    private readonly EncryptedFileFallbackSecretStore _fallback;
+    private bool _usedFallback;
+
+    public LinuxSecretServiceSecretStore(string? customFallbackPath = null)
+    {
+        _fallback = new EncryptedFileFallbackSecretStore(customFallbackPath);
+    }
 
     public static bool IsAvailable()
     {
@@ -28,7 +40,6 @@ public class LinuxSecretServiceSecretStore : ISecretStore
             }
             NativeLibrary.Free(handle);
 
-            // Check if D-Bus session address is set (required for SecretService)
             var dbusSession = Environment.GetEnvironmentVariable("DBUS_SESSION_BUS_ADDRESS");
             return !string.IsNullOrWhiteSpace(dbusSession);
         }
@@ -38,12 +49,17 @@ public class LinuxSecretServiceSecretStore : ISecretStore
         }
     }
 
-    public Task<string?> GetSecretAsync(string key, CancellationToken ct = default)
+    public async Task<string?> GetSecretAsync(string key, CancellationToken ct = default)
     {
-        EnsureSchema();
-        var error = IntPtr.Zero;
+        if (_usedFallback)
+        {
+            return await _fallback.GetSecretAsync(key, ct);
+        }
+
         try
         {
+            EnsureSchema();
+            var error = IntPtr.Zero;
             var resultPtr = secret_password_lookup_sync(
                 _schemaPtr,
                 IntPtr.Zero,
@@ -56,36 +72,45 @@ public class LinuxSecretServiceSecretStore : ISecretStore
             if (error != IntPtr.Zero)
             {
                 g_error_free(error);
-                return Task.FromResult<string?>(null);
+                return await _fallback.GetSecretAsync(key, ct);
             }
 
             if (resultPtr == IntPtr.Zero)
             {
-                return Task.FromResult<string?>(null);
+                // Also check fallback if key was stored there previously
+                return await _fallback.GetSecretAsync(key, ct);
             }
 
             try
             {
                 var secret = Marshal.PtrToStringUTF8(resultPtr);
-                return Task.FromResult(secret);
+                return secret;
             }
             finally
             {
                 secret_password_free(resultPtr);
             }
         }
-        catch
+        catch (Exception ex)
         {
-            return Task.FromResult<string?>(null);
+            Console.Error.WriteLine($"[SECRET SERVICE WARNING] libsecret read failed, using fallback: {ex.Message}");
+            _usedFallback = true;
+            return await _fallback.GetSecretAsync(key, ct);
         }
     }
 
-    public Task SetSecretAsync(string key, string secret, CancellationToken ct = default)
+    public async Task SetSecretAsync(string key, string secret, CancellationToken ct = default)
     {
-        EnsureSchema();
-        var error = IntPtr.Zero;
+        if (_usedFallback)
+        {
+            await _fallback.SetSecretAsync(key, secret, ct);
+            return;
+        }
+
         try
         {
+            EnsureSchema();
+            var error = IntPtr.Zero;
             var success = secret_password_store_sync(
                 _schemaPtr,
                 "default",
@@ -102,43 +127,48 @@ public class LinuxSecretServiceSecretStore : ISecretStore
             {
                 var errMsg = GetGErrorMessage(error);
                 g_error_free(error);
-                throw new InvalidOperationException($"Secret Service store failed: {errMsg}");
+                Console.Error.WriteLine($"[SECRET SERVICE WARNING] libsecret store returned error: {errMsg}. Storing in fallback.");
+                _usedFallback = true;
+                await _fallback.SetSecretAsync(key, secret, ct);
             }
         }
-        catch (Exception ex) when (ex is not InvalidOperationException)
+        catch (Exception ex)
         {
-            throw new InvalidOperationException("Failed to save secret to Linux Secret Service.", ex);
+            Console.Error.WriteLine($"[SECRET SERVICE WARNING] libsecret store threw: {ex.Message}. Storing in fallback.");
+            _usedFallback = true;
+            await _fallback.SetSecretAsync(key, secret, ct);
         }
-
-        return Task.CompletedTask;
     }
 
-    public Task DeleteSecretAsync(string key, CancellationToken ct = default)
+    public async Task DeleteSecretAsync(string key, CancellationToken ct = default)
     {
-        EnsureSchema();
-        var error = IntPtr.Zero;
         try
         {
-            secret_password_clear_sync(
-                _schemaPtr,
-                IntPtr.Zero,
-                out error,
-                "service", "FolderSyncEr",
-                "account", key,
-                IntPtr.Zero
-            );
-
-            if (error != IntPtr.Zero)
+            if (!_usedFallback)
             {
-                g_error_free(error);
+                EnsureSchema();
+                var error = IntPtr.Zero;
+                secret_password_clear_sync(
+                    _schemaPtr,
+                    IntPtr.Zero,
+                    out error,
+                    "service", "FolderSyncEr",
+                    "account", key,
+                    IntPtr.Zero
+                );
+
+                if (error != IntPtr.Zero)
+                {
+                    g_error_free(error);
+                }
             }
         }
         catch
         {
-            // Ignore on delete
+            // Ignore libsecret delete error
         }
 
-        return Task.CompletedTask;
+        await _fallback.DeleteSecretAsync(key, ct);
     }
 
     private static void EnsureSchema()
@@ -149,13 +179,19 @@ public class LinuxSecretServiceSecretStore : ISecretStore
         {
             if (_schemaPtr != IntPtr.Zero) return;
 
-            // Define SecretSchema dynamically in unmanaged memory
-            // struct SecretSchema: name (ptr), flags (int), attributes[32] (name ptr, type int)
-            var size = IntPtr.Size + sizeof(int) + 32 * (IntPtr.Size + sizeof(int));
-            _schemaPtr = Marshal.AllocHGlobal(size);
+            // GCC 64-bit Linux struct SecretSchema alignment:
+            // Offset 0:  const gchar *name (8 bytes)
+            // Offset 8:  SecretSchemaFlags flags (4 bytes) + 4 bytes padding
+            // Offset 16: attributes[0].name (8 bytes)
+            // Offset 24: attributes[0].type (4 bytes) + 4 bytes padding
+            // Offset 32: attributes[1].name (8 bytes)
+            // Offset 40: attributes[1].type (4 bytes) + 4 bytes padding
+            // Total allocation size for 32 attributes = 16 + 32 * 16 = 528 bytes
+            const int totalSize = 528;
+            _schemaPtr = Marshal.AllocHGlobal(totalSize);
 
             // Zero out memory
-            for (int i = 0; i < size; i++)
+            for (int i = 0; i < totalSize; i++)
             {
                 Marshal.WriteByte(_schemaPtr, i, 0);
             }
@@ -164,24 +200,19 @@ public class LinuxSecretServiceSecretStore : ISecretStore
             var serviceAttr = Marshal.StringToHGlobalAnsi("service");
             var accountAttr = Marshal.StringToHGlobalAnsi("account");
 
-            var offset = 0;
-            Marshal.WriteIntPtr(_schemaPtr, offset, namePtr);
-            offset += IntPtr.Size;
+            // Write schema name & flags
+            Marshal.WriteIntPtr(_schemaPtr, 0, namePtr);
+            Marshal.WriteInt32(_schemaPtr, 8, 0); // SECRET_SCHEMA_NONE
 
-            Marshal.WriteInt32(_schemaPtr, offset, 0); // SECRET_SCHEMA_NONE
-            offset += sizeof(int);
+            // Attribute 0: "service" (SECRET_SCHEMA_ATTRIBUTE_STRING = 0)
+            Marshal.WriteIntPtr(_schemaPtr, 16, serviceAttr);
+            Marshal.WriteInt32(_schemaPtr, 24, 0);
 
-            // Attribute 0: service (STRING = 0)
-            Marshal.WriteIntPtr(_schemaPtr, offset, serviceAttr);
-            offset += IntPtr.Size;
-            Marshal.WriteInt32(_schemaPtr, offset, 0);
-            offset += sizeof(int);
+            // Attribute 1: "account" (SECRET_SCHEMA_ATTRIBUTE_STRING = 0)
+            Marshal.WriteIntPtr(_schemaPtr, 32, accountAttr);
+            Marshal.WriteInt32(_schemaPtr, 40, 0);
 
-            // Attribute 1: account (STRING = 0)
-            Marshal.WriteIntPtr(_schemaPtr, offset, accountAttr);
-            offset += IntPtr.Size;
-            Marshal.WriteInt32(_schemaPtr, offset, 0);
-            offset += sizeof(int);
+            // Attribute 2..31 remain 0 (name is NULL), terminating the attribute array
         }
     }
 
@@ -193,36 +224,36 @@ public class LinuxSecretServiceSecretStore : ISecretStore
         return Marshal.PtrToStringUTF8(msgPtr) ?? "Unknown GError";
     }
 
-    [DllImport(LibSecret, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibSecret, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern bool secret_password_store_sync(
         IntPtr schema,
-        string? collection,
-        string label,
-        string password,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string? collection,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string label,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string password,
         IntPtr cancellable,
         out IntPtr error,
-        string attr1, string val1,
-        string attr2, string val2,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string attr1, [MarshalAs(UnmanagedType.LPUTF8Str)] string val1,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string attr2, [MarshalAs(UnmanagedType.LPUTF8Str)] string val2,
         IntPtr end
     );
 
-    [DllImport(LibSecret, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibSecret, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern IntPtr secret_password_lookup_sync(
         IntPtr schema,
         IntPtr cancellable,
         out IntPtr error,
-        string attr1, string val1,
-        string attr2, string val2,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string attr1, [MarshalAs(UnmanagedType.LPUTF8Str)] string val1,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string attr2, [MarshalAs(UnmanagedType.LPUTF8Str)] string val2,
         IntPtr end
     );
 
-    [DllImport(LibSecret, CallingConvention = CallingConvention.Cdecl)]
+    [DllImport(LibSecret, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
     private static extern bool secret_password_clear_sync(
         IntPtr schema,
         IntPtr cancellable,
         out IntPtr error,
-        string attr1, string val1,
-        string attr2, string val2,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string attr1, [MarshalAs(UnmanagedType.LPUTF8Str)] string val1,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string attr2, [MarshalAs(UnmanagedType.LPUTF8Str)] string val2,
         IntPtr end
     );
 
@@ -232,4 +263,3 @@ public class LinuxSecretServiceSecretStore : ISecretStore
     [DllImport("libglib-2.0.so.0", CallingConvention = CallingConvention.Cdecl)]
     private static extern void g_error_free(IntPtr error);
 }
-

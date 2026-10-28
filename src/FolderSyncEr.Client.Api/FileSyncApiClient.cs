@@ -60,7 +60,8 @@ public class FileSyncApiClient : IFileSyncApi
                 Version: status.Version,
                 ServerTimeUtc: status.ServerTimeUtc,
                 LatencyMs: sw.ElapsedMilliseconds,
-                ErrorMessage: status.DbReachable ? null : "Database unreachable on server"
+                ErrorMessage: status.DbReachable ? null : "Database unreachable on server",
+                CompiledUtc: status.CompiledUtc
             );
         }
         catch (Exception ex)

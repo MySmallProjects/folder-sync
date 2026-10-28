@@ -15,6 +15,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
 {
     private readonly ISecretStore _secretStore;
     private readonly IFileSyncApi _api;
+    private readonly ClientSettingsManager _settingsManager;
 
     public ConnectionCheckViewModel Connection { get; }
     public LoginViewModel Login { get; }
@@ -37,6 +38,18 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
 
     [ObservableProperty]
     private string _syncStatusSummary = "Ready";
+
+    [ObservableProperty]
+    private bool _showElevationWarning;
+
+    [ObservableProperty]
+    private string _elevationWarningText = string.Empty;
+
+    [RelayCommand]
+    private void DismissElevationWarning()
+    {
+        ShowElevationWarning = false;
+    }
 
     [ObservableProperty]
     private bool _isSynchronizing;
@@ -64,10 +77,12 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         IFileSyncApi api,
         ConnectionCheckViewModel connection,
         LoginViewModel login,
-        FolderSelectionViewModel folder)
+        FolderSelectionViewModel folder,
+        ClientSettingsManager? settingsManager = null)
     {
         _secretStore = secretStore ?? throw new ArgumentNullException(nameof(secretStore));
         _api = api ?? throw new ArgumentNullException(nameof(api));
+        _settingsManager = settingsManager ?? new ClientSettingsManager();
         Connection = connection ?? throw new ArgumentNullException(nameof(connection));
         Login = login ?? throw new ArgumentNullException(nameof(login));
         Folder = folder ?? throw new ArgumentNullException(nameof(folder));
@@ -81,10 +96,11 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         Settings = new SettingsViewModel(
             _api,
             _secretStore,
+            _settingsManager,
             () => Folder.SelectedFolderPath,
-            newFolder =>
+            async newFolder =>
             {
-                Folder.SelectedFolderPath = newFolder;
+                await Folder.SaveAndSetFolderPathAsync(newFolder);
                 RebuildCoordinator();
             },
             newPolicy =>
@@ -98,8 +114,45 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         _secretStoreDescription = secretStore.Description;
         _isSecretStoreInsecure = secretStore.IsInsecureFallback;
 
+        // Check for elevated / sudo privileges
+        if (PrivilegeDetector.IsRunningAsRoot() || PrivilegeDetector.IsInvokedViaSudo())
+        {
+            ShowElevationWarning = true;
+            ElevationWarningText = PrivilegeDetector.IsInvokedViaSudo()
+                ? $"⚠️ Running via sudo (invoked by '{PrivilegeDetector.GetInvokingUsername()}'). Regular user mode is recommended so synced files maintain standard user permissions."
+                : "⚠️ Running as root. Regular user mode is recommended so synced files maintain standard user permissions.";
+        }
+
         // Auto-switch tabs or update sync readiness
-        Connection.PropertyChanged += (_, _) => OnPropertyChanged(nameof(IsReadyForSync));
+        Connection.PropertyChanged += (_, e) =>
+        {
+            OnPropertyChanged(nameof(IsReadyForSync));
+            if (e.PropertyName == nameof(Connection.ServerUrl))
+            {
+                if (!string.IsNullOrWhiteSpace(Connection.ServerUrl))
+                {
+                    _api.ServerUrl = Connection.ServerUrl;
+                }
+                if (Settings != null && Settings.ServerUrl != Connection.ServerUrl)
+                {
+                    Settings.ServerUrl = Connection.ServerUrl;
+                }
+            }
+        };
+        Settings.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(Settings.ServerUrl))
+            {
+                if (!string.IsNullOrWhiteSpace(Settings.ServerUrl))
+                {
+                    _api.ServerUrl = Settings.ServerUrl;
+                }
+                if (Connection != null && Connection.ServerUrl != Settings.ServerUrl)
+                {
+                    Connection.ServerUrl = Settings.ServerUrl;
+                }
+            }
+        };
         Login.PropertyChanged += (_, _) =>
         {
             OnPropertyChanged(nameof(IsReadyForSync));
@@ -108,8 +161,12 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                 RebuildCoordinator();
             }
         };
-        Folder.PropertyChanged += (_, _) =>
+        Folder.PropertyChanged += (_, e) =>
         {
+            if (e.PropertyName == nameof(Folder.SelectedFolderPath) && Settings != null)
+            {
+                Settings.CurrentSyncFolder = Folder.SelectedFolderPath ?? string.Empty;
+            }
             OnPropertyChanged(nameof(IsReadyForSync));
             if (Folder.IsFolderSelected && Login.IsLoggedIn)
             {
@@ -120,14 +177,52 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
 
     public async Task InitializeAsync()
     {
+        Settings.IsInitialized = false;
+
+        var appSettings = await _settingsManager.LoadSettingsAsync();
+        if (appSettings != null)
+        {
+            Settings.SyncIntervalSeconds = appSettings.SyncIntervalSeconds;
+            Settings.CloseToTray = appSettings.CloseToTray;
+            if (Enum.TryParse<ConflictPolicy>(appSettings.ConflictPolicy, out var pol))
+            {
+                Settings.SelectedConflictPolicy = pol;
+            }
+            if (!string.IsNullOrWhiteSpace(appSettings.ServerUrl))
+            {
+                _api.ServerUrl = appSettings.ServerUrl;
+                Connection.ServerUrl = appSettings.ServerUrl;
+                Settings.ServerUrl = appSettings.ServerUrl;
+            }
+        }
+
+        await Connection.InitializeAsync();
         await Login.InitializeSessionAsync();
+        if (!string.IsNullOrWhiteSpace(_api.ServerUrl))
+        {
+            Connection.ServerUrl = _api.ServerUrl;
+            Settings.ServerUrl = _api.ServerUrl;
+        }
         await Folder.InitializeFolderAsync();
+        if (string.IsNullOrWhiteSpace(Folder.SelectedFolderPath) && !string.IsNullOrWhiteSpace(appSettings?.SyncFolderPath))
+        {
+            await Folder.SaveAndSetFolderPathAsync(appSettings.SyncFolderPath);
+        }
+
+        Settings.CurrentSyncFolder = Folder.SelectedFolderPath ?? string.Empty;
+        Settings.IsInitialized = true;
+
         await Connection.CheckConnectionCommand.ExecuteAsync(null);
 
         if (IsReadyForSync)
         {
             RebuildCoordinator();
             await FileList.RefreshCommand.ExecuteAsync(null);
+            SelectedTabIndex = 0; // Synced Files
+        }
+        else
+        {
+            SelectedTabIndex = 3; // Account & Connection tab
         }
     }
 
@@ -150,21 +245,45 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
 
             Coordinator.ProgressChanged += (s, e) =>
             {
-                ProgressPercentage = e.Percentage;
-                ProgressItem = e.CurrentItem;
-                SyncStatusSummary = $"Syncing: {e.ProcessedItems}/{e.TotalItems} items ({e.Percentage:0}%)";
+                void UpdateProgress()
+                {
+                    ProgressPercentage = e.Percentage;
+                    ProgressItem = e.CurrentItem;
+                    SyncStatusSummary = $"Syncing: {e.ProcessedItems}/{e.TotalItems} items ({e.Percentage:0}%)";
+                }
+
+                if (Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
+                {
+                    UpdateProgress();
+                }
+                else
+                {
+                    Avalonia.Threading.Dispatcher.UIThread.Post(UpdateProgress);
+                }
             };
 
             Coordinator.SyncCompleted += (s, e) =>
             {
-                IsSynchronizing = false;
-                LastSyncText = DateTime.UtcNow.ToString("HH:mm:ss 'UTC'");
-                SyncStatusSummary = e.Result.Success
-                    ? $"In Sync ({e.Result.ItemsProcessed} items, {e.Result.Duration.TotalSeconds:0.#}s)"
-                    : $"Sync error: {e.Result.ErrorMessage}";
+                void HandleSyncCompleted()
+                {
+                    IsSynchronizing = false;
+                    LastSyncText = DateTime.UtcNow.ToString("HH:mm:ss 'UTC'");
+                    SyncStatusSummary = e.Result.Success
+                        ? $"In Sync ({e.Result.ItemsProcessed} items, {e.Result.Duration.TotalSeconds:0.#}s)"
+                        : $"Sync error: {e.Result.ErrorMessage}";
 
-                // Refresh file list after sync completes
-                _ = FileList.RefreshCommand.ExecuteAsync(null);
+                    // Refresh file list safely on the UI thread
+                    _ = FileList.RefreshCommand.ExecuteAsync(null);
+                }
+
+                if (Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
+                {
+                    HandleSyncCompleted();
+                }
+                else
+                {
+                    Avalonia.Threading.Dispatcher.UIThread.Post(HandleSyncCompleted);
+                }
             };
 
             Coordinator.StartBackgroundSync(TimeSpan.FromSeconds(Settings.SyncIntervalSeconds));

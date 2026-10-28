@@ -50,6 +50,52 @@ public class SyncCoordinatorTests : IDisposable
         Assert.Equal(0, result.ErrorsCount);
     }
 
+    [Fact]
+    public async Task RunSyncAsync_UploadsNewLocalFile_WithoutConflict()
+    {
+        _fakeApi.IsServerConnected = true;
+
+        var localFile = Path.Combine(_testDir, "hello.txt");
+        await File.WriteAllTextAsync(localFile, "Hello sync world");
+
+        int conflictCount = 0;
+        _coordinator.ConflictDetected += (s, e) => conflictCount++;
+
+        var result = await _coordinator.RunSyncAsync();
+
+        Assert.True(result.Success, result.ErrorMessage);
+        Assert.Equal(0, conflictCount);
+        Assert.Equal(0, result.ConflictsResolved);
+
+        var conflictFiles = Directory.GetFiles(_testDir, "*conflict*");
+        Assert.Empty(conflictFiles);
+    }
+
+    [Fact]
+    public async Task RunSyncAsync_TwoConsecutiveSyncs_NoConflict()
+    {
+        _fakeApi.IsServerConnected = true;
+
+        var localFile = Path.Combine(_testDir, "test.txt");
+        await File.WriteAllTextAsync(localFile, "Initial content");
+
+        int conflictCount = 0;
+        _coordinator.ConflictDetected += (s, e) => conflictCount++;
+
+        // First sync: uploads the file
+        var result1 = await _coordinator.RunSyncAsync();
+        Assert.True(result1.Success, result1.ErrorMessage);
+
+        // Second sync: should be an in-sync no-op run, NO conflicts!
+        var result2 = await _coordinator.RunSyncAsync();
+        Assert.True(result2.Success, result2.ErrorMessage);
+        Assert.Equal(0, conflictCount);
+        Assert.Equal(0, result2.ConflictsResolved);
+
+        var conflictFiles = Directory.GetFiles(_testDir, "*conflict*");
+        Assert.Empty(conflictFiles);
+    }
+
     public void Dispose()
     {
         _coordinator.Dispose();
@@ -73,18 +119,46 @@ public class SyncCoordinatorTests : IDisposable
         public Task LogoutAsync(CancellationToken ct = default) => Task.CompletedTask;
         public Task<UserDto?> GetMeAsync(CancellationToken ct = default) => Task.FromResult<UserDto?>(null);
 
-        public Task<FileListResponse> ListFilesAsync(long? sinceSeq = null, DateTime? since = null, bool includeDeleted = false, string? cursor = null, int limit = 1000, CancellationToken ct = default) =>
-            Task.FromResult(new FileListResponse(Array.Empty<FileDto>(), null, 0, DateTime.UtcNow));
+        public List<FileDto> ServerFiles { get; } = new();
 
-        public Task<FileDto?> GetFileMetaByPathAsync(string path, CancellationToken ct = default) => Task.FromResult<FileDto?>(null);
-        public Task<FileDto?> GetFileMetaByIdAsync(string id, CancellationToken ct = default) => Task.FromResult<FileDto?>(null);
+        public Task<FileListResponse> ListFilesAsync(long? sinceSeq = null, DateTime? since = null, bool includeDeleted = false, string? cursor = null, int limit = 1000, CancellationToken ct = default) =>
+            Task.FromResult(new FileListResponse(ServerFiles.ToList(), null, ServerFiles.Count, DateTime.UtcNow));
+
+        public Task<FileDto?> GetFileMetaByPathAsync(string path, CancellationToken ct = default) =>
+            Task.FromResult(ServerFiles.FirstOrDefault(f => f.Path.Equals(path, StringComparison.OrdinalIgnoreCase)));
+
+        public Task<FileDto?> GetFileMetaByIdAsync(string id, CancellationToken ct = default) =>
+            Task.FromResult(ServerFiles.FirstOrDefault(f => f.Id == id));
 
         public Task<Stream> DownloadFileStreamAsync(string id, (long from, long? to)? range = null, CancellationToken ct = default) =>
-            Task.FromResult<Stream>(new MemoryStream());
+            Task.FromResult<Stream>(new MemoryStream(Encoding.UTF8.GetBytes("Initial content")));
 
         public Task<UploadResult> UploadFileStreamAsync(string path, Stream contentStream, string? sha256Hex = null, string? ifMatchSha256 = null, string? ifNoneMatch = null, long? baseVersion = null, DateTime? lastModifiedUtc = null, CancellationToken ct = default)
         {
-            var dto = new FileDto("upload-id", path, false, 10, "abc", 1, DateTime.UtcNow, DateTime.UtcNow, "dev", false, 1);
+            using var ms = new MemoryStream();
+            contentStream.CopyTo(ms);
+            var bytes = ms.ToArray();
+            var sha256 = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(bytes)).ToLowerInvariant();
+
+            var existing = ServerFiles.FirstOrDefault(f => f.Path.Equals(path, StringComparison.OrdinalIgnoreCase));
+            var version = (existing?.Version ?? 0) + 1;
+            var dto = new FileDto(
+                Id: existing?.Id ?? Guid.NewGuid().ToString("N"),
+                Path: path,
+                IsDirectory: false,
+                Size: bytes.Length,
+                Sha256: sha256,
+                Version: version,
+                LastModifiedUtc: lastModifiedUtc ?? DateTime.UtcNow,
+                UploadedAtUtc: DateTime.UtcNow,
+                UploadedByDeviceId: "dev",
+                IsDeleted: false,
+                ChangeSeq: version
+            );
+
+            if (existing != null) ServerFiles.Remove(existing);
+            ServerFiles.Add(dto);
+
             return Task.FromResult(new UploadResult(true, false, false, dto, null, null));
         }
 

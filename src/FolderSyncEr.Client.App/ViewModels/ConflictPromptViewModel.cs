@@ -30,15 +30,35 @@ public partial class ConflictPromptViewModel : ViewModelBase, IConflictPromptHan
     {
         _tcs = new TaskCompletionSource<ConflictResolutionChoice>();
 
-        FilePath = prompt.Path;
-        LocalInfoText = $"Size: {FormatBytes(prompt.LocalSize)} | Modified: {prompt.LocalModifiedUtc:yyyy-MM-dd HH:mm:ss} UTC | Hash: {FormatHash(prompt.LocalHash)}";
-        RemoteInfoText = $"Size: {FormatBytes(prompt.RemoteSize)} | Modified: {prompt.RemoteModifiedUtc:yyyy-MM-dd HH:mm:ss} UTC | Hash: {FormatHash(prompt.RemoteHash)}";
-        DeviceInfoText = $"Conflict originating from device: {prompt.DeviceName}";
-        IsVisible = true;
+        void ShowPrompt()
+        {
+            FilePath = prompt.Path;
+            LocalInfoText = $"Size: {FormatBytes(prompt.LocalSize)} | Modified: {prompt.LocalModifiedUtc:yyyy-MM-dd HH:mm:ss} UTC | Hash: {FormatHash(prompt.LocalHash)}";
+            RemoteInfoText = $"Size: {FormatBytes(prompt.RemoteSize)} | Modified: {prompt.RemoteModifiedUtc:yyyy-MM-dd HH:mm:ss} UTC | Hash: {FormatHash(prompt.RemoteHash)}";
+            DeviceInfoText = $"Conflict originating from device: {prompt.DeviceName}";
+            IsVisible = true;
+        }
+
+        if (Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
+        {
+            ShowPrompt();
+        }
+        else
+        {
+            Avalonia.Threading.Dispatcher.UIThread.Post(ShowPrompt);
+        }
 
         cancellationToken.Register(() =>
         {
-            IsVisible = false;
+            void HidePrompt() => IsVisible = false;
+            if (Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
+            {
+                HidePrompt();
+            }
+            else
+            {
+                Avalonia.Threading.Dispatcher.UIThread.Post(HidePrompt);
+            }
             _tcs.TrySetCanceled(cancellationToken);
         });
 

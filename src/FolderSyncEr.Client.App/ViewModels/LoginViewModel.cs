@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FolderSyncEr.Client.Api;
+using FolderSyncEr.Client.Platform;
 
 namespace FolderSyncEr.Client.App.ViewModels;
 
@@ -8,6 +9,7 @@ public partial class LoginViewModel : ViewModelBase
 {
     private readonly IFileSyncApi _api;
     private readonly AuthTokenManager _tokenManager;
+    private readonly ClientSettingsManager? _settingsManager;
 
     [ObservableProperty]
     private string _username = "admin";
@@ -36,17 +38,31 @@ public partial class LoginViewModel : ViewModelBase
 
     public string? DeviceId => _tokenManager.CurrentSession?.DeviceId;
 
-    public LoginViewModel(IFileSyncApi api, AuthTokenManager tokenManager)
+    public LoginViewModel(IFileSyncApi api, AuthTokenManager tokenManager, ClientSettingsManager? settingsManager = null)
     {
         _api = api;
         _tokenManager = tokenManager;
+        _settingsManager = settingsManager;
     }
 
     public async Task InitializeSessionAsync()
     {
+        if (_settingsManager != null)
+        {
+            var settings = await _settingsManager.LoadSettingsAsync();
+            if (!string.IsNullOrWhiteSpace(settings.ServerUrl))
+            {
+                _api.ServerUrl = settings.ServerUrl;
+            }
+        }
+
         var session = await _tokenManager.GetSessionAsync();
         if (session != null && session.IsRefreshTokenValid)
         {
+            if (string.IsNullOrWhiteSpace(_api.ServerUrl) && !string.IsNullOrWhiteSpace(session.ServerUrl))
+            {
+                _api.ServerUrl = session.ServerUrl;
+            }
             IsLoggedIn = true;
             LoggedInUserText = $"{session.Username} ({session.Role}) on {session.DeviceId[..Math.Min(8, session.DeviceId.Length)]}";
         }
@@ -59,6 +75,15 @@ public partial class LoginViewModel : ViewModelBase
         {
             ErrorMessage = "Username and password are required.";
             return;
+        }
+
+        if (_settingsManager != null)
+        {
+            var settings = await _settingsManager.LoadSettingsAsync();
+            if (!string.IsNullOrWhiteSpace(settings.ServerUrl))
+            {
+                _api.ServerUrl = settings.ServerUrl;
+            }
         }
 
         IsLoggingIn = true;
@@ -74,7 +99,7 @@ public partial class LoginViewModel : ViewModelBase
         catch (Exception ex)
         {
             IsLoggedIn = false;
-            ErrorMessage = ex.Message;
+            ErrorMessage = $"{ex.Message} (Target: {_api.ServerUrl})";
         }
         finally
         {

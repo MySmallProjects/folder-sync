@@ -66,6 +66,16 @@
                 </Grid>
             </Border>
 
+            <!-- Elevation / Sudo Warning Banner -->
+            <Border DockPanel.Dock="Top" Background="#451A03" BorderBrush="#B45309" BorderThickness="0,0,0,1" Padding="16,8"
+                    IsVisible="{Binding ShowElevationWarning}">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0" Text="{Binding ElevationWarningText}" Foreground="#FDE047" FontSize="12" FontWeight="Medium" VerticalAlignment="Center"/>
+                    <Button Grid.Column="1" Content="Dismiss" Command="{Binding DismissElevationWarningCommand}"
+                            Background="Transparent" Foreground="#FDE047" FontSize="11" Padding="8,4"/>
+                </Grid>
+            </Border>
+
             <!-- Bottom Navigation Tabs -->
             <TabControl SelectedIndex="{Binding SelectedTabIndex}" Margin="16">
                 <!-- TAB 1: FILES LIST -->
@@ -240,6 +250,23 @@
                                 </StackPanel>
                             </Border>
 
+                            <!-- Server URL Configuration Card -->
+                            <Border Background="#1F2937" CornerRadius="10" Padding="20" BorderBrush="#374151" BorderThickness="1">
+                                <StackPanel Spacing="12">
+                                    <TextBlock Text="Server Connection URL" FontSize="16" FontWeight="SemiBold" Foreground="#F3F4F6"/>
+                                    <TextBlock Text="Set the FolderSyncEr Web API endpoint (URL and port) to connect to:" FontSize="12" Foreground="#9CA3AF"/>
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
+                                        <TextBox Grid.Column="0" Text="{Binding ServerUrl, Mode=TwoWay}"
+                                                 Watermark="http://localhost:5000" Margin="0,0,10,0"/>
+                                        <Button Grid.Column="1" Content="Save URL"
+                                                Command="{Binding SaveServerUrlCommand}"
+                                                Background="#059669" Foreground="White" FontWeight="SemiBold" Padding="14,7"/>
+                                    </Grid>
+                                    <TextBlock Text="{Binding ServerUrlStatusMessage}" Foreground="#10B981" FontSize="12"
+                                               IsVisible="{Binding HasServerUrlStatusMessage}"/>
+                                </StackPanel>
+                            </Border>
+
                             <!-- Conflict Policy & Behavior Card -->
                             <Border Background="#1F2937" CornerRadius="10" Padding="20" BorderBrush="#374151" BorderThickness="1">
                                 <StackPanel Spacing="14">
@@ -288,6 +315,52 @@
                                     <TextBlock Text="{Binding StatusMessage}" Foreground="#10B981" FontSize="12"/>
                                 </StackPanel>
                             </Border>
+
+                            <!-- App Configuration File Link Card -->
+                            <Border Background="#1F2937" CornerRadius="10" Padding="20" BorderBrush="#374151" BorderThickness="1">
+                                <StackPanel Spacing="10">
+                                    <TextBlock Text="App Configuration File" FontSize="16" FontWeight="SemiBold" Foreground="#F3F4F6"/>
+                                    <TextBlock Text="All client application preferences and settings are stored locally in:"
+                                               FontSize="12" Foreground="#9CA3AF"/>
+
+                                    <!-- Clickable Link to Settings File -->
+                                    <Button Command="{Binding OpenSettingsFileCommand}"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Padding="0"
+                                            Cursor="Hand"
+                                            HorizontalAlignment="Left">
+                                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                            <TextBlock Text="📄" FontSize="14" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding SettingsFilePath}"
+                                                       FontSize="12"
+                                                       FontWeight="Medium"
+                                                       Foreground="#60A5FA"
+                                                       TextDecorations="Underline"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Button>
+
+                                    <TextBlock Text="{Binding OpenSettingsStatus}"
+                                               Foreground="#10B981"
+                                               FontSize="11"
+                                               IsVisible="{Binding HasOpenSettingsStatus}"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Application Build & Version Info Card -->
+                            <Border Background="#1F2937" CornerRadius="10" Padding="20" BorderBrush="#374151" BorderThickness="1">
+                                <StackPanel Spacing="10">
+                                    <TextBlock Text="Application Information" FontSize="16" FontWeight="SemiBold" Foreground="#F3F4F6"/>
+                                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" Margin="0,4,0,0">
+                                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Client Version:" Foreground="#9CA3AF" FontSize="12" Margin="0,0,16,6"/>
+                                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding AppVersion}" Foreground="#60A5FA" FontWeight="SemiBold" FontSize="12"/>
+
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Compiled DateTime:" Foreground="#9CA3AF" FontSize="12"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding AppCompileDateTime}" Foreground="#E5E7EB" FontWeight="Medium" FontSize="12"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
                         </StackPanel>
                     </ScrollViewer>
                 </TabItem>
@@ -300,13 +373,16 @@
                             <Border Background="#1F2937" CornerRadius="10" Padding="20" BorderBrush="#374151" BorderThickness="1"
                                     DataContext="{Binding Connection}">
                                 <StackPanel Spacing="12">
-                                    <Grid ColumnDefinitions="*,Auto">
-                                        <TextBlock Text="Server Connection Check" FontSize="16" FontWeight="SemiBold" Foreground="#F3F4F6"/>
+                                    <TextBlock Text="Server Connection Check" FontSize="16" FontWeight="SemiBold" Foreground="#F3F4F6"/>
+                                    <TextBlock Text="Test connectivity to the Web API server (configure persistent URL on the Settings tab):" FontSize="12" Foreground="#9CA3AF"/>
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
+                                        <TextBox Grid.Column="0" Text="{Binding ServerUrl, Mode=TwoWay}" Watermark="http://localhost:5000" Margin="0,0,10,0"/>
                                         <Button Grid.Column="1" Content="Check Connection" Command="{Binding CheckConnectionCommand}"
-                                                Background="#2563EB" Foreground="White" Padding="12,6"/>
+                                                Background="#2563EB" Foreground="White" FontWeight="SemiBold" Padding="14,7"/>
                                     </Grid>
-                                    <TextBox Text="{Binding ServerUrl, Mode=TwoWay}" Watermark="http://localhost:5000"/>
-                                    <Grid ColumnDefinitions="*,*,*" Margin="0,8,0,0">
+                                    <TextBlock Text="{Binding ErrorMessage}" Foreground="#EF4444" FontSize="12"
+                                               IsVisible="{Binding HasErrorMessage}"/>
+                                    <Grid ColumnDefinitions="*,*,*,*" Margin="0,8,0,0">
                                         <StackPanel Grid.Column="0">
                                             <TextBlock Text="STATUS" FontSize="10" Foreground="#9CA3AF" FontWeight="Bold"/>
                                             <TextBlock Text="{Binding StatusText}" FontSize="14" FontWeight="SemiBold" Foreground="#F3F4F6"/>
@@ -318,6 +394,10 @@
                                         <StackPanel Grid.Column="2">
                                             <TextBlock Text="SERVER CLOCK (UTC)" FontSize="10" Foreground="#9CA3AF" FontWeight="Bold"/>
                                             <TextBlock Text="{Binding ServerTimeText}" FontSize="14" FontWeight="SemiBold" Foreground="#F3F4F6"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="3">
+                                            <TextBlock Text="SERVER COMPILED (UTC)" FontSize="10" Foreground="#9CA3AF" FontWeight="Bold"/>
+                                            <TextBlock Text="{Binding ServerCompiledText}" FontSize="14" FontWeight="SemiBold" Foreground="#60A5FA"/>
                                         </StackPanel>
                                     </Grid>
                                 </StackPanel>

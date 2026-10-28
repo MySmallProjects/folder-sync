@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Input;
 using FolderSyncEr.Client.Api;
 using FolderSyncEr.Client.Platform;
 using FolderSyncEr.Client.Sync.Conflicts;
+using FolderSyncEr.Contracts;
 
 namespace FolderSyncEr.Client.App.ViewModels;
 
@@ -14,8 +15,9 @@ public partial class SettingsViewModel : ViewModelBase
 {
     private readonly IFileSyncApi _api;
     private readonly ISecretStore _secretStore;
+    private readonly ClientSettingsManager _settingsManager;
     private readonly Func<string?> _getSyncFolder;
-    private readonly Action<string> _setSyncFolder;
+    private readonly Func<string, Task> _setSyncFolder;
     private readonly Action<ConflictPolicy> _setConflictPolicy;
 
     [ObservableProperty]
@@ -45,6 +47,21 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isDownloadingArchive;
 
+    [ObservableProperty]
+    private string _settingsFilePath = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasOpenSettingsStatus))]
+    private string? _openSettingsStatus;
+
+    public bool HasOpenSettingsStatus => !string.IsNullOrWhiteSpace(OpenSettingsStatus);
+
+    [ObservableProperty]
+    private string _appVersion = "1.0.0";
+
+    [ObservableProperty]
+    private string _appCompileDateTime = "-";
+
     public IReadOnlyList<ConflictPolicy> AvailablePolicies { get; } = new[]
     {
         ConflictPolicy.KeepBoth,
@@ -55,24 +72,149 @@ public partial class SettingsViewModel : ViewModelBase
     public SettingsViewModel(
         IFileSyncApi api,
         ISecretStore secretStore,
+        ClientSettingsManager settingsManager,
         Func<string?> getSyncFolder,
-        Action<string> setSyncFolder,
+        Func<string, Task> setSyncFolder,
         Action<ConflictPolicy> setConflictPolicy)
     {
         _api = api ?? throw new ArgumentNullException(nameof(api));
         _secretStore = secretStore ?? throw new ArgumentNullException(nameof(secretStore));
+        _settingsManager = settingsManager ?? new ClientSettingsManager();
         _getSyncFolder = getSyncFolder ?? throw new ArgumentNullException(nameof(getSyncFolder));
         _setSyncFolder = setSyncFolder ?? throw new ArgumentNullException(nameof(setSyncFolder));
         _setConflictPolicy = setConflictPolicy ?? throw new ArgumentNullException(nameof(setConflictPolicy));
 
         CurrentSyncFolder = _getSyncFolder() ?? string.Empty;
         ServerUrl = _api.ServerUrl;
+        SettingsFilePath = _settingsManager.SettingsFilePath;
+
+        var appAssembly = typeof(SettingsViewModel).Assembly;
+        AppVersion = BuildInfo.GetVersionString(appAssembly);
+        AppCompileDateTime = BuildInfo.GetBuildDateUtc(appAssembly).ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
     }
+
+    public bool IsInitialized { get; set; }
+
+    public SettingsViewModel(
+        IFileSyncApi api,
+        ISecretStore secretStore,
+        Func<string?> getSyncFolder,
+        Func<string, Task> setSyncFolder,
+        Action<ConflictPolicy> setConflictPolicy)
+        : this(api, secretStore, new ClientSettingsManager(), getSyncFolder, setSyncFolder, setConflictPolicy)
+    {
+    }
+
+    public SettingsViewModel(
+        IFileSyncApi api,
+        ISecretStore secretStore,
+        Func<string?> getSyncFolder,
+        Action<string> setSyncFolder,
+        Action<ConflictPolicy> setConflictPolicy)
+        : this(api, secretStore, new ClientSettingsManager(), getSyncFolder, folder => { setSyncFolder(folder); return Task.CompletedTask; }, setConflictPolicy)
+    {
+    }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasServerUrlStatusMessage))]
+    private string _serverUrlStatusMessage = string.Empty;
+
+    public bool HasServerUrlStatusMessage => !string.IsNullOrWhiteSpace(ServerUrlStatusMessage);
 
     partial void OnSelectedConflictPolicyChanged(ConflictPolicy value)
     {
         _setConflictPolicy(value);
         StatusMessage = $"Conflict policy changed to: {value}";
+        if (IsInitialized)
+        {
+            _ = PersistCurrentSettingsAsync();
+        }
+    }
+
+    partial void OnSyncIntervalSecondsChanged(int value)
+    {
+        if (IsInitialized)
+        {
+            _ = PersistCurrentSettingsAsync();
+        }
+    }
+
+    partial void OnCloseToTrayChanged(bool value)
+    {
+        if (IsInitialized)
+        {
+            _ = PersistCurrentSettingsAsync();
+        }
+    }
+
+    [RelayCommand]
+    public async Task SaveServerUrlAsync()
+    {
+        ServerUrlStatusMessage = string.Empty;
+
+        if (string.IsNullOrWhiteSpace(ServerUrl))
+        {
+            ServerUrlStatusMessage = "Server URL cannot be empty.";
+            return;
+        }
+
+        var trimmed = ServerUrl.Trim().TrimEnd('/');
+        if (!Uri.TryCreate(trimmed, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        {
+            ServerUrlStatusMessage = "Invalid URL. Please enter a valid HTTP or HTTPS URL (e.g. http://localhost:5000).";
+            return;
+        }
+
+        _api.ServerUrl = trimmed;
+        ServerUrl = trimmed;
+        await _secretStore.SetSecretAsync("ConfiguredServerUrl", trimmed);
+        await PersistCurrentSettingsAsync();
+        ServerUrlStatusMessage = $"Server URL saved: {trimmed}";
+    }
+
+    [RelayCommand]
+    public async Task OpenSettingsFileAsync()
+    {
+        OpenSettingsStatus = null;
+        if (string.IsNullOrWhiteSpace(SettingsFilePath) || !File.Exists(SettingsFilePath))
+        {
+            await PersistCurrentSettingsAsync();
+        }
+
+        var success = ClientSettingsManager.OpenSettingsFileInDefaultViewer(SettingsFilePath);
+        if (success)
+        {
+            OpenSettingsStatus = "Settings file opened in default viewer.";
+        }
+        else
+        {
+            OpenSettingsStatus = $"File path: {SettingsFilePath}";
+        }
+    }
+
+    public async Task PersistCurrentSettingsAsync()
+    {
+        try
+        {
+            var settings = await _settingsManager.LoadSettingsAsync();
+            if (!string.IsNullOrWhiteSpace(ServerUrl))
+            {
+                settings.ServerUrl = ServerUrl;
+            }
+            if (!string.IsNullOrWhiteSpace(CurrentSyncFolder))
+            {
+                settings.SyncFolderPath = CurrentSyncFolder;
+            }
+            settings.ConflictPolicy = SelectedConflictPolicy.ToString();
+            settings.SyncIntervalSeconds = SyncIntervalSeconds;
+            settings.CloseToTray = CloseToTray;
+            settings.LastUpdatedUtc = DateTime.UtcNow;
+            await _settingsManager.SaveSettingsAsync(settings);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"[SETTINGS PERSIST ERROR] {ex.Message}");
+        }
     }
 
     [RelayCommand]
@@ -96,15 +238,18 @@ public partial class SettingsViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    public void ConfirmChangeFolder()
+    public async Task ConfirmChangeFolderAsync()
     {
         var fullPath = Path.GetFullPath(NewSyncFolderInput.Trim());
-        _setSyncFolder(fullPath);
+        await _setSyncFolder(fullPath);
         CurrentSyncFolder = fullPath;
         NewSyncFolderInput = string.Empty;
         ShowFolderChangeConfirmation = false;
+        await PersistCurrentSettingsAsync();
         StatusMessage = $"Sync folder successfully switched to: {fullPath}";
     }
+
+    public void ConfirmChangeFolder() => ConfirmChangeFolderAsync().GetAwaiter().GetResult();
 
     [RelayCommand]
     public void CancelChangeFolder()

@@ -25,6 +25,9 @@ public class StatusAndAuthTests : IClassFixture<TestServerFixture>
         Assert.Equal("Healthy", status.Status);
         Assert.True(status.DbReachable);
         Assert.True(status.ServerTimeUtc > DateTime.UtcNow.AddMinutes(-5));
+        Assert.False(string.IsNullOrWhiteSpace(status.Version));
+        Assert.NotNull(status.CompiledUtc);
+        Assert.True(status.CompiledUtc > DateTime.UtcNow.AddYears(-1));
     }
 
     [Fact]

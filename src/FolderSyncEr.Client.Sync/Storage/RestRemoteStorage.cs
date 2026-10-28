@@ -23,6 +23,7 @@ public sealed class RestRemoteStorage : ISyncStorage
     private readonly IFileSyncApi _api;
     private readonly RemoteSnapshot _snapshot;
     private readonly RunFailureRegistry _failureRegistry;
+    private readonly Func<string, DateTime?>? _getLocalLastModified;
     private readonly ILogger<RestRemoteStorage> _logger;
 
     public RestRemoteStorage(
@@ -30,10 +31,21 @@ public sealed class RestRemoteStorage : ISyncStorage
         RemoteSnapshot snapshot,
         RunFailureRegistry failureRegistry,
         ILogger<RestRemoteStorage>? logger = null)
+        : this(api, snapshot, failureRegistry, null, logger)
+    {
+    }
+
+    public RestRemoteStorage(
+        IFileSyncApi api,
+        RemoteSnapshot snapshot,
+        RunFailureRegistry failureRegistry,
+        Func<string, DateTime?>? getLocalLastModified,
+        ILogger<RestRemoteStorage>? logger = null)
     {
         _api = api ?? throw new ArgumentNullException(nameof(api));
         _snapshot = snapshot ?? throw new ArgumentNullException(nameof(snapshot));
         _failureRegistry = failureRegistry ?? throw new ArgumentNullException(nameof(failureRegistry));
+        _getLocalLastModified = getLocalLastModified;
         _logger = logger ?? NullLogger<RestRemoteStorage>.Instance;
     }
 
@@ -84,17 +96,35 @@ public sealed class RestRemoteStorage : ISyncStorage
         return item != null;
     }
 
-    public Task<string> ComputeHashAsync(string path, CancellationToken cancellationToken = default)
+    public async Task<string> ComputeHashAsync(string path, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         var item = _snapshot.GetItem(path);
         if (item != null && !string.IsNullOrEmpty(item.Hash))
         {
-            return Task.FromResult(item.Hash);
+            return item.Hash;
         }
 
-        return Task.FromResult(string.Empty);
+        try
+        {
+            var dto = await _api.GetFileMetaByPathAsync(path, cancellationToken);
+            if (dto != null && !dto.IsDeleted && !string.IsNullOrEmpty(dto.Sha256))
+            {
+                _snapshot.AddOrUpdate(dto);
+                var base64 = HashConverter.HexToBase64(dto.Sha256);
+                if (!string.IsNullOrEmpty(base64))
+                {
+                    return base64;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogDebug(ex, "Failed to compute remote hash for '{Path}'", path);
+        }
+
+        return string.Empty;
     }
 
     public async Task<Stream> ReadFileAsync(string path, CancellationToken cancellationToken = default)
@@ -151,6 +181,8 @@ public sealed class RestRemoteStorage : ISyncStorage
                 StorageOperation.Upload,
                 args => ProgressChanged?.Invoke(this, args));
 
+            DateTime? lastModifiedUtc = _getLocalLastModified?.Invoke(path);
+
             var result = await _api.UploadFileStreamAsync(
                 path: path,
                 contentStream: progressStream,
@@ -158,6 +190,7 @@ public sealed class RestRemoteStorage : ISyncStorage
                 ifMatchSha256: ifMatchSha256,
                 ifNoneMatch: ifNoneMatch,
                 baseVersion: baseVersion,
+                lastModifiedUtc: lastModifiedUtc,
                 ct: cancellationToken);
 
             if (result.IsConflict)

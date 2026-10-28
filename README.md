@@ -87,6 +87,7 @@ dotnet run --project src/FolderSyncEr.Client.App
 
 ### 2. Client Features (Phase 2 & Phase 4 Full UI)
 - **Status & Latency Checker**: Real-time roundtrip ping and server UTC time verification against `/api/status`.
+- **Configurable Server URL & Port**: Enter any custom server URL and port (e.g. `http://localhost:5001`) and click **Save URL** to persist it to secure storage (`ISecretStore`) and apply it across the app.
 - **Authentication**: JWT login with automatic token refresh on expiry, session persistence across restarts, and secure logout.
 - **OS-Native Secret Storage (`ISecretStore`)**:
   - **Windows**: Windows Credential Manager (`advapi32.dll` CredWriteW/CredReadW/CredDeleteW) with fallback to DPAPI `ProtectedData`.
@@ -110,6 +111,7 @@ dotnet run --project src/FolderSyncEr.Client.App
   - **Sync Interval**: Configurable periodic background scan frequency (seconds).
   - **Close-to-Tray**: Configurable toggle to minimize to notification tray on window close.
   - **Admin Folder Archive**: One-click download of the user's remote files bundled as a compressed ZIP archive (`GET /api/files/export`).
+  - **App Settings Storage Link**: Clickable file path link at the bottom of the Settings tab displaying the exact local location of `settings.json` (`~/.config/foldersyncer/settings.json` on Linux or `%LOCALAPPDATA%\FolderSyncEr\settings.json` on Windows) and opening it in the system's default text editor / viewer on click.
 - **System Tray Integration (`TrayIcon`)**:
   - Tray menu options: **Open FolderSyncEr**, **Sync Now**, **Pause / Resume Sync**, and **Quit**.
   - **Linux Desktop Environment Caveats**:
@@ -161,9 +163,9 @@ To run with detailed test log output:
 dotnet test --logger "console;verbosity=normal"
 ```
 
-### Test Suites (59 Tests Total)
+### Test Suites (65 Tests Total)
 - **`FolderSyncEr.Server.IntegrationTests` (17 tests)**: Full ASP.NET Core Web API server tests against SQLite EF Core, verifying JWT auth, token rotation, streaming uploads/downloads, atomic writes, optimistic concurrency, soft delete tombstones, and admin ZIP export.
-- **`FolderSyncEr.Client.Tests` (15 tests)**: Client platform and UI viewmodel tests verifying OS secret stores (`ISecretStore`), token management with 401 automatic single-flight token refresh, `FileListViewModel` (local/remote merge & badge logic), `LogsViewModel` (filters & pagination), `ConflictPromptViewModel` (interactive resolution), and `SettingsViewModel` (folder migration warning & ZIP export).
+- **`FolderSyncEr.Client.Tests` (21 tests)**: Client platform and UI viewmodel tests verifying OS secret stores (`ISecretStore`), token management with 401 automatic single-flight token refresh, `FileListViewModel` (local/remote merge & badge logic), `LogsViewModel` (filters & pagination), `ConflictPromptViewModel` (interactive resolution), `SettingsViewModel` (folder migration warning, URL persistence, `settings.json` file link, & ZIP export), `ClientSettingsManager` (atomic JSON loading & saving), `LoginViewModel` (uses settings URL on sign-in), and `ConnectionCheckViewModel` (explicit URL save & persistence).
 - **`FolderSyncEr.Client.Sync.Tests` (27 tests)**: SharpSync integration tests verifying `RestRemoteStorage`, `SafeLocalStorage` (atomic writes + trash recovery + hash cache), `GuardedSyncDatabase` (R1 failure suppression + version tagging), `PolicyConflictResolver` (keep-both, newest-wins, prompt), and `SyncCoordinator`.
 
 ### Integration Test Credentials
@@ -180,7 +182,7 @@ All endpoints require a Bearer token (`Authorization: Bearer <token>`) except `/
 
 | Method | Endpoint | Description | SharpSync Mapping |
 |---|---|---|---|
-| `GET` | `/api/status` | Anonymous health check, version, server UTC time, DB reachability | `TestConnectionAsync` |
+| `GET` | `/api/status` | Anonymous health check, version, server UTC time, compile UTC datetime, DB reachability | `TestConnectionAsync` |
 | `POST` | `/api/auth/login` | Login with username, password, and device info. Returns JWT + refresh token. Rate-limited (10 req/min per IP) | Client Authentication |
 | `POST` | `/api/auth/refresh` | Refresh JWT with rotation & reuse revocation | Auth handler |
 | `POST` | `/api/auth/logout` | Revoke active refresh tokens for the calling device | Client Logout |

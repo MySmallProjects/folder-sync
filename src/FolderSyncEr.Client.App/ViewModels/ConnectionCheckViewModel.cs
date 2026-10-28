@@ -1,12 +1,18 @@
+using System;
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FolderSyncEr.Client.Api;
+using FolderSyncEr.Client.Platform;
 
 namespace FolderSyncEr.Client.App.ViewModels;
 
 public partial class ConnectionCheckViewModel : ViewModelBase
 {
+    private const string ServerUrlStoreKey = "ConfiguredServerUrl";
     private readonly IFileSyncApi _api;
+    private readonly ISecretStore? _secretStore;
+    private readonly ClientSettingsManager? _settingsManager;
 
     [ObservableProperty]
     private string _serverUrl = "http://localhost:5000";
@@ -27,12 +33,87 @@ public partial class ConnectionCheckViewModel : ViewModelBase
     private string _serverTimeText = "-";
 
     [ObservableProperty]
+    private string _serverCompiledText = "-";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasErrorMessage))]
     private string? _errorMessage;
 
-    public ConnectionCheckViewModel(IFileSyncApi api)
+    public bool HasErrorMessage => !string.IsNullOrWhiteSpace(ErrorMessage);
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSaveMessage))]
+    private string? _saveMessage;
+
+    public bool HasSaveMessage => !string.IsNullOrWhiteSpace(SaveMessage);
+
+    public ConnectionCheckViewModel(IFileSyncApi api, ISecretStore? secretStore = null, ClientSettingsManager? settingsManager = null)
     {
         _api = api;
+        _secretStore = secretStore;
+        _settingsManager = settingsManager;
         _serverUrl = _api.ServerUrl;
+    }
+
+    public async Task InitializeAsync()
+    {
+        if (_settingsManager != null)
+        {
+            var settings = await _settingsManager.LoadSettingsAsync();
+            if (!string.IsNullOrWhiteSpace(settings.ServerUrl))
+            {
+                ServerUrl = settings.ServerUrl;
+                _api.ServerUrl = settings.ServerUrl;
+                return;
+            }
+        }
+
+        if (_secretStore != null)
+        {
+            var saved = await _secretStore.GetSecretAsync(ServerUrlStoreKey);
+            if (!string.IsNullOrWhiteSpace(saved))
+            {
+                ServerUrl = saved;
+                _api.ServerUrl = saved;
+            }
+        }
+    }
+
+    [RelayCommand]
+    public async Task SaveServerUrlAsync()
+    {
+        SaveMessage = null;
+        ErrorMessage = null;
+
+        if (string.IsNullOrWhiteSpace(ServerUrl))
+        {
+            ErrorMessage = "Server URL cannot be empty.";
+            return;
+        }
+
+        var trimmed = ServerUrl.Trim().TrimEnd('/');
+        if (!Uri.TryCreate(trimmed, UriKind.Absolute, out var uri) || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        {
+            ErrorMessage = "Invalid server URL. Please enter a valid HTTP or HTTPS URL (e.g. http://localhost:5000).";
+            return;
+        }
+
+        _api.ServerUrl = trimmed;
+        ServerUrl = trimmed;
+
+        if (_secretStore != null)
+        {
+            await _secretStore.SetSecretAsync(ServerUrlStoreKey, trimmed);
+        }
+
+        if (_settingsManager != null)
+        {
+            var current = await _settingsManager.LoadSettingsAsync();
+            current.ServerUrl = trimmed;
+            await _settingsManager.SaveSettingsAsync(current);
+        }
+
+        SaveMessage = $"Server URL saved: {trimmed}";
     }
 
     [RelayCommand]
@@ -40,7 +121,11 @@ public partial class ConnectionCheckViewModel : ViewModelBase
     {
         IsChecking = true;
         ErrorMessage = null;
-        _api.ServerUrl = ServerUrl;
+        SaveMessage = null;
+        if (!string.IsNullOrWhiteSpace(ServerUrl))
+        {
+            _api.ServerUrl = ServerUrl.Trim().TrimEnd('/');
+        }
 
         try
         {
@@ -49,6 +134,7 @@ public partial class ConnectionCheckViewModel : ViewModelBase
             StatusText = result.Status;
             LatencyText = $"{result.LatencyMs} ms";
             ServerTimeText = result.ServerTimeUtc?.ToString("yyyy-MM-dd HH:mm:ss 'UTC'") ?? "-";
+            ServerCompiledText = result.CompiledUtc?.ToString("yyyy-MM-dd HH:mm:ss 'UTC'") ?? "-";
             ErrorMessage = result.ErrorMessage;
         }
         catch (Exception ex)
@@ -57,7 +143,8 @@ public partial class ConnectionCheckViewModel : ViewModelBase
             StatusText = "Error";
             LatencyText = "-";
             ServerTimeText = "-";
-            ErrorMessage = ex.Message;
+            ServerCompiledText = "-";
+            ErrorMessage = $"{ex.Message} (Target: {_api.ServerUrl})";
         }
         finally
         {
@@ -65,4 +152,3 @@ public partial class ConnectionCheckViewModel : ViewModelBase
         }
     }
 }
-

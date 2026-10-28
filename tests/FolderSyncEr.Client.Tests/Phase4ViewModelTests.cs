@@ -274,6 +274,59 @@ public class Phase4ViewModelTests
     }
 
     [Fact]
+    public async Task SettingsViewModel_FolderChange_PersistsToSecretStoreAndUpdatesFolderSelectionViewModel()
+    {
+        var api = new FakeFileSyncApi();
+        var secretStore = new TestSecretStore();
+        var folderVm = new FolderSelectionViewModel(secretStore);
+
+        var tempDir = Path.Combine(Path.GetTempPath(), "InitialSyncFolder_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempDir);
+        var targetNewFolder = Path.Combine(Path.GetTempPath(), "NewSyncFolder_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(targetNewFolder);
+
+        try
+        {
+            await folderVm.SaveAndSetFolderPathAsync(tempDir);
+            Assert.Equal(tempDir, folderVm.SelectedFolderPath);
+            Assert.Equal(tempDir, await secretStore.GetSecretAsync("SyncFolderPath"));
+
+            var settingsVm = new SettingsViewModel(
+                api,
+                secretStore,
+                getSyncFolder: () => folderVm.SelectedFolderPath ?? string.Empty,
+                setSyncFolder: async folder => await folderVm.SaveAndSetFolderPathAsync(folder),
+                setConflictPolicy: _ => { }
+            );
+
+            Assert.Equal(tempDir, settingsVm.CurrentSyncFolder);
+
+            // Change folder via Settings
+            settingsVm.NewSyncFolderInput = targetNewFolder;
+            settingsVm.RequestChangeFolder();
+            Assert.True(settingsVm.ShowFolderChangeConfirmation);
+
+            // Confirm folder change asynchronously
+            await settingsVm.ConfirmChangeFolderAsync();
+
+            Assert.False(settingsVm.ShowFolderChangeConfirmation);
+            Assert.Equal(targetNewFolder, settingsVm.CurrentSyncFolder);
+            Assert.Equal(targetNewFolder, folderVm.SelectedFolderPath);
+            Assert.Equal(targetNewFolder, await secretStore.GetSecretAsync("SyncFolderPath"));
+
+            // Verify a new session/app restart correctly reloads the persisted folder from secret store
+            var newFolderVm = new FolderSelectionViewModel(secretStore);
+            await newFolderVm.InitializeFolderAsync();
+            Assert.Equal(targetNewFolder, newFolderVm.SelectedFolderPath);
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir)) Directory.Delete(tempDir, recursive: true);
+            if (Directory.Exists(targetNewFolder)) Directory.Delete(targetNewFolder, recursive: true);
+        }
+    }
+
+    [Fact]
     public async Task SettingsViewModel_DownloadAdminArchive_Success()
     {
         var api = new FakeFileSyncApi();
@@ -283,5 +336,261 @@ public class Phase4ViewModelTests
         await vm.DownloadArchiveAsync(Path.GetTempPath());
         Assert.False(vm.IsDownloadingArchive);
         Assert.Contains("Server archive saved to", vm.StatusMessage);
+    }
+
+    [Fact]
+    public async Task ConnectionCheckViewModel_SaveServerUrl_AppliesAndPersistsUrlOnlyOnExplicitSave()
+    {
+        var tempFile = Path.Combine(Path.GetTempPath(), "test_conn_settings_" + Guid.NewGuid().ToString("N") + ".json");
+        try
+        {
+            var api = new FakeFileSyncApi { ServerUrl = "http://localhost:5000" };
+            var secretStore = new TestSecretStore();
+            var manager = new ClientSettingsManager(tempFile);
+            var vm = new ConnectionCheckViewModel(api, secretStore, manager);
+
+            // Typing a new URL in the textbox should NOT immediately overwrite api.ServerUrl, secret store, or settings.json
+            vm.ServerUrl = "http://localhost:7890";
+            Assert.Equal("http://localhost:5000", api.ServerUrl);
+            Assert.Null(await secretStore.GetSecretAsync("ConfiguredServerUrl"));
+
+            // Invalid URL check
+            vm.ServerUrl = "not-a-valid-url";
+            await vm.SaveServerUrlAsync();
+            Assert.True(vm.HasErrorMessage);
+            Assert.Contains("Invalid server URL", vm.ErrorMessage);
+            Assert.Equal("http://localhost:5000", api.ServerUrl);
+            Assert.Null(await secretStore.GetSecretAsync("ConfiguredServerUrl"));
+
+            // Explicitly clicking Save URL applies and persists to both secret store and settings.json
+            vm.ServerUrl = "http://localhost:7890/";
+            await vm.SaveServerUrlAsync();
+
+            Assert.False(vm.HasErrorMessage);
+            Assert.True(vm.HasSaveMessage);
+            Assert.Equal("http://localhost:7890", api.ServerUrl);
+            Assert.Equal("http://localhost:7890", await secretStore.GetSecretAsync("ConfiguredServerUrl"));
+
+            var savedSettings = await manager.LoadSettingsAsync();
+            Assert.Equal("http://localhost:7890", savedSettings.ServerUrl);
+
+            // Subsequent launch restores it
+            var newVm = new ConnectionCheckViewModel(api, secretStore, manager);
+            await newVm.InitializeAsync();
+            Assert.Equal("http://localhost:7890", newVm.ServerUrl);
+        }
+        finally
+        {
+            if (File.Exists(tempFile)) File.Delete(tempFile);
+        }
+    }
+
+    [Fact]
+    public async Task SettingsViewModel_SaveServerUrl_AppliesAndPersistsUrl()
+    {
+        var tempFile = Path.Combine(Path.GetTempPath(), "test_settings_saveurl_" + Guid.NewGuid().ToString("N") + ".json");
+        try
+        {
+            var api = new FakeFileSyncApi { ServerUrl = "http://localhost:5000" };
+            var secretStore = new TestSecretStore();
+            var manager = new ClientSettingsManager(tempFile);
+            var vm = new SettingsViewModel(api, secretStore, manager, () => "/dummy", _ => Task.CompletedTask, _ => { });
+
+            // Changing property alone does not persist
+            vm.ServerUrl = "https://myserver.example.com:8443";
+            Assert.Equal("http://localhost:5000", api.ServerUrl);
+            Assert.Null(await secretStore.GetSecretAsync("ConfiguredServerUrl"));
+
+            // Explicit save applies and persists to both secret store and settings.json
+            await vm.SaveServerUrlAsync();
+            Assert.True(vm.HasServerUrlStatusMessage);
+            Assert.Contains("saved", vm.ServerUrlStatusMessage);
+            Assert.Equal("https://myserver.example.com:8443", api.ServerUrl);
+            Assert.Equal("https://myserver.example.com:8443", await secretStore.GetSecretAsync("ConfiguredServerUrl"));
+
+            var savedSettings = await manager.LoadSettingsAsync();
+            Assert.Equal("https://myserver.example.com:8443", savedSettings.ServerUrl);
+
+            // Version and compile datetime are populated
+            Assert.False(string.IsNullOrWhiteSpace(vm.AppVersion));
+            Assert.False(string.IsNullOrWhiteSpace(vm.AppCompileDateTime));
+        }
+        finally
+        {
+            if (File.Exists(tempFile)) File.Delete(tempFile);
+        }
+    }
+
+    [Fact]
+    public async Task ClientSettingsManager_LoadAndSave_PersistsJsonFileCorrectly()
+    {
+        var tempFile = Path.Combine(Path.GetTempPath(), "test_settings_" + Guid.NewGuid().ToString("N") + ".json");
+        try
+        {
+            var manager = new ClientSettingsManager(tempFile);
+            var settings = new ClientSettings
+            {
+                ServerUrl = "http://mycustomserver:5000",
+                SyncFolderPath = "/custom/sync/path",
+                ConflictPolicy = "NewestWins",
+                SyncIntervalSeconds = 120,
+                CloseToTray = false
+            };
+
+            await manager.SaveSettingsAsync(settings);
+            Assert.True(File.Exists(tempFile));
+
+            var loaded = await manager.LoadSettingsAsync();
+            Assert.Equal("http://mycustomserver:5000", loaded.ServerUrl);
+            Assert.Equal("/custom/sync/path", loaded.SyncFolderPath);
+            Assert.Equal("NewestWins", loaded.ConflictPolicy);
+            Assert.Equal(120, loaded.SyncIntervalSeconds);
+            Assert.False(loaded.CloseToTray);
+        }
+        finally
+        {
+            if (File.Exists(tempFile)) File.Delete(tempFile);
+        }
+    }
+
+    [Fact]
+    public async Task SettingsViewModel_SettingsFileLink_ExposesPathAndPersistsOnChange()
+    {
+        var tempFile = Path.Combine(Path.GetTempPath(), "test_vm_settings_" + Guid.NewGuid().ToString("N") + ".json");
+        try
+        {
+            var api = new FakeFileSyncApi { ServerUrl = "http://localhost:5000" };
+            var secretStore = new TestSecretStore();
+            var manager = new ClientSettingsManager(tempFile);
+
+            var vm = new SettingsViewModel(
+                api,
+                secretStore,
+                manager,
+                getSyncFolder: () => "/initial/folder",
+                setSyncFolder: _ => Task.CompletedTask,
+                setConflictPolicy: _ => { }
+            );
+
+            Assert.Equal(tempFile, vm.SettingsFilePath);
+            await vm.PersistCurrentSettingsAsync();
+            Assert.True(File.Exists(tempFile));
+
+            // Verify OpenSettingsFileCommand
+            await vm.OpenSettingsFileAsync();
+            Assert.True(vm.HasOpenSettingsStatus);
+            Assert.False(string.IsNullOrWhiteSpace(vm.OpenSettingsStatus));
+
+            // Verify file content has the initialized properties
+            var loaded = await manager.LoadSettingsAsync();
+            Assert.Equal("http://localhost:5000", loaded.ServerUrl);
+            Assert.Equal("/initial/folder", loaded.SyncFolderPath);
+        }
+        finally
+        {
+            if (File.Exists(tempFile)) File.Delete(tempFile);
+        }
+    }
+
+    [Fact]
+    public async Task LoginViewModel_UsesServerUrlFromSettings_WhenLoggingIn()
+    {
+        var tempFile = Path.Combine(Path.GetTempPath(), "test_login_url_" + Guid.NewGuid().ToString("N") + ".json");
+        try
+        {
+            var manager = new ClientSettingsManager(tempFile);
+            await manager.SaveSettingsAsync(new ClientSettings
+            {
+                ServerUrl = "http://localhost:8080"
+            });
+
+            var api = new FakeFileSyncApi { ServerUrl = "http://localhost:5000" };
+            var secretStore = new TestSecretStore();
+            var tokenManager = new AuthTokenManager(secretStore, Microsoft.Extensions.Logging.Abstractions.NullLogger<AuthTokenManager>.Instance);
+
+            var loginVm = new LoginViewModel(api, tokenManager, manager);
+            Assert.Equal("http://localhost:5000", api.ServerUrl);
+
+            // On initialization or login, the configured URL is applied
+            await loginVm.InitializeSessionAsync();
+            Assert.Equal("http://localhost:8080", api.ServerUrl);
+
+            // Verify LoginAsync uses the updated URL
+            loginVm.Username = "admin";
+            loginVm.Password = "password";
+            await loginVm.LoginAsync();
+
+            Assert.Equal("http://localhost:8080", api.ServerUrl);
+            Assert.True(loginVm.IsLoggedIn);
+        }
+        finally
+        {
+            if (File.Exists(tempFile)) File.Delete(tempFile);
+        }
+    }
+
+    [Fact]
+    public async Task MainWindowViewModel_Initialization_PreservesExistingSettingsWithoutOverwriting()
+    {
+        var tempFile = Path.Combine(Path.GetTempPath(), "test_main_settings_" + Guid.NewGuid().ToString("N") + ".json");
+        var tempSyncFolder = Path.Combine(Path.GetTempPath(), "test_sync_folder_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempSyncFolder);
+
+        try
+        {
+            var manager = new ClientSettingsManager(tempFile);
+            var initialSettings = new ClientSettings
+            {
+                ServerUrl = "http://localhost:9090",
+                SyncFolderPath = tempSyncFolder,
+                ConflictPolicy = "NewestWins",
+                SyncIntervalSeconds = 120,
+                CloseToTray = false
+            };
+            await manager.SaveSettingsAsync(initialSettings);
+
+            var api = new FakeFileSyncApi { ServerUrl = "http://localhost:5000" };
+            var secretStore = new TestSecretStore();
+            var tokenManager = new AuthTokenManager(secretStore, Microsoft.Extensions.Logging.Abstractions.NullLogger<AuthTokenManager>.Instance);
+            var connVm = new ConnectionCheckViewModel(api, secretStore, manager);
+            var loginVm = new LoginViewModel(api, tokenManager, manager);
+            var folderVm = new FolderSelectionViewModel(secretStore);
+
+            // Construct MainWindowViewModel (previously constructor triggered PersistCurrentSettingsAsync and wiped the file)
+            var mainVm = new MainWindowViewModel(secretStore, api, connVm, loginVm, folderVm, manager);
+
+            // File should remain completely unchanged after construction
+            var postConstructorSettings = await manager.LoadSettingsAsync();
+            Assert.Equal("http://localhost:9090", postConstructorSettings.ServerUrl);
+            Assert.Equal(tempSyncFolder, postConstructorSettings.SyncFolderPath);
+            Assert.Equal("NewestWins", postConstructorSettings.ConflictPolicy);
+            Assert.Equal(120, postConstructorSettings.SyncIntervalSeconds);
+            Assert.False(postConstructorSettings.CloseToTray);
+
+            // Run InitializeAsync
+            await mainVm.InitializeAsync();
+
+            // Verify settings were loaded properly into ViewModel
+            Assert.Equal("http://localhost:9090", api.ServerUrl);
+            Assert.Equal("http://localhost:9090", mainVm.Settings.ServerUrl);
+            Assert.Equal("http://localhost:9090", connVm.ServerUrl);
+            Assert.Equal(tempSyncFolder, mainVm.Settings.CurrentSyncFolder);
+            Assert.Equal(120, mainVm.Settings.SyncIntervalSeconds);
+            Assert.False(mainVm.Settings.CloseToTray);
+            Assert.Equal(ConflictPolicy.NewestWins, mainVm.Settings.SelectedConflictPolicy);
+
+            // Verify file was not overwritten with defaults during initialization
+            var postInitSettings = await manager.LoadSettingsAsync();
+            Assert.Equal("http://localhost:9090", postInitSettings.ServerUrl);
+            Assert.Equal(tempSyncFolder, postInitSettings.SyncFolderPath);
+            Assert.Equal("NewestWins", postInitSettings.ConflictPolicy);
+            Assert.Equal(120, postInitSettings.SyncIntervalSeconds);
+            Assert.False(postInitSettings.CloseToTray);
+        }
+        finally
+        {
+            if (File.Exists(tempFile)) File.Delete(tempFile);
+            if (Directory.Exists(tempSyncFolder)) Directory.Delete(tempSyncFolder, recursive: true);
+        }
     }
 }

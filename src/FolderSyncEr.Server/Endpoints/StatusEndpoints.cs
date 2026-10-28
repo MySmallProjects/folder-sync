@@ -20,12 +20,16 @@ public static class StatusEndpoints
                 dbReachable = false;
             }
 
-            var version = typeof(StatusEndpoints).Assembly.GetName().Version?.ToString() ?? "1.0.0";
+            var assembly = typeof(StatusEndpoints).Assembly;
+            var version = BuildInfo.GetVersionString(assembly);
+            var compiledUtc = BuildInfo.GetBuildDateUtc(assembly);
+
             var response = new StatusResponse(
                 Status: dbReachable ? "Healthy" : "Degraded",
                 Version: version,
                 ServerTimeUtc: DateTime.UtcNow,
-                DbReachable: dbReachable
+                DbReachable: dbReachable,
+                CompiledUtc: compiledUtc
             );
 
             return Results.Ok(response);

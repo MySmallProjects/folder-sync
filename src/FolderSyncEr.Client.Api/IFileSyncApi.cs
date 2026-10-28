@@ -8,7 +8,8 @@ public record ApiConnectionStatus(
     string Version,
     DateTime? ServerTimeUtc,
     long LatencyMs,
-    string? ErrorMessage
+    string? ErrorMessage,
+    DateTime? CompiledUtc = null
 );
 
 public record UploadResult(

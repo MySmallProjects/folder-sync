@@ -25,6 +25,12 @@ public sealed class RemoteSnapshot
 
     public RemoteSnapshot(IEnumerable<FileDto> initialItems, long snapshotSeq, DateTime serverTimeUtc)
     {
+        Load(initialItems, snapshotSeq, serverTimeUtc);
+    }
+
+    public void Load(IEnumerable<FileDto> initialItems, long snapshotSeq, DateTime serverTimeUtc)
+    {
+        _items.Clear();
         SnapshotSeq = snapshotSeq;
         ServerTimeUtc = serverTimeUtc;
         foreach (var item in initialItems)
