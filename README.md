@@ -97,6 +97,10 @@ dotnet run --project src/FolderSyncEr.Client.App
   - Displays relative path, local size and UTC last-modified time, server version and SHA-256 prefix, server size and UTC last-modified time.
   - Colored sync status badges: **In sync** (green), **Local newer** (blue), **Server newer** (purple), **Conflict** (orange), **Error** (red).
   - Search box and quick filter dropdown ("All", "In sync", "Local newer", "Server newer", "Conflict", "Errors").
+- **Deleted Files (Trash) View**:
+  - Lists soft-deleted (tombstoned) files and folders from `/api/trash`, folding children into their deleted parent folder with item count and total size.
+  - **Restore**: Restores a deleted file or folder (including contents deleted with the folder). If a file or folder now exists at the original path, restores it alongside as `name (restored yyyy-MM-dd).ext`.
+  - **Delete Forever & Empty Trash**: Per-item permanent deletion and full trash purge with inline confirmation dialogs.
 - **Activity Logs Viewer**:
   - Paged server-side audit logs fetched directly from `/api/logs`.
   - Auto-refresh toggle (polls every 4 seconds when active).
@@ -194,6 +198,10 @@ All endpoints require a Bearer token (`Authorization: Bearer <token>`) except `/
 | `PUT` | `/api/files?path=` | Stream file upload (atomic temp-then-move). Supports `If-Match`, `If-None-Match`, `X-Content-SHA256`, `X-Base-Version`. Returns 409 on conflict | `WriteFileAsync` |
 | `POST` | `/api/directories` | Create directory metadata entry | `CreateDirectoryAsync` |
 | `DELETE`| `/api/files/{id}` | Soft delete (tombstone) with `If-Match` precondition | `DeleteAsync` |
+| `GET` | `/api/trash` | List top-level deleted (tombstoned) files and folders | Deleted Files tab |
+| `POST` | `/api/trash/{id}/restore` | Restore a deleted file/folder (optionally at `targetPath` as a copy) | Deleted Files tab |
+| `DELETE` | `/api/trash/{id}` | Permanently delete a tombstoned item and its stored version blobs | Deleted Files tab |
+| `DELETE` | `/api/trash` | Empty trash: permanently delete all tombstoned items and blobs for the user | Deleted Files tab |
 | `POST` | `/api/files/move` | Rename or move file path | `MoveAsync` |
 | `PATCH`| `/api/files/{id}` | Update last modified UTC timestamp | `SetLastModifiedAsync` |
 | `GET` | `/api/storage` | Returns total disk space, used space, and quota | `GetStorageInfoAsync` |

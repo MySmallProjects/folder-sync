@@ -140,6 +140,18 @@ public class RestRemoteStorageTests
         public Task<Stream> ExportFolderZipAsync(CancellationToken ct = default) =>
             Task.FromResult<Stream>(new MemoryStream());
 
+        public Task<IReadOnlyList<DeletedItemDto>> ListDeletedItemsAsync(CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<DeletedItemDto>>(Array.Empty<DeletedItemDto>());
+
+        public Task<TrashActionResult<RestoreResponse>> RestoreDeletedItemAsync(string id, string? targetPath = null, CancellationToken ct = default) =>
+            Task.FromResult(new TrashActionResult<RestoreResponse>(true, false, false, new RestoreResponse(targetPath ?? string.Empty, 1), null));
+
+        public Task<TrashActionResult<PurgeResponse>> PurgeDeletedItemAsync(string id, CancellationToken ct = default) =>
+            Task.FromResult(new TrashActionResult<PurgeResponse>(true, false, false, new PurgeResponse(1, 0), null));
+
+        public Task<PurgeResponse> EmptyTrashAsync(CancellationToken ct = default) =>
+            Task.FromResult(new PurgeResponse(0, 0));
+
         public Task<PagedResult<ActivityLogDto>> GetLogsAsync(int page = 1, int pageSize = 50, string? action = null, string? result = null, string? path = null, DateTime? fromUtc = null, DateTime? toUtc = null, CancellationToken ct = default) =>
             throw new NotImplementedException();
     }

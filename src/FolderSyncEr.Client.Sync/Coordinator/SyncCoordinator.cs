@@ -217,7 +217,9 @@ public sealed class SyncCoordinator : IDisposable
                     var msg = $"Server unreachable: {status.ErrorMessage ?? status.Status}";
                     _logger.LogWarning("Preflight failed: {Error}", msg);
                     LastError = msg;
-                    return new ClientSyncResult(false, 0, 0, 1, sw.Elapsed, msg);
+                    var unreachableResult = new ClientSyncResult(false, 0, 0, 1, sw.Elapsed, msg);
+                    SyncCompleted?.Invoke(this, new CoordinatorSyncCompletedEventArgs { Result = unreachableResult });
+                    return unreachableResult;
                 }
 
                 // 2. Fetch fresh remote snapshot (Mitigating Risk R2)
@@ -232,7 +234,7 @@ public sealed class SyncCoordinator : IDisposable
                 {
                     ChecksumOnly = false,
                     ConflictResolution = ConflictResolution.Ask, // Passes control to IConflictResolver
-                    DeleteExtraneous = true,
+                    DeleteExtraneous = false,
                     UpdateExisting = true,
                     PreserveTimestamps = true,
                     PreservePermissions = false,
@@ -304,13 +306,29 @@ public sealed class SyncCoordinator : IDisposable
         var remoteItems = _currentSnapshot.GetAllItems();
         foreach (var remote in remoteItems)
         {
-            if (remote.IsDirectory || remote.IsDeleted)
+            if (remote.IsDeleted)
                 continue;
 
             var normPath = RemoteSnapshot.NormalizePath(remote.Path);
             var localFullPath = Path.Combine(_localFolderPath, normPath.Replace('/', Path.DirectorySeparatorChar));
+            var existsLocally = remote.IsDirectory ? Directory.Exists(localFullPath) : File.Exists(localFullPath);
 
-            if (!File.Exists(localFullPath))
+            if (!existsLocally)
+            {
+                // If the item is missing locally but has a newer server version than what we last
+                // synced (e.g., it was restored from Trash), clear the stale SyncState so SharpSync
+                // downloads it rather than treating the missing local file as a new deletion.
+                var tracked = await _guardedDb.GetSyncStateAsync(normPath, cancellationToken);
+                if (tracked != null && tracked.ETag != remote.Version.ToString())
+                {
+                    _logger.LogInformation("Clearing stale sync state for restored/updated remote item '{Path}' (tracked ETag={TrackedETag}, server v{ServerVersion})",
+                        normPath, tracked.ETag, remote.Version);
+                    await _guardedDb.DeleteSyncStateAsync(normPath, cancellationToken);
+                }
+                continue;
+            }
+
+            if (remote.IsDirectory)
                 continue;
 
             var localHash = await _localStorage.ComputeHashAsync(normPath, cancellationToken);
@@ -364,10 +382,22 @@ public sealed class SyncCoordinator : IDisposable
         var interval = periodicInterval ?? TimeSpan.FromMinutes(5);
         _periodicTimer = new Timer(async _ =>
         {
-            if (!IsPaused && !IsSynchronizing)
+            if (_isDisposed) return;
+            try
             {
-                _logger.LogInformation("Periodic background sync timer fired.");
-                await RunSyncAsync();
+                if (!IsPaused && !IsSynchronizing)
+                {
+                    _logger.LogInformation("Periodic background sync timer fired.");
+                    await RunSyncAsync();
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                // Coordinator disposed while timer callback was in flight
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in periodic background sync timer.");
             }
         }, null, interval, interval);
 
@@ -394,6 +424,9 @@ public sealed class SyncCoordinator : IDisposable
 
     private void OnFileSystemEvent(object sender, FileSystemEventArgs e)
     {
+        if (_isDisposed)
+            return;
+
         // Ignore internal sync metadata folder
         if (e.FullPath.Contains(".foldersyncer"))
             return;
@@ -410,14 +443,26 @@ public sealed class SyncCoordinator : IDisposable
         _debounceTimer?.Dispose();
         _debounceTimer = new Timer(async _ =>
         {
-            if (!IsPaused && !IsSynchronizing)
+            if (_isDisposed) return;
+            try
             {
-                _logger.LogInformation("Debounced local change detected ({ChangeType}: '{Path}'); starting sync.", e.ChangeType, e.Name);
-                await RunSyncAsync();
+                if (!IsPaused && !IsSynchronizing)
+                {
+                    _logger.LogInformation("Debounced local change detected ({ChangeType}: '{Path}'); starting sync.", e.ChangeType, e.Name);
+                    await RunSyncAsync();
+                }
+                else
+                {
+                    _pendingSyncRequested = true;
+                }
             }
-            else
+            catch (ObjectDisposedException)
             {
-                _pendingSyncRequested = true;
+                // Coordinator disposed while debounce callback was in flight
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in file watcher debounce sync.");
             }
         }, null, 1200, Timeout.Infinite);
     }

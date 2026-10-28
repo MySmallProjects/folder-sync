@@ -35,6 +35,9 @@ public partial class FileListViewModel : ViewModelBase
     [ObservableProperty]
     private string _summaryText = "0 files";
 
+    [ObservableProperty]
+    private bool _areAllFilesInSync;
+
     public IReadOnlyList<string> StatusFilters { get; } = new[]
     {
         "All",
@@ -83,10 +86,12 @@ public partial class FileListViewModel : ViewModelBase
 
             // 2. Fetch remote files
             IReadOnlyList<FileDto> remoteFiles = Array.Empty<FileDto>();
+            var remoteReachable = false;
             try
             {
                 var resp = await _api.ListFilesAsync(includeDeleted: false, limit: 5000);
                 remoteFiles = resp.Items;
+                remoteReachable = true;
             }
             catch
             {
@@ -169,6 +174,8 @@ public partial class FileListViewModel : ViewModelBase
                 {
                     _allFiles.Add(it);
                 }
+                AreAllFilesInSync = remoteReachable &&
+                                    _allFiles.All(f => string.Equals(f.Status, "In sync", StringComparison.OrdinalIgnoreCase));
                 ApplyFilter();
             }
 

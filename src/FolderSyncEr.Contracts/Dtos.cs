@@ -96,6 +96,41 @@ public record PatchFileRequest(
     DateTime LastModifiedUtc
 );
 
+/// <summary>
+/// A top-level deleted (tombstoned) file or folder shown in the Deleted Files list.
+/// Items whose parent folder is also deleted are folded into that folder
+/// (see <see cref="ContainedItemCount"/> / <see cref="ContainedSize"/>).
+/// </summary>
+public record DeletedItemDto(
+    string Id,
+    string Path,
+    bool IsDirectory,
+    long Size,
+    long Version,
+    DateTime LastModifiedUtc,
+    DateTime DeletedAtUtc,
+    int ContainedItemCount,
+    long ContainedSize
+);
+
+/// <summary>
+/// Restore request. When <see cref="TargetPath"/> is set the item is restored under that
+/// path instead of its original one (used for "restore as copy" when the original path is taken).
+/// </summary>
+public record RestoreRequest(
+    string? TargetPath
+);
+
+public record RestoreResponse(
+    string Path,
+    int RestoredCount
+);
+
+public record PurgeResponse(
+    int PurgedCount,
+    long FreedBytes
+);
+
 public record StorageInfoDto(
     long TotalSpace,
     long UsedSpace,

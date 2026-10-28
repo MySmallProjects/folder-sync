@@ -119,6 +119,43 @@ public class Phase4ViewModelTests
 
         public Task<Stream> ExportFolderZipAsync(CancellationToken ct = default) =>
             Task.FromResult<Stream>(new MemoryStream(MockZipBytes));
+
+        public List<DeletedItemDto> MockDeletedItems { get; } = new();
+        public List<(string Id, string? TargetPath)> RestoreCalls { get; } = new();
+
+        public Task<IReadOnlyList<DeletedItemDto>> ListDeletedItemsAsync(CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<DeletedItemDto>>(MockDeletedItems.ToList());
+
+        public Task<TrashActionResult<RestoreResponse>> RestoreDeletedItemAsync(string id, string? targetPath = null, CancellationToken ct = default)
+        {
+            RestoreCalls.Add((id, targetPath));
+            var item = MockDeletedItems.FirstOrDefault(i => i.Id == id);
+            if (item == null)
+                return Task.FromResult(new TrashActionResult<RestoreResponse>(false, false, true, null, "Not found"));
+
+            MockDeletedItems.Remove(item);
+            return Task.FromResult(new TrashActionResult<RestoreResponse>(true, false, false,
+                new RestoreResponse(targetPath ?? item.Path, 1 + item.ContainedItemCount), null));
+        }
+
+        public Task<TrashActionResult<PurgeResponse>> PurgeDeletedItemAsync(string id, CancellationToken ct = default)
+        {
+            var item = MockDeletedItems.FirstOrDefault(i => i.Id == id);
+            if (item == null)
+                return Task.FromResult(new TrashActionResult<PurgeResponse>(false, false, true, null, "Not found"));
+
+            MockDeletedItems.Remove(item);
+            return Task.FromResult(new TrashActionResult<PurgeResponse>(true, false, false,
+                new PurgeResponse(1 + item.ContainedItemCount, item.Size + item.ContainedSize), null));
+        }
+
+        public Task<PurgeResponse> EmptyTrashAsync(CancellationToken ct = default)
+        {
+            var count = MockDeletedItems.Count;
+            var size = MockDeletedItems.Sum(i => i.Size + i.ContainedSize);
+            MockDeletedItems.Clear();
+            return Task.FromResult(new PurgeResponse(count, size));
+        }
     }
 
     [Fact]
@@ -590,6 +627,152 @@ public class Phase4ViewModelTests
         finally
         {
             if (File.Exists(tempFile)) File.Delete(tempFile);
+            if (Directory.Exists(tempSyncFolder)) Directory.Delete(tempSyncFolder, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task DeletedFilesViewModel_RestoresAsCopy_WhenOriginalPathExistsLocally()
+    {
+        var tempDir = Path.Combine(Path.GetTempPath(), "FolderSyncEr_Trash_UI_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempDir);
+
+        try
+        {
+            var api = new FakeFileSyncApi();
+            api.MockDeletedItems.Add(new DeletedItemDto("del-1", "notes/report.txt", false, 512, 2, DateTime.UtcNow, DateTime.UtcNow, 0, 0));
+            api.MockDeletedItems.Add(new DeletedItemDto("del-2", "notes/clean.txt", false, 256, 2, DateTime.UtcNow, DateTime.UtcNow, 0, 0));
+
+            // Create a local file at "notes/report.txt" so restore must pick a copy name
+            Directory.CreateDirectory(Path.Combine(tempDir, "notes"));
+            await File.WriteAllTextAsync(Path.Combine(tempDir, "notes", "report.txt"), "new local report");
+
+            int syncTriggered = 0;
+            var vm = new DeletedFilesViewModel(api, () => tempDir, () =>
+            {
+                syncTriggered++;
+                return Task.CompletedTask;
+            });
+
+            await vm.RefreshCommand.ExecuteAsync(null);
+            Assert.Equal(2, vm.Items.Count);
+
+            // 1. Restore "notes/report.txt" -> should restore as "notes/report (restored yyyy-MM-dd).txt"
+            var reportItem = vm.Items.First(i => i.Id == "del-1");
+            await reportItem.RestoreCommand.ExecuteAsync(null);
+
+            Assert.Single(api.RestoreCalls);
+            Assert.Equal("del-1", api.RestoreCalls[0].Id);
+            Assert.NotNull(api.RestoreCalls[0].TargetPath);
+            Assert.StartsWith("notes/report (restored ", api.RestoreCalls[0].TargetPath);
+            Assert.EndsWith(").txt", api.RestoreCalls[0].TargetPath);
+            Assert.Equal(1, syncTriggered);
+
+            // 2. Restore "notes/clean.txt" (no local collision) -> should restore at original path (TargetPath == null)
+            var cleanItem = vm.Items.First(i => i.Id == "del-2");
+            await cleanItem.RestoreCommand.ExecuteAsync(null);
+
+            Assert.Equal(2, api.RestoreCalls.Count);
+            Assert.Equal("del-2", api.RestoreCalls[1].Id);
+            Assert.Null(api.RestoreCalls[1].TargetPath);
+            Assert.Equal(2, syncTriggered);
+            Assert.Empty(vm.Items);
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir)) Directory.Delete(tempDir, recursive: true);
+        }
+    }
+
+    [Fact]
+    public async Task DeletedFilesViewModel_PurgeAndEmptyTrash_RequireConfirmation()
+    {
+        var api = new FakeFileSyncApi();
+        api.MockDeletedItems.Add(new DeletedItemDto("del-1", "a.txt", false, 100, 2, DateTime.UtcNow, DateTime.UtcNow, 0, 0));
+        api.MockDeletedItems.Add(new DeletedItemDto("del-2", "b.txt", false, 200, 2, DateTime.UtcNow, DateTime.UtcNow, 0, 0));
+
+        var vm = new DeletedFilesViewModel(api, () => null, () => Task.CompletedTask);
+        await vm.RefreshCommand.ExecuteAsync(null);
+        Assert.Equal(2, vm.Items.Count);
+
+        // Request per-item purge -> shows confirmation without deleting yet
+        vm.Items[0].PurgeCommand.Execute(null);
+        Assert.True(vm.IsConfirmVisible);
+        Assert.Equal(2, api.MockDeletedItems.Count);
+
+        // Cancel confirmation -> nothing deleted
+        vm.ConfirmNoCommand.Execute(null);
+        Assert.False(vm.IsConfirmVisible);
+        Assert.Equal(2, api.MockDeletedItems.Count);
+
+        // Request per-item purge again and confirm -> deletes 1 item
+        vm.Items[0].PurgeCommand.Execute(null);
+        await vm.ConfirmYesCommand.ExecuteAsync(null);
+        Assert.False(vm.IsConfirmVisible);
+        Assert.Single(vm.Items);
+
+        // Request Empty Trash and confirm -> deletes all remaining items
+        vm.EmptyTrashCommand.Execute(null);
+        Assert.True(vm.IsConfirmVisible);
+        await vm.ConfirmYesCommand.ExecuteAsync(null);
+        Assert.Empty(vm.Items);
+        Assert.True(vm.IsEmpty);
+    }
+
+    [Fact]
+    public async Task MainWindowViewModel_TrayIconState_ReflectsConnectionAndSyncStatus()
+    {
+        var tempSyncFolder = Path.Combine(Path.GetTempPath(), $"FolderSyncEr_Tray_{Guid.NewGuid():N}");
+        var tempSettingsFile = Path.Combine(Path.GetTempPath(), $"FolderSyncEr_TraySettings_{Guid.NewGuid():N}.json");
+        Directory.CreateDirectory(tempSyncFolder);
+
+        try
+        {
+            var manager = new ClientSettingsManager(tempSettingsFile);
+            var api = new FakeFileSyncApi();
+            var secretStore = new TestSecretStore();
+            var tokenManager = new AuthTokenManager(secretStore, Microsoft.Extensions.Logging.Abstractions.NullLogger<AuthTokenManager>.Instance);
+            var connVm = new ConnectionCheckViewModel(api, secretStore, manager);
+            var loginVm = new LoginViewModel(api, tokenManager, manager);
+            var folderVm = new FolderSelectionViewModel(secretStore);
+
+            using var mainVm = new MainWindowViewModel(secretStore, api, connVm, loginVm, folderVm, manager);
+
+            // 1. Disconnected initially -> TrayIconState.Disconnected
+            Assert.False(connVm.IsConnected);
+            Assert.Equal(TrayIconState.Disconnected, mainVm.CurrentTrayIconState);
+
+            // 2. Connected, but not logged in / no folder -> TrayIconState.Active
+            connVm.IsConnected = true;
+            Assert.Equal(TrayIconState.Active, mainVm.CurrentTrayIconState);
+
+            // 3. Logged in & folder selected, local file matches remote file -> TrayIconState.Synced
+            var localFile = Path.Combine(tempSyncFolder, "doc.txt");
+            await File.WriteAllTextAsync(localFile, "hello");
+            var modTime = File.GetLastWriteTimeUtc(localFile);
+            api.MockFiles.Add(new FileDto("1", "doc.txt", false, 5, "hash", 1, modTime, modTime, "dev", false, 1));
+
+            await folderVm.SaveAndSetFolderPathAsync(tempSyncFolder);
+            loginVm.IsLoggedIn = true;
+            await mainVm.FileList.RefreshCommand.ExecuteAsync(null);
+
+            Assert.True(mainVm.FileList.AreAllFilesInSync);
+            Assert.Equal(TrayIconState.Synced, mainVm.CurrentTrayIconState);
+
+            // 4. Local-only unsynced file added -> TrayIconState.Active
+            await File.WriteAllTextAsync(Path.Combine(tempSyncFolder, "unsynced.txt"), "new content");
+            await mainVm.FileList.RefreshCommand.ExecuteAsync(null);
+
+            Assert.False(mainVm.FileList.AreAllFilesInSync);
+            Assert.Equal(TrayIconState.Active, mainVm.CurrentTrayIconState);
+
+            // 5. Connection lost -> TrayIconState.Disconnected
+            connVm.IsConnected = false;
+            Assert.Equal(TrayIconState.Disconnected, mainVm.CurrentTrayIconState);
+        }
+        finally
+        {
+            if (File.Exists(tempSettingsFile)) File.Delete(tempSettingsFile);
             if (Directory.Exists(tempSyncFolder)) Directory.Delete(tempSyncFolder, recursive: true);
         }
     }

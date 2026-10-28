@@ -96,6 +96,44 @@ public class SyncCoordinatorTests : IDisposable
         Assert.Empty(conflictFiles);
     }
 
+    [Fact]
+    public async Task RunSyncAsync_DownloadsRestoredFile_AfterLocalDeleteAndServerRestore()
+    {
+        _fakeApi.IsServerConnected = true;
+
+        var localFile = Path.Combine(_testDir, "restore-me.txt");
+        await File.WriteAllTextAsync(localFile, "Initial content");
+
+        // 1. Initial sync uploads the file (v1)
+        var r1 = await _coordinator.RunSyncAsync();
+        Assert.True(r1.Success, r1.ErrorMessage);
+        Assert.Single(_fakeApi.ServerFiles.Where(f => !f.IsDeleted));
+
+        // 2. Delete locally and sync -> server tombstones it (v2)
+        File.Delete(localFile);
+        var r2 = await _coordinator.RunSyncAsync();
+        Assert.True(r2.Success, r2.ErrorMessage);
+        Assert.Empty(_fakeApi.ServerFiles.Where(f => !f.IsDeleted));
+
+        // 3. Simulate server restore from Trash -> IsDeleted = false, Version = 3
+        var tombstoned = _fakeApi.ServerFiles.First();
+        _fakeApi.ServerFiles[0] = tombstoned with { IsDeleted = false, Version = tombstoned.Version + 1, ChangeSeq = tombstoned.ChangeSeq + 1 };
+
+        // 4. Sync again -> file should be downloaded back into the local sync folder!
+        var r3 = await _coordinator.RunSyncAsync();
+        Assert.True(r3.Success, r3.ErrorMessage);
+        Assert.True(File.Exists(localFile), "Restored file should be downloaded back to the local sync folder");
+        Assert.Equal("Initial content", await File.ReadAllTextAsync(localFile));
+
+        // 5. Simulate another device deleting the file on the server -> local sync moves it to local trash
+        var current = _fakeApi.ServerFiles.First();
+        _fakeApi.ServerFiles[0] = current with { IsDeleted = true, Version = current.Version + 1, ChangeSeq = current.ChangeSeq + 1 };
+
+        var r4 = await _coordinator.RunSyncAsync();
+        Assert.True(r4.Success, r4.ErrorMessage);
+        Assert.False(File.Exists(localFile), "Server-deleted file should be removed from the local sync folder");
+    }
+
     public void Dispose()
     {
         _coordinator.Dispose();
@@ -121,8 +159,11 @@ public class SyncCoordinatorTests : IDisposable
 
         public List<FileDto> ServerFiles { get; } = new();
 
-        public Task<FileListResponse> ListFilesAsync(long? sinceSeq = null, DateTime? since = null, bool includeDeleted = false, string? cursor = null, int limit = 1000, CancellationToken ct = default) =>
-            Task.FromResult(new FileListResponse(ServerFiles.ToList(), null, ServerFiles.Count, DateTime.UtcNow));
+        public Task<FileListResponse> ListFilesAsync(long? sinceSeq = null, DateTime? since = null, bool includeDeleted = false, string? cursor = null, int limit = 1000, CancellationToken ct = default)
+        {
+            var items = includeDeleted ? ServerFiles.ToList() : ServerFiles.Where(f => !f.IsDeleted).ToList();
+            return Task.FromResult(new FileListResponse(items, null, ServerFiles.Count, DateTime.UtcNow));
+        }
 
         public Task<FileDto?> GetFileMetaByPathAsync(string path, CancellationToken ct = default) =>
             Task.FromResult(ServerFiles.FirstOrDefault(f => f.Path.Equals(path, StringComparison.OrdinalIgnoreCase)));
@@ -165,8 +206,16 @@ public class SyncCoordinatorTests : IDisposable
         public Task<FileDto> CreateDirectoryAsync(string path, CancellationToken ct = default) =>
             Task.FromResult(new FileDto("dir-id", path, true, 0, null, 1, DateTime.UtcNow, DateTime.UtcNow, "dev", false, 1));
 
-        public Task<bool> DeleteFileAsync(string id, string? ifMatchSha256 = null, long? baseVersion = null, CancellationToken ct = default) =>
-            Task.FromResult(true);
+        public Task<bool> DeleteFileAsync(string id, string? ifMatchSha256 = null, long? baseVersion = null, CancellationToken ct = default)
+        {
+            var idx = ServerFiles.FindIndex(f => f.Id == id);
+            if (idx >= 0)
+            {
+                var cur = ServerFiles[idx];
+                ServerFiles[idx] = cur with { IsDeleted = true, Version = cur.Version + 1, ChangeSeq = cur.ChangeSeq + 1 };
+            }
+            return Task.FromResult(true);
+        }
 
         public Task<FileDto?> MoveFileAsync(string fromPath, string toPath, string? ifMatchSha256 = null, CancellationToken ct = default) =>
             Task.FromResult<FileDto?>(null);
@@ -176,6 +225,18 @@ public class SyncCoordinatorTests : IDisposable
 
         public Task<Stream> ExportFolderZipAsync(CancellationToken ct = default) =>
             Task.FromResult<Stream>(new MemoryStream());
+
+        public Task<IReadOnlyList<DeletedItemDto>> ListDeletedItemsAsync(CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<DeletedItemDto>>(Array.Empty<DeletedItemDto>());
+
+        public Task<TrashActionResult<RestoreResponse>> RestoreDeletedItemAsync(string id, string? targetPath = null, CancellationToken ct = default) =>
+            Task.FromResult(new TrashActionResult<RestoreResponse>(true, false, false, new RestoreResponse(targetPath ?? string.Empty, 1), null));
+
+        public Task<TrashActionResult<PurgeResponse>> PurgeDeletedItemAsync(string id, CancellationToken ct = default) =>
+            Task.FromResult(new TrashActionResult<PurgeResponse>(true, false, false, new PurgeResponse(1, 0), null));
+
+        public Task<PurgeResponse> EmptyTrashAsync(CancellationToken ct = default) =>
+            Task.FromResult(new PurgeResponse(0, 0));
 
         public Task<PagedResult<ActivityLogDto>> GetLogsAsync(int page = 1, int pageSize = 50, string? action = null, string? result = null, string? path = null, DateTime? fromUtc = null, DateTime? toUtc = null, CancellationToken ct = default) =>
             throw new NotImplementedException();

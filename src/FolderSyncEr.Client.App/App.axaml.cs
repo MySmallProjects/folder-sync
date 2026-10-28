@@ -33,21 +33,13 @@ public partial class App : Application
             desktop.MainWindow = mainWindow;
             mainWindow.Show();
 
-            // Load application icon
-            WindowIcon? icon = null;
-            try
+            // Load application icons
+            var defaultIcon = LoadIcon("icon.png");
+            var offlineIcon = LoadIcon("icon-offline.png");
+            var syncedIcon = LoadIcon("icon-synced.png");
+            if (defaultIcon != null)
             {
-                var uri = new Uri("avares://FolderSyncEr.Client.App/Assets/icon.png");
-                if (AssetLoader.Exists(uri))
-                {
-                    using var stream = AssetLoader.Open(uri);
-                    icon = new WindowIcon(stream);
-                    mainWindow.Icon = icon;
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"[ICON WARNING] Could not load app icon: {ex.Message}");
+                mainWindow.Icon = defaultIcon;
             }
 
             // Track explicit shutdown to prevent recursive Closing -> Shutdown -> Close -> Closing loop
@@ -59,7 +51,7 @@ public partial class App : Application
             };
 
             // Setup System Tray icon
-            SetupSystemTray(desktop, mainVm, icon, () => isShuttingDown = true);
+            SetupSystemTray(desktop, mainVm, defaultIcon, offlineIcon, syncedIcon, () => isShuttingDown = true);
 
             // Handle close behavior (close-to-tray or quit)
             mainWindow.Closing += (s, e) =>
@@ -86,10 +78,30 @@ public partial class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 
+    private static WindowIcon? LoadIcon(string assetName)
+    {
+        try
+        {
+            var uri = new Uri($"avares://FolderSyncEr.Client.App/Assets/{assetName}");
+            if (AssetLoader.Exists(uri))
+            {
+                using var stream = AssetLoader.Open(uri);
+                return new WindowIcon(stream);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"[ICON WARNING] Could not load app icon '{assetName}': {ex.Message}");
+        }
+        return null;
+    }
+
     private void SetupSystemTray(
         IClassicDesktopStyleApplicationLifetime desktop,
         MainWindowViewModel mainVm,
-        WindowIcon? icon,
+        WindowIcon? defaultIcon,
+        WindowIcon? offlineIcon,
+        WindowIcon? syncedIcon,
         Action onQuit)
     {
         try
@@ -98,7 +110,43 @@ public partial class App : Application
             {
                 ToolTipText = "FolderSyncEr — Cross-Device File Sync",
                 IsVisible = true,
-                Icon = icon
+                Icon = defaultIcon
+            };
+
+            void UpdateTrayAppearance()
+            {
+                switch (mainVm.CurrentTrayIconState)
+                {
+                    case TrayIconState.Disconnected:
+                        trayIcon.Icon = offlineIcon ?? defaultIcon;
+                        trayIcon.ToolTipText = "FolderSyncEr — Disconnected from server";
+                        break;
+                    case TrayIconState.Synced:
+                        trayIcon.Icon = syncedIcon ?? defaultIcon;
+                        trayIcon.ToolTipText = "FolderSyncEr — All files in sync";
+                        break;
+                    default:
+                        trayIcon.Icon = defaultIcon;
+                        trayIcon.ToolTipText = "FolderSyncEr — Cross-Device File Sync";
+                        break;
+                }
+            }
+
+            UpdateTrayAppearance();
+
+            mainVm.PropertyChanged += (_, e) =>
+            {
+                if (e.PropertyName == nameof(MainWindowViewModel.CurrentTrayIconState))
+                {
+                    if (Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
+                    {
+                        UpdateTrayAppearance();
+                    }
+                    else
+                    {
+                        Avalonia.Threading.Dispatcher.UIThread.Post(UpdateTrayAppearance);
+                    }
+                }
             };
 
             var menu = new NativeMenu();

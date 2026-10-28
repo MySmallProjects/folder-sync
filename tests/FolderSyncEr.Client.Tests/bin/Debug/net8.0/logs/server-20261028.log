@@ -9182,3 +9182,1416 @@ RETURNING 1;
 2026-10-28 19:08:34.002 +00:00 [INF] Executed endpoint 'HTTP: GET api/status'
 2026-10-28 19:08:34.002 +00:00 [INF] HTTP GET /api/status responded 200 in 19.3395 ms
 2026-10-28 19:08:34.002 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost/api/status - 200 null application/json; charset=utf-8 20.2725ms
+2026-10-28 19:45:17.015 +00:00 [INF] Executed DbCommand (15ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+PRAGMA journal_mode = 'wal';
+2026-10-28 19:45:17.189 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ActivityLog" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_ActivityLog" PRIMARY KEY AUTOINCREMENT,
+    "TimestampUtc" TEXT NOT NULL,
+    "UserId" INTEGER NULL,
+    "DeviceId" TEXT NULL,
+    "Action" TEXT NOT NULL,
+    "Path" TEXT NULL,
+    "Result" TEXT NOT NULL,
+    "Message" TEXT NULL,
+    "CorrelationId" TEXT NULL
+);
+2026-10-28 19:45:17.196 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ApiSettings" (
+    "Key" TEXT NOT NULL CONSTRAINT "PK_ApiSettings" PRIMARY KEY,
+    "Value" TEXT NOT NULL,
+    "UpdatedUtc" TEXT NOT NULL
+);
+2026-10-28 19:45:17.196 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Devices" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_Devices" PRIMARY KEY,
+    "UserId" INTEGER NOT NULL,
+    "Name" TEXT NOT NULL,
+    "CreatedUtc" TEXT NOT NULL,
+    "LastSeenUtc" TEXT NOT NULL,
+    "IsRevoked" INTEGER NOT NULL
+);
+2026-10-28 19:45:17.196 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Files" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_Files" PRIMARY KEY,
+    "UserId" INTEGER NOT NULL,
+    "Path" TEXT NOT NULL,
+    "PathKey" TEXT NOT NULL,
+    "IsDirectory" INTEGER NOT NULL,
+    "Size" INTEGER NOT NULL,
+    "Sha256" TEXT NULL,
+    "Version" INTEGER NOT NULL,
+    "LastModifiedUtc" TEXT NOT NULL,
+    "UploadedAtUtc" TEXT NOT NULL,
+    "UploadedByDeviceId" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "DeletedAtUtc" TEXT NULL,
+    "ChangeSeq" INTEGER NOT NULL
+);
+2026-10-28 19:45:17.197 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "FileVersions" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_FileVersions" PRIMARY KEY AUTOINCREMENT,
+    "FileId" TEXT NOT NULL,
+    "Version" INTEGER NOT NULL,
+    "Sha256" TEXT NOT NULL,
+    "Size" INTEGER NOT NULL,
+    "BlobRelativePath" TEXT NOT NULL,
+    "CreatedUtc" TEXT NOT NULL,
+    "DeviceId" TEXT NULL
+);
+2026-10-28 19:45:17.197 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "RefreshTokens" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_RefreshTokens" PRIMARY KEY AUTOINCREMENT,
+    "UserId" INTEGER NOT NULL,
+    "DeviceId" TEXT NOT NULL,
+    "TokenHash" TEXT NOT NULL,
+    "CreatedUtc" TEXT NOT NULL,
+    "ExpiresUtc" TEXT NOT NULL,
+    "RevokedUtc" TEXT NULL,
+    "ReplacedByTokenId" INTEGER NULL
+);
+2026-10-28 19:45:17.197 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "UserCounters" (
+    "UserId" INTEGER NOT NULL CONSTRAINT "PK_UserCounters" PRIMARY KEY AUTOINCREMENT,
+    "LastChangeSeq" INTEGER NOT NULL
+);
+2026-10-28 19:45:17.197 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Users" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_Users" PRIMARY KEY AUTOINCREMENT,
+    "Username" TEXT NOT NULL,
+    "PasswordHash" TEXT NOT NULL,
+    "Role" TEXT NOT NULL,
+    "CreatedUtc" TEXT NOT NULL,
+    "LastLoginUtc" TEXT NULL,
+    "IsDisabled" INTEGER NOT NULL
+);
+2026-10-28 19:45:17.197 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ActivityLog_UserId_TimestampUtc" ON "ActivityLog" ("UserId", "TimestampUtc");
+2026-10-28 19:45:17.197 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Devices_UserId_Id" ON "Devices" ("UserId", "Id");
+2026-10-28 19:45:17.198 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Files_UserId_ChangeSeq" ON "Files" ("UserId", "ChangeSeq");
+2026-10-28 19:45:17.198 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Files_UserId_IsDeleted" ON "Files" ("UserId", "IsDeleted");
+2026-10-28 19:45:17.198 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_Files_UserId_PathKey" ON "Files" ("UserId", "PathKey");
+2026-10-28 19:45:17.198 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_FileVersions_FileId_Version" ON "FileVersions" ("FileId", "Version");
+2026-10-28 19:45:17.199 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_RefreshTokens_TokenHash" ON "RefreshTokens" ("TokenHash");
+2026-10-28 19:45:17.199 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_RefreshTokens_UserId_DeviceId" ON "RefreshTokens" ("UserId", "DeviceId");
+2026-10-28 19:45:17.199 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_Users_Username" ON "Users" ("Username");
+2026-10-28 19:45:17.506 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Users" AS "u")
+2026-10-28 19:45:17.848 +00:00 [INF] Executed DbCommand (6ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (DbType = Boolean), @p2='?' (DbType = DateTime), @p3='?' (Size = 84), @p4='?' (Size = 5), @p5='?' (Size = 15)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Users" ("CreatedUtc", "IsDisabled", "LastLoginUtc", "PasswordHash", "Role", "Username")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5)
+RETURNING "Id";
+2026-10-28 19:45:17.884 +00:00 [INF] Seeded initial administrator account 'clienttestadmin'
+2026-10-28 19:45:17.936 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 14)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-28 19:45:17.959 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 15)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-28 19:45:17.962 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 16)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-28 19:45:17.963 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 22)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-28 19:45:17.963 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 21)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-28 19:45:17.974 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 16), @p1='?' (DbType = DateTime), @p2='?' (Size = 2)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ApiSettings" ("Key", "UpdatedUtc", "Value")
+VALUES (@p0, @p1, @p2);
+2026-10-28 19:45:17.975 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 14), @p1='?' (DbType = DateTime), @p2='?' (Size = 10)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ApiSettings" ("Key", "UpdatedUtc", "Value")
+VALUES (@p0, @p1, @p2);
+2026-10-28 19:45:17.976 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 15), @p1='?' (DbType = DateTime), @p2='?' (Size = 70)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ApiSettings" ("Key", "UpdatedUtc", "Value")
+VALUES (@p0, @p1, @p2);
+2026-10-28 19:45:17.976 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 22), @p1='?' (DbType = DateTime), @p2='?' (Size = 3)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ApiSettings" ("Key", "UpdatedUtc", "Value")
+VALUES (@p0, @p1, @p2);
+2026-10-28 19:45:17.976 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 21), @p1='?' (DbType = DateTime), @p2='?' (Size = 1)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ApiSettings" ("Key", "UpdatedUtc", "Value")
+VALUES (@p0, @p1, @p2);
+2026-10-28 19:45:17.994 +00:00 [WRN] Using an in-memory repository. Keys will not be persisted to storage.
+2026-10-28 19:45:17.995 +00:00 [WRN] Neither user profile nor HKLM registry available. Using an ephemeral key repository. Protected data will be unavailable when application exits.
+2026-10-28 19:45:18.023 +00:00 [INF] Creating key {3fc313dc-8dee-4bb0-9aac-edbd04fea901} with creation date 2026-10-28 19:45:18Z, activation date 2026-10-28 19:45:18Z, and expiration date 2027-01-26 19:45:18Z.
+2026-10-28 19:45:18.030 +00:00 [WRN] No XML encryptor configured. Key {3fc313dc-8dee-4bb0-9aac-edbd04fea901} may be persisted to storage in unencrypted form.
+2026-10-28 19:45:18.265 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost/api/auth/login - application/json; charset=utf-8 null
+2026-10-28 19:45:18.445 +00:00 [INF] Executing endpoint 'HTTP: POST api/auth/login'
+2026-10-28 19:45:18.657 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__ToLower_0='?' (Size = 15)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."CreatedUtc", "u"."IsDisabled", "u"."LastLoginUtc", "u"."PasswordHash", "u"."Role", "u"."Username"
+FROM "Users" AS "u"
+WHERE lower("u"."Username") = @__ToLower_0
+LIMIT 1
+2026-10-28 19:45:18.778 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__deviceId_0='?' (Size = 32), @__user_Id_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."CreatedUtc", "d"."IsRevoked", "d"."LastSeenUtc", "d"."Name", "d"."UserId"
+FROM "Devices" AS "d"
+WHERE "d"."Id" = @__deviceId_0 AND "d"."UserId" = @__user_Id_1
+LIMIT 1
+2026-10-28 19:45:18.864 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 32), @p1='?' (DbType = DateTime), @p2='?' (DbType = Boolean), @p3='?' (DbType = DateTime), @p4='?' (Size = 13), @p5='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Devices" ("Id", "CreatedUtc", "IsRevoked", "LastSeenUtc", "Name", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-10-28 19:45:18.865 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (Size = 32), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 64), @p6='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "RefreshTokens" ("CreatedUtc", "DeviceId", "ExpiresUtc", "ReplacedByTokenId", "RevokedUtc", "TokenHash", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
+RETURNING "Id";
+2026-10-28 19:45:18.869 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p1='?' (DbType = Int32), @p0='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+UPDATE "Users" SET "LastLoginUtc" = @p0
+WHERE "Id" = @p1
+RETURNING 1;
+2026-10-28 19:45:18.876 +00:00 [INF] User 'clienttestadmin' logged in successfully on device '5fa7aff367294284b8760f2bdda64a7f'
+2026-10-28 19:45:18.905 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 5), @p1='?' (Size = 13), @p2='?' (Size = 32), @p3='?' (Size = 35), @p4='?', @p5='?' (Size = 7), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-28 19:45:18.912 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 19:45:18.918 +00:00 [INF] Writing value of type 'LoginResponse' as Json.
+2026-10-28 19:45:18.927 +00:00 [INF] Executed endpoint 'HTTP: POST api/auth/login'
+2026-10-28 19:45:18.929 +00:00 [INF] HTTP POST /api/auth/login responded 200 in 532.0468 ms
+2026-10-28 19:45:18.935 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost/api/auth/login - 200 null application/json; charset=utf-8 673.1309ms
+2026-10-28 19:45:18.944 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost/api/auth/me - null null
+2026-10-28 19:45:19.005 +00:00 [INF] Executing endpoint 'HTTP: GET api/auth/me'
+2026-10-28 19:45:19.067 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."CreatedUtc", "u"."IsDisabled", "u"."LastLoginUtc", "u"."PasswordHash", "u"."Role", "u"."Username"
+FROM "Users" AS "u"
+WHERE "u"."Id" = @__userId_0 AND NOT ("u"."IsDisabled")
+LIMIT 1
+2026-10-28 19:45:19.068 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 19:45:19.068 +00:00 [INF] Writing value of type 'UserDto' as Json.
+2026-10-28 19:45:19.068 +00:00 [INF] Executed endpoint 'HTTP: GET api/auth/me'
+2026-10-28 19:45:19.068 +00:00 [INF] HTTP GET /api/auth/me responded 200 in 116.8481 ms
+2026-10-28 19:45:19.069 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost/api/auth/me - 200 null application/json; charset=utf-8 124.8155ms
+2026-10-28 19:45:19.071 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost/api/directories - application/json; charset=utf-8 null
+2026-10-28 19:45:19.075 +00:00 [INF] Executing endpoint 'HTTP: POST api/directories'
+2026-10-28 19:45:19.085 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 11)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-28 19:45:19.091 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."UserId", "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-28 19:45:19.102 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "UserCounters" ("UserId", "LastChangeSeq")
+VALUES (@p0, @p1);
+2026-10-28 19:45:19.143 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 15), @p1='?', @p2='?' (Size = 32), @p3='?' (Size = 17), @p4='?' (Size = 11), @p5='?' (Size = 7), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-28 19:45:19.143 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 32), @p1='?' (DbType = Int64), @p2='?' (DbType = DateTime), @p3='?' (DbType = Boolean), @p4='?' (DbType = Boolean), @p5='?' (DbType = DateTime), @p6='?' (Size = 11), @p7='?' (Size = 11), @p8='?', @p9='?' (DbType = Int64), @p10='?' (DbType = DateTime), @p11='?' (Size = 32), @p12='?' (DbType = Int32), @p13='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Files" ("Id", "ChangeSeq", "DeletedAtUtc", "IsDeleted", "IsDirectory", "LastModifiedUtc", "Path", "PathKey", "Sha256", "Size", "UploadedAtUtc", "UploadedByDeviceId", "UserId", "Version")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13);
+2026-10-28 19:45:19.146 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 19:45:19.151 +00:00 [INF] Writing value of type 'FileDto' as Json.
+2026-10-28 19:45:19.154 +00:00 [INF] Executed endpoint 'HTTP: POST api/directories'
+2026-10-28 19:45:19.154 +00:00 [INF] HTTP POST /api/directories responded 200 in 81.6958 ms
+2026-10-28 19:45:19.154 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost/api/directories - 200 null application/json; charset=utf-8 82.87ms
+2026-10-28 19:45:19.159 +00:00 [INF] Request starting HTTP/1.1 PUT http://localhost/api/files?path=notes%2Fdaily%2Fentry1.txt - application/octet-stream 39
+2026-10-28 19:45:19.162 +00:00 [INF] Executing endpoint 'HTTP: PUT api/files'
+2026-10-28 19:45:19.193 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__command_UserId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 22)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__command_UserId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-28 19:45:19.194 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."UserId", "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-28 19:45:19.199 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p1='?' (DbType = Int32), @p0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+UPDATE "UserCounters" SET "LastChangeSeq" = @p0
+WHERE "UserId" = @p1
+RETURNING 1;
+2026-10-28 19:45:19.241 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__fileId_0='?' (Size = 32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."BlobRelativePath", "f"."CreatedUtc", "f"."DeviceId", "f"."FileId", "f"."Sha256", "f"."Size", "f"."Version"
+FROM "FileVersions" AS "f"
+WHERE "f"."FileId" = @__fileId_0
+ORDER BY "f"."Version" DESC
+LIMIT -1 OFFSET @__p_1
+2026-10-28 19:45:19.248 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 6), @p1='?', @p2='?' (Size = 32), @p3='?' (Size = 40), @p4='?' (Size = 22), @p5='?' (Size = 7), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-28 19:45:19.249 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 44), @p1='?' (DbType = DateTime), @p2='?' (Size = 32), @p3='?' (Size = 32), @p4='?' (Size = 64), @p5='?' (DbType = Int64), @p6='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "FileVersions" ("BlobRelativePath", "CreatedUtc", "DeviceId", "FileId", "Sha256", "Size", "Version")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
+RETURNING "Id";
+2026-10-28 19:45:19.250 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 32), @p1='?' (DbType = Int64), @p2='?' (DbType = DateTime), @p3='?' (DbType = Boolean), @p4='?' (DbType = Boolean), @p5='?' (DbType = DateTime), @p6='?' (Size = 22), @p7='?' (Size = 22), @p8='?' (Size = 64), @p9='?' (DbType = Int64), @p10='?' (DbType = DateTime), @p11='?' (Size = 32), @p12='?' (DbType = Int32), @p13='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Files" ("Id", "ChangeSeq", "DeletedAtUtc", "IsDeleted", "IsDirectory", "LastModifiedUtc", "Path", "PathKey", "Sha256", "Size", "UploadedAtUtc", "UploadedByDeviceId", "UserId", "Version")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13);
+2026-10-28 19:45:19.254 +00:00 [INF] Setting HTTP status code 201.
+2026-10-28 19:45:19.255 +00:00 [INF] Writing value of type 'FileDto' as Json.
+2026-10-28 19:45:19.256 +00:00 [INF] Executed endpoint 'HTTP: PUT api/files'
+2026-10-28 19:45:19.257 +00:00 [INF] HTTP PUT /api/files responded 201 in 96.2308 ms
+2026-10-28 19:45:19.259 +00:00 [INF] Request finished HTTP/1.1 PUT http://localhost/api/files?path=notes%2Fdaily%2Fentry1.txt - 201 null application/json; charset=utf-8 99.5604ms
+2026-10-28 19:45:19.267 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost/api/files/meta?path=notes%2Fdaily%2Fentry1.txt - null null
+2026-10-28 19:45:19.269 +00:00 [INF] Executing endpoint 'HTTP: GET api/files/meta'
+2026-10-28 19:45:19.285 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 22)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-28 19:45:19.286 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 19:45:19.286 +00:00 [INF] Writing value of type 'FileDto' as Json.
+2026-10-28 19:45:19.286 +00:00 [INF] Executed endpoint 'HTTP: GET api/files/meta'
+2026-10-28 19:45:19.286 +00:00 [INF] HTTP GET /api/files/meta responded 200 in 17.3504 ms
+2026-10-28 19:45:19.286 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost/api/files/meta?path=notes%2Fdaily%2Fentry1.txt - 200 null application/json; charset=utf-8 19.2316ms
+2026-10-28 19:45:19.289 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost/api/files/cf288ccae4cf407ba4d9525ded8de085/content - null null
+2026-10-28 19:45:19.290 +00:00 [INF] Executing endpoint 'HTTP: GET api/files/{id}/content'
+2026-10-28 19:45:19.301 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__fileId_1='?' (Size = 32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND "f"."Id" = @__fileId_1
+LIMIT 1
+2026-10-28 19:45:19.302 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 8), @p1='?' (Size = 13), @p2='?' (Size = 32), @p3='?' (Size = 24), @p4='?' (Size = 22), @p5='?' (Size = 7), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-28 19:45:19.305 +00:00 [INF] Sending file with download name 'entry1.txt'.
+2026-10-28 19:45:19.313 +00:00 [INF] Executed endpoint 'HTTP: GET api/files/{id}/content'
+2026-10-28 19:45:19.313 +00:00 [INF] HTTP GET /api/files/cf288ccae4cf407ba4d9525ded8de085/content responded 200 in 23.2188 ms
+2026-10-28 19:45:19.314 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost/api/files/cf288ccae4cf407ba4d9525ded8de085/content - 200 39 application/octet-stream 24.7751ms
+2026-10-28 19:45:19.315 +00:00 [INF] Request starting HTTP/1.1 PUT http://localhost/api/files?path=notes%2Fdaily%2Fentry1.txt - application/octet-stream 16
+2026-10-28 19:45:19.316 +00:00 [INF] Executing endpoint 'HTTP: PUT api/files'
+2026-10-28 19:45:19.331 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__command_UserId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 22)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__command_UserId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-28 19:45:19.335 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 8), @p1='?' (Size = 13), @p2='?' (Size = 32), @p3='?' (Size = 51), @p4='?' (Size = 22), @p5='?' (Size = 8), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-28 19:45:19.336 +00:00 [INF] Setting HTTP status code 409.
+2026-10-28 19:45:19.352 +00:00 [INF] Writing value of type 'ConflictDto' as Json.
+2026-10-28 19:45:19.359 +00:00 [INF] Executed endpoint 'HTTP: PUT api/files'
+2026-10-28 19:45:19.359 +00:00 [INF] HTTP PUT /api/files responded 409 in 43.7729 ms
+2026-10-28 19:45:19.359 +00:00 [INF] Request finished HTTP/1.1 PUT http://localhost/api/files?path=notes%2Fdaily%2Fentry1.txt - 409 null application/json; charset=utf-8 44.2761ms
+2026-10-28 19:45:19.372 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost/api/auth/logout - null null
+2026-10-28 19:45:19.373 +00:00 [INF] Executing endpoint 'HTTP: POST api/auth/logout'
+2026-10-28 19:45:19.387 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__deviceId_1='?' (Size = 32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "r"."Id", "r"."CreatedUtc", "r"."DeviceId", "r"."ExpiresUtc", "r"."ReplacedByTokenId", "r"."RevokedUtc", "r"."TokenHash", "r"."UserId"
+FROM "RefreshTokens" AS "r"
+WHERE "r"."UserId" = @__userId_0 AND "r"."DeviceId" = @__deviceId_1 AND "r"."RevokedUtc" IS NULL
+2026-10-28 19:45:19.399 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p1='?' (DbType = Int32), @p0='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+UPDATE "RefreshTokens" SET "RevokedUtc" = @p0
+WHERE "Id" = @p1
+RETURNING 1;
+2026-10-28 19:45:19.402 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 19:45:19.402 +00:00 [INF] Executed endpoint 'HTTP: POST api/auth/logout'
+2026-10-28 19:45:19.402 +00:00 [INF] HTTP POST /api/auth/logout responded 200 in 30.0272 ms
+2026-10-28 19:45:19.403 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost/api/auth/logout - 200 null null 30.7355ms
+2026-10-28 19:45:19.414 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost/api/status - null null
+2026-10-28 19:45:19.415 +00:00 [INF] Executing endpoint 'HTTP: GET api/status'
+2026-10-28 19:45:19.424 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 19:45:19.426 +00:00 [INF] Writing value of type 'StatusResponse' as Json.
+2026-10-28 19:45:19.429 +00:00 [INF] Executed endpoint 'HTTP: GET api/status'
+2026-10-28 19:45:19.429 +00:00 [INF] HTTP GET /api/status responded 200 in 14.6854 ms
+2026-10-28 19:45:19.429 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost/api/status - 200 null application/json; charset=utf-8 15.3111ms
+2026-10-28 19:55:21.582 +00:00 [INF] Executed DbCommand (12ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+PRAGMA journal_mode = 'wal';
+2026-10-28 19:55:21.765 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ActivityLog" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_ActivityLog" PRIMARY KEY AUTOINCREMENT,
+    "TimestampUtc" TEXT NOT NULL,
+    "UserId" INTEGER NULL,
+    "DeviceId" TEXT NULL,
+    "Action" TEXT NOT NULL,
+    "Path" TEXT NULL,
+    "Result" TEXT NOT NULL,
+    "Message" TEXT NULL,
+    "CorrelationId" TEXT NULL
+);
+2026-10-28 19:55:21.772 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ApiSettings" (
+    "Key" TEXT NOT NULL CONSTRAINT "PK_ApiSettings" PRIMARY KEY,
+    "Value" TEXT NOT NULL,
+    "UpdatedUtc" TEXT NOT NULL
+);
+2026-10-28 19:55:21.772 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Devices" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_Devices" PRIMARY KEY,
+    "UserId" INTEGER NOT NULL,
+    "Name" TEXT NOT NULL,
+    "CreatedUtc" TEXT NOT NULL,
+    "LastSeenUtc" TEXT NOT NULL,
+    "IsRevoked" INTEGER NOT NULL
+);
+2026-10-28 19:55:21.773 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Files" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_Files" PRIMARY KEY,
+    "UserId" INTEGER NOT NULL,
+    "Path" TEXT NOT NULL,
+    "PathKey" TEXT NOT NULL,
+    "IsDirectory" INTEGER NOT NULL,
+    "Size" INTEGER NOT NULL,
+    "Sha256" TEXT NULL,
+    "Version" INTEGER NOT NULL,
+    "LastModifiedUtc" TEXT NOT NULL,
+    "UploadedAtUtc" TEXT NOT NULL,
+    "UploadedByDeviceId" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "DeletedAtUtc" TEXT NULL,
+    "ChangeSeq" INTEGER NOT NULL
+);
+2026-10-28 19:55:21.773 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "FileVersions" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_FileVersions" PRIMARY KEY AUTOINCREMENT,
+    "FileId" TEXT NOT NULL,
+    "Version" INTEGER NOT NULL,
+    "Sha256" TEXT NOT NULL,
+    "Size" INTEGER NOT NULL,
+    "BlobRelativePath" TEXT NOT NULL,
+    "CreatedUtc" TEXT NOT NULL,
+    "DeviceId" TEXT NULL
+);
+2026-10-28 19:55:21.773 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "RefreshTokens" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_RefreshTokens" PRIMARY KEY AUTOINCREMENT,
+    "UserId" INTEGER NOT NULL,
+    "DeviceId" TEXT NOT NULL,
+    "TokenHash" TEXT NOT NULL,
+    "CreatedUtc" TEXT NOT NULL,
+    "ExpiresUtc" TEXT NOT NULL,
+    "RevokedUtc" TEXT NULL,
+    "ReplacedByTokenId" INTEGER NULL
+);
+2026-10-28 19:55:21.773 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "UserCounters" (
+    "UserId" INTEGER NOT NULL CONSTRAINT "PK_UserCounters" PRIMARY KEY AUTOINCREMENT,
+    "LastChangeSeq" INTEGER NOT NULL
+);
+2026-10-28 19:55:21.776 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Users" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_Users" PRIMARY KEY AUTOINCREMENT,
+    "Username" TEXT NOT NULL,
+    "PasswordHash" TEXT NOT NULL,
+    "Role" TEXT NOT NULL,
+    "CreatedUtc" TEXT NOT NULL,
+    "LastLoginUtc" TEXT NULL,
+    "IsDisabled" INTEGER NOT NULL
+);
+2026-10-28 19:55:21.777 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ActivityLog_UserId_TimestampUtc" ON "ActivityLog" ("UserId", "TimestampUtc");
+2026-10-28 19:55:21.777 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Devices_UserId_Id" ON "Devices" ("UserId", "Id");
+2026-10-28 19:55:21.777 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Files_UserId_ChangeSeq" ON "Files" ("UserId", "ChangeSeq");
+2026-10-28 19:55:21.777 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Files_UserId_IsDeleted" ON "Files" ("UserId", "IsDeleted");
+2026-10-28 19:55:21.778 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_Files_UserId_PathKey" ON "Files" ("UserId", "PathKey");
+2026-10-28 19:55:21.778 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_FileVersions_FileId_Version" ON "FileVersions" ("FileId", "Version");
+2026-10-28 19:55:21.778 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_RefreshTokens_TokenHash" ON "RefreshTokens" ("TokenHash");
+2026-10-28 19:55:21.778 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_RefreshTokens_UserId_DeviceId" ON "RefreshTokens" ("UserId", "DeviceId");
+2026-10-28 19:55:21.778 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_Users_Username" ON "Users" ("Username");
+2026-10-28 19:55:22.016 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Users" AS "u")
+2026-10-28 19:55:22.306 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (DbType = Boolean), @p2='?' (DbType = DateTime), @p3='?' (Size = 84), @p4='?' (Size = 5), @p5='?' (Size = 15)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Users" ("CreatedUtc", "IsDisabled", "LastLoginUtc", "PasswordHash", "Role", "Username")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5)
+RETURNING "Id";
+2026-10-28 19:55:22.336 +00:00 [INF] Seeded initial administrator account 'clienttestadmin'
+2026-10-28 19:55:22.411 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 14)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-28 19:55:22.469 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 15)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-28 19:55:22.471 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 16)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-28 19:55:22.499 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 22)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-28 19:55:22.500 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 21)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-28 19:55:22.516 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 16), @p1='?' (DbType = DateTime), @p2='?' (Size = 2)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ApiSettings" ("Key", "UpdatedUtc", "Value")
+VALUES (@p0, @p1, @p2);
+2026-10-28 19:55:22.517 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 14), @p1='?' (DbType = DateTime), @p2='?' (Size = 10)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ApiSettings" ("Key", "UpdatedUtc", "Value")
+VALUES (@p0, @p1, @p2);
+2026-10-28 19:55:22.517 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 15), @p1='?' (DbType = DateTime), @p2='?' (Size = 70)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ApiSettings" ("Key", "UpdatedUtc", "Value")
+VALUES (@p0, @p1, @p2);
+2026-10-28 19:55:22.518 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 22), @p1='?' (DbType = DateTime), @p2='?' (Size = 3)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ApiSettings" ("Key", "UpdatedUtc", "Value")
+VALUES (@p0, @p1, @p2);
+2026-10-28 19:55:22.518 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 21), @p1='?' (DbType = DateTime), @p2='?' (Size = 1)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ApiSettings" ("Key", "UpdatedUtc", "Value")
+VALUES (@p0, @p1, @p2);
+2026-10-28 19:55:22.584 +00:00 [WRN] Using an in-memory repository. Keys will not be persisted to storage.
+2026-10-28 19:55:22.585 +00:00 [WRN] Neither user profile nor HKLM registry available. Using an ephemeral key repository. Protected data will be unavailable when application exits.
+2026-10-28 19:55:22.653 +00:00 [INF] Creating key {1361392b-c6c9-47c7-95fd-36ddc846b27f} with creation date 2026-10-28 19:55:22Z, activation date 2026-10-28 19:55:22Z, and expiration date 2027-01-26 19:55:22Z.
+2026-10-28 19:55:22.670 +00:00 [WRN] No XML encryptor configured. Key {1361392b-c6c9-47c7-95fd-36ddc846b27f} may be persisted to storage in unencrypted form.
+2026-10-28 19:55:23.118 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost/api/auth/login - application/json; charset=utf-8 null
+2026-10-28 19:55:23.612 +00:00 [INF] Executing endpoint 'HTTP: POST api/auth/login'
+2026-10-28 19:55:23.836 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__ToLower_0='?' (Size = 15)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."CreatedUtc", "u"."IsDisabled", "u"."LastLoginUtc", "u"."PasswordHash", "u"."Role", "u"."Username"
+FROM "Users" AS "u"
+WHERE lower("u"."Username") = @__ToLower_0
+LIMIT 1
+2026-10-28 19:55:24.030 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__deviceId_0='?' (Size = 32), @__user_Id_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."CreatedUtc", "d"."IsRevoked", "d"."LastSeenUtc", "d"."Name", "d"."UserId"
+FROM "Devices" AS "d"
+WHERE "d"."Id" = @__deviceId_0 AND "d"."UserId" = @__user_Id_1
+LIMIT 1
+2026-10-28 19:55:24.174 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 32), @p1='?' (DbType = DateTime), @p2='?' (DbType = Boolean), @p3='?' (DbType = DateTime), @p4='?' (Size = 13), @p5='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Devices" ("Id", "CreatedUtc", "IsRevoked", "LastSeenUtc", "Name", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-10-28 19:55:24.176 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (Size = 32), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 64), @p6='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "RefreshTokens" ("CreatedUtc", "DeviceId", "ExpiresUtc", "ReplacedByTokenId", "RevokedUtc", "TokenHash", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
+RETURNING "Id";
+2026-10-28 19:55:24.182 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p1='?' (DbType = Int32), @p0='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+UPDATE "Users" SET "LastLoginUtc" = @p0
+WHERE "Id" = @p1
+RETURNING 1;
+2026-10-28 19:55:24.190 +00:00 [INF] User 'clienttestadmin' logged in successfully on device 'd7df99b9b24848ce8e38044114340bc5'
+2026-10-28 19:55:24.236 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 5), @p1='?' (Size = 13), @p2='?' (Size = 32), @p3='?' (Size = 35), @p4='?', @p5='?' (Size = 7), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-28 19:55:24.244 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 19:55:24.256 +00:00 [INF] Writing value of type 'LoginResponse' as Json.
+2026-10-28 19:55:24.269 +00:00 [INF] Executed endpoint 'HTTP: POST api/auth/login'
+2026-10-28 19:55:24.272 +00:00 [INF] HTTP POST /api/auth/login responded 200 in 711.8280 ms
+2026-10-28 19:55:24.280 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost/api/auth/login - 200 null application/json; charset=utf-8 1168.2539ms
+2026-10-28 19:55:24.314 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost/api/auth/me - null null
+2026-10-28 19:55:24.382 +00:00 [INF] Executing endpoint 'HTTP: GET api/auth/me'
+2026-10-28 19:55:24.473 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."CreatedUtc", "u"."IsDisabled", "u"."LastLoginUtc", "u"."PasswordHash", "u"."Role", "u"."Username"
+FROM "Users" AS "u"
+WHERE "u"."Id" = @__userId_0 AND NOT ("u"."IsDisabled")
+LIMIT 1
+2026-10-28 19:55:24.483 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 19:55:24.483 +00:00 [INF] Writing value of type 'UserDto' as Json.
+2026-10-28 19:55:24.485 +00:00 [INF] Executed endpoint 'HTTP: GET api/auth/me'
+2026-10-28 19:55:24.485 +00:00 [INF] HTTP GET /api/auth/me responded 200 in 162.2128 ms
+2026-10-28 19:55:24.486 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost/api/auth/me - 200 null application/json; charset=utf-8 171.8813ms
+2026-10-28 19:55:24.510 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost/api/directories - application/json; charset=utf-8 null
+2026-10-28 19:55:24.517 +00:00 [INF] Executing endpoint 'HTTP: POST api/directories'
+2026-10-28 19:55:24.529 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 11)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-28 19:55:24.537 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."UserId", "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-28 19:55:24.554 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "UserCounters" ("UserId", "LastChangeSeq")
+VALUES (@p0, @p1);
+2026-10-28 19:55:24.639 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 15), @p1='?', @p2='?' (Size = 32), @p3='?' (Size = 17), @p4='?' (Size = 11), @p5='?' (Size = 7), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-28 19:55:24.641 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 32), @p1='?' (DbType = Int64), @p2='?' (DbType = DateTime), @p3='?' (DbType = Boolean), @p4='?' (DbType = Boolean), @p5='?' (DbType = DateTime), @p6='?' (Size = 11), @p7='?' (Size = 11), @p8='?', @p9='?' (DbType = Int64), @p10='?' (DbType = DateTime), @p11='?' (Size = 32), @p12='?' (DbType = Int32), @p13='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Files" ("Id", "ChangeSeq", "DeletedAtUtc", "IsDeleted", "IsDirectory", "LastModifiedUtc", "Path", "PathKey", "Sha256", "Size", "UploadedAtUtc", "UploadedByDeviceId", "UserId", "Version")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13);
+2026-10-28 19:55:24.646 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 19:55:24.653 +00:00 [INF] Writing value of type 'FileDto' as Json.
+2026-10-28 19:55:24.656 +00:00 [INF] Executed endpoint 'HTTP: POST api/directories'
+2026-10-28 19:55:24.656 +00:00 [INF] HTTP POST /api/directories responded 200 in 144.9661 ms
+2026-10-28 19:55:24.656 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost/api/directories - 200 null application/json; charset=utf-8 146.5393ms
+2026-10-28 19:55:24.664 +00:00 [INF] Request starting HTTP/1.1 PUT http://localhost/api/files?path=notes%2Fdaily%2Fentry1.txt - application/octet-stream 39
+2026-10-28 19:55:24.668 +00:00 [INF] Executing endpoint 'HTTP: PUT api/files'
+2026-10-28 19:55:24.694 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__command_UserId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 22)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__command_UserId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-28 19:55:24.695 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."UserId", "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-28 19:55:24.700 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p1='?' (DbType = Int32), @p0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+UPDATE "UserCounters" SET "LastChangeSeq" = @p0
+WHERE "UserId" = @p1
+RETURNING 1;
+2026-10-28 19:55:24.734 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__fileId_0='?' (Size = 32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."BlobRelativePath", "f"."CreatedUtc", "f"."DeviceId", "f"."FileId", "f"."Sha256", "f"."Size", "f"."Version"
+FROM "FileVersions" AS "f"
+WHERE "f"."FileId" = @__fileId_0
+ORDER BY "f"."Version" DESC
+LIMIT -1 OFFSET @__p_1
+2026-10-28 19:55:24.740 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 6), @p1='?', @p2='?' (Size = 32), @p3='?' (Size = 40), @p4='?' (Size = 22), @p5='?' (Size = 7), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-28 19:55:24.741 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 44), @p1='?' (DbType = DateTime), @p2='?' (Size = 32), @p3='?' (Size = 32), @p4='?' (Size = 64), @p5='?' (DbType = Int64), @p6='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "FileVersions" ("BlobRelativePath", "CreatedUtc", "DeviceId", "FileId", "Sha256", "Size", "Version")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
+RETURNING "Id";
+2026-10-28 19:55:24.743 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 32), @p1='?' (DbType = Int64), @p2='?' (DbType = DateTime), @p3='?' (DbType = Boolean), @p4='?' (DbType = Boolean), @p5='?' (DbType = DateTime), @p6='?' (Size = 22), @p7='?' (Size = 22), @p8='?' (Size = 64), @p9='?' (DbType = Int64), @p10='?' (DbType = DateTime), @p11='?' (Size = 32), @p12='?' (DbType = Int32), @p13='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Files" ("Id", "ChangeSeq", "DeletedAtUtc", "IsDeleted", "IsDirectory", "LastModifiedUtc", "Path", "PathKey", "Sha256", "Size", "UploadedAtUtc", "UploadedByDeviceId", "UserId", "Version")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13);
+2026-10-28 19:55:24.747 +00:00 [INF] Setting HTTP status code 201.
+2026-10-28 19:55:24.747 +00:00 [INF] Writing value of type 'FileDto' as Json.
+2026-10-28 19:55:24.748 +00:00 [INF] Executed endpoint 'HTTP: PUT api/files'
+2026-10-28 19:55:24.749 +00:00 [INF] HTTP PUT /api/files responded 201 in 82.5429 ms
+2026-10-28 19:55:24.750 +00:00 [INF] Request finished HTTP/1.1 PUT http://localhost/api/files?path=notes%2Fdaily%2Fentry1.txt - 201 null application/json; charset=utf-8 86.2179ms
+2026-10-28 19:55:24.757 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost/api/files/meta?path=notes%2Fdaily%2Fentry1.txt - null null
+2026-10-28 19:55:24.759 +00:00 [INF] Executing endpoint 'HTTP: GET api/files/meta'
+2026-10-28 19:55:24.773 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 22)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-28 19:55:24.773 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 19:55:24.774 +00:00 [INF] Writing value of type 'FileDto' as Json.
+2026-10-28 19:55:24.774 +00:00 [INF] Executed endpoint 'HTTP: GET api/files/meta'
+2026-10-28 19:55:24.774 +00:00 [INF] HTTP GET /api/files/meta responded 200 in 15.7086 ms
+2026-10-28 19:55:24.774 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost/api/files/meta?path=notes%2Fdaily%2Fentry1.txt - 200 null application/json; charset=utf-8 17.2278ms
+2026-10-28 19:55:24.776 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost/api/files/6717e7d5208740588719e967f1e3291c/content - null null
+2026-10-28 19:55:24.778 +00:00 [INF] Executing endpoint 'HTTP: GET api/files/{id}/content'
+2026-10-28 19:55:24.787 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__fileId_1='?' (Size = 32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND "f"."Id" = @__fileId_1
+LIMIT 1
+2026-10-28 19:55:24.789 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 8), @p1='?' (Size = 13), @p2='?' (Size = 32), @p3='?' (Size = 24), @p4='?' (Size = 22), @p5='?' (Size = 7), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-28 19:55:24.792 +00:00 [INF] Sending file with download name 'entry1.txt'.
+2026-10-28 19:55:24.798 +00:00 [INF] Executed endpoint 'HTTP: GET api/files/{id}/content'
+2026-10-28 19:55:24.798 +00:00 [INF] HTTP GET /api/files/6717e7d5208740588719e967f1e3291c/content responded 200 in 20.9216 ms
+2026-10-28 19:55:24.798 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost/api/files/6717e7d5208740588719e967f1e3291c/content - 200 39 application/octet-stream 22.2521ms
+2026-10-28 19:55:24.802 +00:00 [INF] Request starting HTTP/1.1 PUT http://localhost/api/files?path=notes%2Fdaily%2Fentry1.txt - application/octet-stream 16
+2026-10-28 19:55:24.803 +00:00 [INF] Executing endpoint 'HTTP: PUT api/files'
+2026-10-28 19:55:24.815 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__command_UserId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 22)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__command_UserId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-28 19:55:24.818 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 8), @p1='?' (Size = 13), @p2='?' (Size = 32), @p3='?' (Size = 51), @p4='?' (Size = 22), @p5='?' (Size = 8), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-28 19:55:24.820 +00:00 [INF] Setting HTTP status code 409.
+2026-10-28 19:55:24.831 +00:00 [INF] Writing value of type 'ConflictDto' as Json.
+2026-10-28 19:55:24.836 +00:00 [INF] Executed endpoint 'HTTP: PUT api/files'
+2026-10-28 19:55:24.836 +00:00 [INF] HTTP PUT /api/files responded 409 in 34.0387 ms
+2026-10-28 19:55:24.836 +00:00 [INF] Request finished HTTP/1.1 PUT http://localhost/api/files?path=notes%2Fdaily%2Fentry1.txt - 409 null application/json; charset=utf-8 34.5238ms
+2026-10-28 19:55:24.846 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost/api/auth/logout - null null
+2026-10-28 19:55:24.847 +00:00 [INF] Executing endpoint 'HTTP: POST api/auth/logout'
+2026-10-28 19:55:24.859 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__deviceId_1='?' (Size = 32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "r"."Id", "r"."CreatedUtc", "r"."DeviceId", "r"."ExpiresUtc", "r"."ReplacedByTokenId", "r"."RevokedUtc", "r"."TokenHash", "r"."UserId"
+FROM "RefreshTokens" AS "r"
+WHERE "r"."UserId" = @__userId_0 AND "r"."DeviceId" = @__deviceId_1 AND "r"."RevokedUtc" IS NULL
+2026-10-28 19:55:24.861 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p1='?' (DbType = Int32), @p0='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+UPDATE "RefreshTokens" SET "RevokedUtc" = @p0
+WHERE "Id" = @p1
+RETURNING 1;
+2026-10-28 19:55:24.863 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 19:55:24.864 +00:00 [INF] Executed endpoint 'HTTP: POST api/auth/logout'
+2026-10-28 19:55:24.864 +00:00 [INF] HTTP POST /api/auth/logout responded 200 in 17.6798 ms
+2026-10-28 19:55:24.865 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost/api/auth/logout - 200 null null 18.4674ms
+2026-10-28 19:55:24.872 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost/api/status - null null
+2026-10-28 19:55:24.874 +00:00 [INF] Executing endpoint 'HTTP: GET api/status'
+2026-10-28 19:55:24.887 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 19:55:24.889 +00:00 [INF] Writing value of type 'StatusResponse' as Json.
+2026-10-28 19:55:24.890 +00:00 [INF] Executed endpoint 'HTTP: GET api/status'
+2026-10-28 19:55:24.891 +00:00 [INF] HTTP GET /api/status responded 200 in 17.4969 ms
+2026-10-28 19:55:24.892 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost/api/status - 200 null application/json; charset=utf-8 19.1003ms
+2026-10-28 23:03:37.166 +00:00 [INF] Executed DbCommand (26ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+PRAGMA journal_mode = 'wal';
+2026-10-28 23:03:37.484 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ActivityLog" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_ActivityLog" PRIMARY KEY AUTOINCREMENT,
+    "TimestampUtc" TEXT NOT NULL,
+    "UserId" INTEGER NULL,
+    "DeviceId" TEXT NULL,
+    "Action" TEXT NOT NULL,
+    "Path" TEXT NULL,
+    "Result" TEXT NOT NULL,
+    "Message" TEXT NULL,
+    "CorrelationId" TEXT NULL
+);
+2026-10-28 23:03:37.488 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ApiSettings" (
+    "Key" TEXT NOT NULL CONSTRAINT "PK_ApiSettings" PRIMARY KEY,
+    "Value" TEXT NOT NULL,
+    "UpdatedUtc" TEXT NOT NULL
+);
+2026-10-28 23:03:37.489 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Devices" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_Devices" PRIMARY KEY,
+    "UserId" INTEGER NOT NULL,
+    "Name" TEXT NOT NULL,
+    "CreatedUtc" TEXT NOT NULL,
+    "LastSeenUtc" TEXT NOT NULL,
+    "IsRevoked" INTEGER NOT NULL
+);
+2026-10-28 23:03:37.490 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Files" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_Files" PRIMARY KEY,
+    "UserId" INTEGER NOT NULL,
+    "Path" TEXT NOT NULL,
+    "PathKey" TEXT NOT NULL,
+    "IsDirectory" INTEGER NOT NULL,
+    "Size" INTEGER NOT NULL,
+    "Sha256" TEXT NULL,
+    "Version" INTEGER NOT NULL,
+    "LastModifiedUtc" TEXT NOT NULL,
+    "UploadedAtUtc" TEXT NOT NULL,
+    "UploadedByDeviceId" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "DeletedAtUtc" TEXT NULL,
+    "ChangeSeq" INTEGER NOT NULL
+);
+2026-10-28 23:03:37.494 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "FileVersions" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_FileVersions" PRIMARY KEY AUTOINCREMENT,
+    "FileId" TEXT NOT NULL,
+    "Version" INTEGER NOT NULL,
+    "Sha256" TEXT NOT NULL,
+    "Size" INTEGER NOT NULL,
+    "BlobRelativePath" TEXT NOT NULL,
+    "CreatedUtc" TEXT NOT NULL,
+    "DeviceId" TEXT NULL
+);
+2026-10-28 23:03:37.494 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "RefreshTokens" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_RefreshTokens" PRIMARY KEY AUTOINCREMENT,
+    "UserId" INTEGER NOT NULL,
+    "DeviceId" TEXT NOT NULL,
+    "TokenHash" TEXT NOT NULL,
+    "CreatedUtc" TEXT NOT NULL,
+    "ExpiresUtc" TEXT NOT NULL,
+    "RevokedUtc" TEXT NULL,
+    "ReplacedByTokenId" INTEGER NULL
+);
+2026-10-28 23:03:37.494 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "UserCounters" (
+    "UserId" INTEGER NOT NULL CONSTRAINT "PK_UserCounters" PRIMARY KEY AUTOINCREMENT,
+    "LastChangeSeq" INTEGER NOT NULL
+);
+2026-10-28 23:03:37.495 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Users" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_Users" PRIMARY KEY AUTOINCREMENT,
+    "Username" TEXT NOT NULL,
+    "PasswordHash" TEXT NOT NULL,
+    "Role" TEXT NOT NULL,
+    "CreatedUtc" TEXT NOT NULL,
+    "LastLoginUtc" TEXT NULL,
+    "IsDisabled" INTEGER NOT NULL
+);
+2026-10-28 23:03:37.495 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ActivityLog_UserId_TimestampUtc" ON "ActivityLog" ("UserId", "TimestampUtc");
+2026-10-28 23:03:37.495 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Devices_UserId_Id" ON "Devices" ("UserId", "Id");
+2026-10-28 23:03:37.495 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Files_UserId_ChangeSeq" ON "Files" ("UserId", "ChangeSeq");
+2026-10-28 23:03:37.496 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Files_UserId_IsDeleted" ON "Files" ("UserId", "IsDeleted");
+2026-10-28 23:03:37.496 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_Files_UserId_PathKey" ON "Files" ("UserId", "PathKey");
+2026-10-28 23:03:37.498 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_FileVersions_FileId_Version" ON "FileVersions" ("FileId", "Version");
+2026-10-28 23:03:37.499 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_RefreshTokens_TokenHash" ON "RefreshTokens" ("TokenHash");
+2026-10-28 23:03:37.500 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_RefreshTokens_UserId_DeviceId" ON "RefreshTokens" ("UserId", "DeviceId");
+2026-10-28 23:03:37.501 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_Users_Username" ON "Users" ("Username");
+2026-10-28 23:03:37.812 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Users" AS "u")
+2026-10-28 23:03:38.175 +00:00 [INF] Executed DbCommand (4ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (DbType = Boolean), @p2='?' (DbType = DateTime), @p3='?' (Size = 84), @p4='?' (Size = 5), @p5='?' (Size = 15)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Users" ("CreatedUtc", "IsDisabled", "LastLoginUtc", "PasswordHash", "Role", "Username")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5)
+RETURNING "Id";
+2026-10-28 23:03:38.201 +00:00 [INF] Seeded initial administrator account 'clienttestadmin'
+2026-10-28 23:03:38.237 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 14)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-28 23:03:38.253 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 15)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-28 23:03:38.254 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 16)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-28 23:03:38.255 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 22)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-28 23:03:38.255 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 21)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-28 23:03:38.266 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 16), @p1='?' (DbType = DateTime), @p2='?' (Size = 2)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ApiSettings" ("Key", "UpdatedUtc", "Value")
+VALUES (@p0, @p1, @p2);
+2026-10-28 23:03:38.266 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 14), @p1='?' (DbType = DateTime), @p2='?' (Size = 10)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ApiSettings" ("Key", "UpdatedUtc", "Value")
+VALUES (@p0, @p1, @p2);
+2026-10-28 23:03:38.267 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 15), @p1='?' (DbType = DateTime), @p2='?' (Size = 70)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ApiSettings" ("Key", "UpdatedUtc", "Value")
+VALUES (@p0, @p1, @p2);
+2026-10-28 23:03:38.267 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 22), @p1='?' (DbType = DateTime), @p2='?' (Size = 3)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ApiSettings" ("Key", "UpdatedUtc", "Value")
+VALUES (@p0, @p1, @p2);
+2026-10-28 23:03:38.267 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 21), @p1='?' (DbType = DateTime), @p2='?' (Size = 1)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ApiSettings" ("Key", "UpdatedUtc", "Value")
+VALUES (@p0, @p1, @p2);
+2026-10-28 23:03:38.280 +00:00 [WRN] Using an in-memory repository. Keys will not be persisted to storage.
+2026-10-28 23:03:38.280 +00:00 [WRN] Neither user profile nor HKLM registry available. Using an ephemeral key repository. Protected data will be unavailable when application exits.
+2026-10-28 23:03:38.299 +00:00 [INF] Creating key {1d9d1f02-295e-48cd-a6e0-697ee48550f7} with creation date 2026-10-28 23:03:38Z, activation date 2026-10-28 23:03:38Z, and expiration date 2027-01-26 23:03:38Z.
+2026-10-28 23:03:38.303 +00:00 [WRN] No XML encryptor configured. Key {1d9d1f02-295e-48cd-a6e0-697ee48550f7} may be persisted to storage in unencrypted form.
+2026-10-28 23:03:38.532 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost/api/auth/login - application/json; charset=utf-8 null
+2026-10-28 23:03:38.934 +00:00 [INF] Executing endpoint 'HTTP: POST api/auth/login'
+2026-10-28 23:03:39.081 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__ToLower_0='?' (Size = 15)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."CreatedUtc", "u"."IsDisabled", "u"."LastLoginUtc", "u"."PasswordHash", "u"."Role", "u"."Username"
+FROM "Users" AS "u"
+WHERE lower("u"."Username") = @__ToLower_0
+LIMIT 1
+2026-10-28 23:03:39.197 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__deviceId_0='?' (Size = 32), @__user_Id_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."CreatedUtc", "d"."IsRevoked", "d"."LastSeenUtc", "d"."Name", "d"."UserId"
+FROM "Devices" AS "d"
+WHERE "d"."Id" = @__deviceId_0 AND "d"."UserId" = @__user_Id_1
+LIMIT 1
+2026-10-28 23:03:39.291 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 32), @p1='?' (DbType = DateTime), @p2='?' (DbType = Boolean), @p3='?' (DbType = DateTime), @p4='?' (Size = 13), @p5='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Devices" ("Id", "CreatedUtc", "IsRevoked", "LastSeenUtc", "Name", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-10-28 23:03:39.292 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (Size = 32), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 64), @p6='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "RefreshTokens" ("CreatedUtc", "DeviceId", "ExpiresUtc", "ReplacedByTokenId", "RevokedUtc", "TokenHash", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
+RETURNING "Id";
+2026-10-28 23:03:39.296 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p1='?' (DbType = Int32), @p0='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+UPDATE "Users" SET "LastLoginUtc" = @p0
+WHERE "Id" = @p1
+RETURNING 1;
+2026-10-28 23:03:39.303 +00:00 [INF] User 'clienttestadmin' logged in successfully on device 'acb1b1a189eb41009a5a2a8464232cda'
+2026-10-28 23:03:39.355 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 5), @p1='?' (Size = 13), @p2='?' (Size = 32), @p3='?' (Size = 35), @p4='?', @p5='?' (Size = 7), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-28 23:03:39.364 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 23:03:39.377 +00:00 [INF] Writing value of type 'LoginResponse' as Json.
+2026-10-28 23:03:39.390 +00:00 [INF] Executed endpoint 'HTTP: POST api/auth/login'
+2026-10-28 23:03:39.393 +00:00 [INF] HTTP POST /api/auth/login responded 200 in 621.9337 ms
+2026-10-28 23:03:39.402 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost/api/auth/login - 200 null application/json; charset=utf-8 874.3575ms
+2026-10-28 23:03:39.419 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost/api/auth/me - null null
+2026-10-28 23:03:39.487 +00:00 [INF] Executing endpoint 'HTTP: GET api/auth/me'
+2026-10-28 23:03:39.567 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."CreatedUtc", "u"."IsDisabled", "u"."LastLoginUtc", "u"."PasswordHash", "u"."Role", "u"."Username"
+FROM "Users" AS "u"
+WHERE "u"."Id" = @__userId_0 AND NOT ("u"."IsDisabled")
+LIMIT 1
+2026-10-28 23:03:39.568 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 23:03:39.569 +00:00 [INF] Writing value of type 'UserDto' as Json.
+2026-10-28 23:03:39.570 +00:00 [INF] Executed endpoint 'HTTP: GET api/auth/me'
+2026-10-28 23:03:39.570 +00:00 [INF] HTTP GET /api/auth/me responded 200 in 138.3620 ms
+2026-10-28 23:03:39.570 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost/api/auth/me - 200 null application/json; charset=utf-8 151.4394ms
+2026-10-28 23:03:39.576 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost/api/directories - application/json; charset=utf-8 null
+2026-10-28 23:03:39.584 +00:00 [INF] Executing endpoint 'HTTP: POST api/directories'
+2026-10-28 23:03:39.596 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 11)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-28 23:03:39.605 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."UserId", "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-28 23:03:39.627 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "UserCounters" ("UserId", "LastChangeSeq")
+VALUES (@p0, @p1);
+2026-10-28 23:03:39.674 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 15), @p1='?', @p2='?' (Size = 32), @p3='?' (Size = 17), @p4='?' (Size = 11), @p5='?' (Size = 7), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-28 23:03:39.675 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 32), @p1='?' (DbType = Int64), @p2='?' (DbType = DateTime), @p3='?' (DbType = Boolean), @p4='?' (DbType = Boolean), @p5='?' (DbType = DateTime), @p6='?' (Size = 11), @p7='?' (Size = 11), @p8='?', @p9='?' (DbType = Int64), @p10='?' (DbType = DateTime), @p11='?' (Size = 32), @p12='?' (DbType = Int32), @p13='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Files" ("Id", "ChangeSeq", "DeletedAtUtc", "IsDeleted", "IsDirectory", "LastModifiedUtc", "Path", "PathKey", "Sha256", "Size", "UploadedAtUtc", "UploadedByDeviceId", "UserId", "Version")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13);
+2026-10-28 23:03:39.678 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 23:03:39.708 +00:00 [INF] Writing value of type 'FileDto' as Json.
+2026-10-28 23:03:39.712 +00:00 [INF] Executed endpoint 'HTTP: POST api/directories'
+2026-10-28 23:03:39.712 +00:00 [INF] HTTP POST /api/directories responded 200 in 133.7666 ms
+2026-10-28 23:03:39.713 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost/api/directories - 200 null application/json; charset=utf-8 136.0996ms
+2026-10-28 23:03:39.719 +00:00 [INF] Request starting HTTP/1.1 PUT http://localhost/api/files?path=notes%2Fdaily%2Fentry1.txt - application/octet-stream 39
+2026-10-28 23:03:39.722 +00:00 [INF] Executing endpoint 'HTTP: PUT api/files'
+2026-10-28 23:03:39.750 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__command_UserId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 22)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__command_UserId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-28 23:03:39.751 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."UserId", "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-28 23:03:39.755 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p1='?' (DbType = Int32), @p0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+UPDATE "UserCounters" SET "LastChangeSeq" = @p0
+WHERE "UserId" = @p1
+RETURNING 1;
+2026-10-28 23:03:39.795 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__fileId_0='?' (Size = 32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."BlobRelativePath", "f"."CreatedUtc", "f"."DeviceId", "f"."FileId", "f"."Sha256", "f"."Size", "f"."Version"
+FROM "FileVersions" AS "f"
+WHERE "f"."FileId" = @__fileId_0
+ORDER BY "f"."Version" DESC
+LIMIT -1 OFFSET @__p_1
+2026-10-28 23:03:39.802 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 6), @p1='?', @p2='?' (Size = 32), @p3='?' (Size = 40), @p4='?' (Size = 22), @p5='?' (Size = 7), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-28 23:03:39.802 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 44), @p1='?' (DbType = DateTime), @p2='?' (Size = 32), @p3='?' (Size = 32), @p4='?' (Size = 64), @p5='?' (DbType = Int64), @p6='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "FileVersions" ("BlobRelativePath", "CreatedUtc", "DeviceId", "FileId", "Sha256", "Size", "Version")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
+RETURNING "Id";
+2026-10-28 23:03:39.804 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 32), @p1='?' (DbType = Int64), @p2='?' (DbType = DateTime), @p3='?' (DbType = Boolean), @p4='?' (DbType = Boolean), @p5='?' (DbType = DateTime), @p6='?' (Size = 22), @p7='?' (Size = 22), @p8='?' (Size = 64), @p9='?' (DbType = Int64), @p10='?' (DbType = DateTime), @p11='?' (Size = 32), @p12='?' (DbType = Int32), @p13='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Files" ("Id", "ChangeSeq", "DeletedAtUtc", "IsDeleted", "IsDirectory", "LastModifiedUtc", "Path", "PathKey", "Sha256", "Size", "UploadedAtUtc", "UploadedByDeviceId", "UserId", "Version")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13);
+2026-10-28 23:03:39.810 +00:00 [INF] Setting HTTP status code 201.
+2026-10-28 23:03:39.810 +00:00 [INF] Writing value of type 'FileDto' as Json.
+2026-10-28 23:03:39.811 +00:00 [INF] Executed endpoint 'HTTP: PUT api/files'
+2026-10-28 23:03:39.813 +00:00 [INF] HTTP PUT /api/files responded 201 in 92.6613 ms
+2026-10-28 23:03:39.815 +00:00 [INF] Request finished HTTP/1.1 PUT http://localhost/api/files?path=notes%2Fdaily%2Fentry1.txt - 201 null application/json; charset=utf-8 96.2031ms
+2026-10-28 23:03:39.821 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost/api/files/meta?path=notes%2Fdaily%2Fentry1.txt - null null
+2026-10-28 23:03:39.822 +00:00 [INF] Executing endpoint 'HTTP: GET api/files/meta'
+2026-10-28 23:03:39.836 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 22)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-28 23:03:39.836 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 23:03:39.837 +00:00 [INF] Writing value of type 'FileDto' as Json.
+2026-10-28 23:03:39.837 +00:00 [INF] Executed endpoint 'HTTP: GET api/files/meta'
+2026-10-28 23:03:39.837 +00:00 [INF] HTTP GET /api/files/meta responded 200 in 15.2164 ms
+2026-10-28 23:03:39.837 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost/api/files/meta?path=notes%2Fdaily%2Fentry1.txt - 200 null application/json; charset=utf-8 16.6792ms
+2026-10-28 23:03:39.841 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost/api/files/7e920576b7ac492a94f4dadc9d9cec84/content - null null
+2026-10-28 23:03:39.844 +00:00 [INF] Executing endpoint 'HTTP: GET api/files/{id}/content'
+2026-10-28 23:03:39.852 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__fileId_1='?' (Size = 32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND "f"."Id" = @__fileId_1
+LIMIT 1
+2026-10-28 23:03:39.853 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 8), @p1='?' (Size = 13), @p2='?' (Size = 32), @p3='?' (Size = 24), @p4='?' (Size = 22), @p5='?' (Size = 7), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-28 23:03:39.856 +00:00 [INF] Sending file with download name 'entry1.txt'.
+2026-10-28 23:03:39.864 +00:00 [INF] Executed endpoint 'HTTP: GET api/files/{id}/content'
+2026-10-28 23:03:39.865 +00:00 [INF] HTTP GET /api/files/7e920576b7ac492a94f4dadc9d9cec84/content responded 200 in 22.0376 ms
+2026-10-28 23:03:39.865 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost/api/files/7e920576b7ac492a94f4dadc9d9cec84/content - 200 39 application/octet-stream 24.1353ms
+2026-10-28 23:03:39.866 +00:00 [INF] Request starting HTTP/1.1 PUT http://localhost/api/files?path=notes%2Fdaily%2Fentry1.txt - application/octet-stream 16
+2026-10-28 23:03:39.866 +00:00 [INF] Executing endpoint 'HTTP: PUT api/files'
+2026-10-28 23:03:39.878 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__command_UserId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 22)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__command_UserId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-28 23:03:39.882 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 8), @p1='?' (Size = 13), @p2='?' (Size = 32), @p3='?' (Size = 51), @p4='?' (Size = 22), @p5='?' (Size = 8), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-28 23:03:39.883 +00:00 [INF] Setting HTTP status code 409.
+2026-10-28 23:03:39.894 +00:00 [INF] Writing value of type 'ConflictDto' as Json.
+2026-10-28 23:03:39.899 +00:00 [INF] Executed endpoint 'HTTP: PUT api/files'
+2026-10-28 23:03:39.899 +00:00 [INF] HTTP PUT /api/files responded 409 in 33.3452 ms
+2026-10-28 23:03:39.899 +00:00 [INF] Request finished HTTP/1.1 PUT http://localhost/api/files?path=notes%2Fdaily%2Fentry1.txt - 409 null application/json; charset=utf-8 33.7004ms
+2026-10-28 23:03:39.908 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost/api/auth/logout - null null
+2026-10-28 23:03:39.909 +00:00 [INF] Executing endpoint 'HTTP: POST api/auth/logout'
+2026-10-28 23:03:39.921 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__deviceId_1='?' (Size = 32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "r"."Id", "r"."CreatedUtc", "r"."DeviceId", "r"."ExpiresUtc", "r"."ReplacedByTokenId", "r"."RevokedUtc", "r"."TokenHash", "r"."UserId"
+FROM "RefreshTokens" AS "r"
+WHERE "r"."UserId" = @__userId_0 AND "r"."DeviceId" = @__deviceId_1 AND "r"."RevokedUtc" IS NULL
+2026-10-28 23:03:39.923 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p1='?' (DbType = Int32), @p0='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+UPDATE "RefreshTokens" SET "RevokedUtc" = @p0
+WHERE "Id" = @p1
+RETURNING 1;
+2026-10-28 23:03:39.925 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 23:03:39.925 +00:00 [INF] Executed endpoint 'HTTP: POST api/auth/logout'
+2026-10-28 23:03:39.926 +00:00 [INF] HTTP POST /api/auth/logout responded 200 in 16.9923 ms
+2026-10-28 23:03:39.926 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost/api/auth/logout - 200 null null 17.6618ms
+2026-10-28 23:03:39.933 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost/api/status - null null
+2026-10-28 23:03:39.933 +00:00 [INF] Executing endpoint 'HTTP: GET api/status'
+2026-10-28 23:03:39.937 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 23:03:39.938 +00:00 [INF] Writing value of type 'StatusResponse' as Json.
+2026-10-28 23:03:39.940 +00:00 [INF] Executed endpoint 'HTTP: GET api/status'
+2026-10-28 23:03:39.940 +00:00 [INF] HTTP GET /api/status responded 200 in 6.8458 ms
+2026-10-28 23:03:39.940 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost/api/status - 200 null application/json; charset=utf-8 7.3028ms
+2026-10-28 23:13:05.669 +00:00 [INF] Executed DbCommand (14ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+PRAGMA journal_mode = 'wal';
+2026-10-28 23:13:05.859 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ActivityLog" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_ActivityLog" PRIMARY KEY AUTOINCREMENT,
+    "TimestampUtc" TEXT NOT NULL,
+    "UserId" INTEGER NULL,
+    "DeviceId" TEXT NULL,
+    "Action" TEXT NOT NULL,
+    "Path" TEXT NULL,
+    "Result" TEXT NOT NULL,
+    "Message" TEXT NULL,
+    "CorrelationId" TEXT NULL
+);
+2026-10-28 23:13:05.863 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ApiSettings" (
+    "Key" TEXT NOT NULL CONSTRAINT "PK_ApiSettings" PRIMARY KEY,
+    "Value" TEXT NOT NULL,
+    "UpdatedUtc" TEXT NOT NULL
+);
+2026-10-28 23:13:05.863 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Devices" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_Devices" PRIMARY KEY,
+    "UserId" INTEGER NOT NULL,
+    "Name" TEXT NOT NULL,
+    "CreatedUtc" TEXT NOT NULL,
+    "LastSeenUtc" TEXT NOT NULL,
+    "IsRevoked" INTEGER NOT NULL
+);
+2026-10-28 23:13:05.863 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Files" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_Files" PRIMARY KEY,
+    "UserId" INTEGER NOT NULL,
+    "Path" TEXT NOT NULL,
+    "PathKey" TEXT NOT NULL,
+    "IsDirectory" INTEGER NOT NULL,
+    "Size" INTEGER NOT NULL,
+    "Sha256" TEXT NULL,
+    "Version" INTEGER NOT NULL,
+    "LastModifiedUtc" TEXT NOT NULL,
+    "UploadedAtUtc" TEXT NOT NULL,
+    "UploadedByDeviceId" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "DeletedAtUtc" TEXT NULL,
+    "ChangeSeq" INTEGER NOT NULL
+);
+2026-10-28 23:13:05.863 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "FileVersions" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_FileVersions" PRIMARY KEY AUTOINCREMENT,
+    "FileId" TEXT NOT NULL,
+    "Version" INTEGER NOT NULL,
+    "Sha256" TEXT NOT NULL,
+    "Size" INTEGER NOT NULL,
+    "BlobRelativePath" TEXT NOT NULL,
+    "CreatedUtc" TEXT NOT NULL,
+    "DeviceId" TEXT NULL
+);
+2026-10-28 23:13:05.864 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "RefreshTokens" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_RefreshTokens" PRIMARY KEY AUTOINCREMENT,
+    "UserId" INTEGER NOT NULL,
+    "DeviceId" TEXT NOT NULL,
+    "TokenHash" TEXT NOT NULL,
+    "CreatedUtc" TEXT NOT NULL,
+    "ExpiresUtc" TEXT NOT NULL,
+    "RevokedUtc" TEXT NULL,
+    "ReplacedByTokenId" INTEGER NULL
+);
+2026-10-28 23:13:05.864 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "UserCounters" (
+    "UserId" INTEGER NOT NULL CONSTRAINT "PK_UserCounters" PRIMARY KEY AUTOINCREMENT,
+    "LastChangeSeq" INTEGER NOT NULL
+);
+2026-10-28 23:13:05.864 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Users" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_Users" PRIMARY KEY AUTOINCREMENT,
+    "Username" TEXT NOT NULL,
+    "PasswordHash" TEXT NOT NULL,
+    "Role" TEXT NOT NULL,
+    "CreatedUtc" TEXT NOT NULL,
+    "LastLoginUtc" TEXT NULL,
+    "IsDisabled" INTEGER NOT NULL
+);
+2026-10-28 23:13:05.864 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ActivityLog_UserId_TimestampUtc" ON "ActivityLog" ("UserId", "TimestampUtc");
+2026-10-28 23:13:05.864 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Devices_UserId_Id" ON "Devices" ("UserId", "Id");
+2026-10-28 23:13:05.865 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Files_UserId_ChangeSeq" ON "Files" ("UserId", "ChangeSeq");
+2026-10-28 23:13:05.865 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Files_UserId_IsDeleted" ON "Files" ("UserId", "IsDeleted");
+2026-10-28 23:13:05.865 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_Files_UserId_PathKey" ON "Files" ("UserId", "PathKey");
+2026-10-28 23:13:05.865 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_FileVersions_FileId_Version" ON "FileVersions" ("FileId", "Version");
+2026-10-28 23:13:05.865 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_RefreshTokens_TokenHash" ON "RefreshTokens" ("TokenHash");
+2026-10-28 23:13:05.865 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_RefreshTokens_UserId_DeviceId" ON "RefreshTokens" ("UserId", "DeviceId");
+2026-10-28 23:13:05.865 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_Users_Username" ON "Users" ("Username");
+2026-10-28 23:14:11.513 +00:00 [INF] Executed DbCommand (12ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+PRAGMA journal_mode = 'wal';
+2026-10-28 23:14:11.663 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ActivityLog" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_ActivityLog" PRIMARY KEY AUTOINCREMENT,
+    "TimestampUtc" TEXT NOT NULL,
+    "UserId" INTEGER NULL,
+    "DeviceId" TEXT NULL,
+    "Action" TEXT NOT NULL,
+    "Path" TEXT NULL,
+    "Result" TEXT NOT NULL,
+    "Message" TEXT NULL,
+    "CorrelationId" TEXT NULL
+);
+2026-10-28 23:14:11.665 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "ApiSettings" (
+    "Key" TEXT NOT NULL CONSTRAINT "PK_ApiSettings" PRIMARY KEY,
+    "Value" TEXT NOT NULL,
+    "UpdatedUtc" TEXT NOT NULL
+);
+2026-10-28 23:14:11.666 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Devices" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_Devices" PRIMARY KEY,
+    "UserId" INTEGER NOT NULL,
+    "Name" TEXT NOT NULL,
+    "CreatedUtc" TEXT NOT NULL,
+    "LastSeenUtc" TEXT NOT NULL,
+    "IsRevoked" INTEGER NOT NULL
+);
+2026-10-28 23:14:11.666 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Files" (
+    "Id" TEXT NOT NULL CONSTRAINT "PK_Files" PRIMARY KEY,
+    "UserId" INTEGER NOT NULL,
+    "Path" TEXT NOT NULL,
+    "PathKey" TEXT NOT NULL,
+    "IsDirectory" INTEGER NOT NULL,
+    "Size" INTEGER NOT NULL,
+    "Sha256" TEXT NULL,
+    "Version" INTEGER NOT NULL,
+    "LastModifiedUtc" TEXT NOT NULL,
+    "UploadedAtUtc" TEXT NOT NULL,
+    "UploadedByDeviceId" TEXT NULL,
+    "IsDeleted" INTEGER NOT NULL,
+    "DeletedAtUtc" TEXT NULL,
+    "ChangeSeq" INTEGER NOT NULL
+);
+2026-10-28 23:14:11.666 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "FileVersions" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_FileVersions" PRIMARY KEY AUTOINCREMENT,
+    "FileId" TEXT NOT NULL,
+    "Version" INTEGER NOT NULL,
+    "Sha256" TEXT NOT NULL,
+    "Size" INTEGER NOT NULL,
+    "BlobRelativePath" TEXT NOT NULL,
+    "CreatedUtc" TEXT NOT NULL,
+    "DeviceId" TEXT NULL
+);
+2026-10-28 23:14:11.666 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "RefreshTokens" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_RefreshTokens" PRIMARY KEY AUTOINCREMENT,
+    "UserId" INTEGER NOT NULL,
+    "DeviceId" TEXT NOT NULL,
+    "TokenHash" TEXT NOT NULL,
+    "CreatedUtc" TEXT NOT NULL,
+    "ExpiresUtc" TEXT NOT NULL,
+    "RevokedUtc" TEXT NULL,
+    "ReplacedByTokenId" INTEGER NULL
+);
+2026-10-28 23:14:11.666 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "UserCounters" (
+    "UserId" INTEGER NOT NULL CONSTRAINT "PK_UserCounters" PRIMARY KEY AUTOINCREMENT,
+    "LastChangeSeq" INTEGER NOT NULL
+);
+2026-10-28 23:14:11.667 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE TABLE "Users" (
+    "Id" INTEGER NOT NULL CONSTRAINT "PK_Users" PRIMARY KEY AUTOINCREMENT,
+    "Username" TEXT NOT NULL,
+    "PasswordHash" TEXT NOT NULL,
+    "Role" TEXT NOT NULL,
+    "CreatedUtc" TEXT NOT NULL,
+    "LastLoginUtc" TEXT NULL,
+    "IsDisabled" INTEGER NOT NULL
+);
+2026-10-28 23:14:11.667 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_ActivityLog_UserId_TimestampUtc" ON "ActivityLog" ("UserId", "TimestampUtc");
+2026-10-28 23:14:11.667 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Devices_UserId_Id" ON "Devices" ("UserId", "Id");
+2026-10-28 23:14:11.667 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Files_UserId_ChangeSeq" ON "Files" ("UserId", "ChangeSeq");
+2026-10-28 23:14:11.667 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_Files_UserId_IsDeleted" ON "Files" ("UserId", "IsDeleted");
+2026-10-28 23:14:11.667 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_Files_UserId_PathKey" ON "Files" ("UserId", "PathKey");
+2026-10-28 23:14:11.667 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_FileVersions_FileId_Version" ON "FileVersions" ("FileId", "Version");
+2026-10-28 23:14:11.668 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_RefreshTokens_TokenHash" ON "RefreshTokens" ("TokenHash");
+2026-10-28 23:14:11.668 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE INDEX "IX_RefreshTokens_UserId_DeviceId" ON "RefreshTokens" ("UserId", "DeviceId");
+2026-10-28 23:14:11.668 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+CREATE UNIQUE INDEX "IX_Users_Username" ON "Users" ("Username");
+2026-10-28 23:14:11.870 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Users" AS "u")
+2026-10-28 23:14:12.098 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (DbType = Boolean), @p2='?' (DbType = DateTime), @p3='?' (Size = 84), @p4='?' (Size = 5), @p5='?' (Size = 15)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Users" ("CreatedUtc", "IsDisabled", "LastLoginUtc", "PasswordHash", "Role", "Username")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5)
+RETURNING "Id";
+2026-10-28 23:14:12.127 +00:00 [INF] Seeded initial administrator account 'clienttestadmin'
+2026-10-28 23:14:12.171 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 14)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-28 23:14:12.191 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 15)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-28 23:14:12.193 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 16)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-28 23:14:12.193 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 22)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-28 23:14:12.193 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 21)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-28 23:14:12.205 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 16), @p1='?' (DbType = DateTime), @p2='?' (Size = 2)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ApiSettings" ("Key", "UpdatedUtc", "Value")
+VALUES (@p0, @p1, @p2);
+2026-10-28 23:14:12.206 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 14), @p1='?' (DbType = DateTime), @p2='?' (Size = 10)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ApiSettings" ("Key", "UpdatedUtc", "Value")
+VALUES (@p0, @p1, @p2);
+2026-10-28 23:14:12.207 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 15), @p1='?' (DbType = DateTime), @p2='?' (Size = 70)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ApiSettings" ("Key", "UpdatedUtc", "Value")
+VALUES (@p0, @p1, @p2);
+2026-10-28 23:14:12.207 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 22), @p1='?' (DbType = DateTime), @p2='?' (Size = 3)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ApiSettings" ("Key", "UpdatedUtc", "Value")
+VALUES (@p0, @p1, @p2);
+2026-10-28 23:14:12.207 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 21), @p1='?' (DbType = DateTime), @p2='?' (Size = 1)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ApiSettings" ("Key", "UpdatedUtc", "Value")
+VALUES (@p0, @p1, @p2);
+2026-10-28 23:14:12.222 +00:00 [WRN] Using an in-memory repository. Keys will not be persisted to storage.
+2026-10-28 23:14:12.223 +00:00 [WRN] Neither user profile nor HKLM registry available. Using an ephemeral key repository. Protected data will be unavailable when application exits.
+2026-10-28 23:14:12.248 +00:00 [INF] Creating key {a7506081-13ca-42b1-9b85-7f366d18e8ff} with creation date 2026-10-28 23:14:12Z, activation date 2026-10-28 23:14:12Z, and expiration date 2027-01-26 23:14:12Z.
+2026-10-28 23:14:12.254 +00:00 [WRN] No XML encryptor configured. Key {a7506081-13ca-42b1-9b85-7f366d18e8ff} may be persisted to storage in unencrypted form.
+2026-10-28 23:14:12.447 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost/api/auth/login - application/json; charset=utf-8 null
+2026-10-28 23:14:12.595 +00:00 [INF] Executing endpoint 'HTTP: POST api/auth/login'
+2026-10-28 23:14:12.718 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__ToLower_0='?' (Size = 15)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."CreatedUtc", "u"."IsDisabled", "u"."LastLoginUtc", "u"."PasswordHash", "u"."Role", "u"."Username"
+FROM "Users" AS "u"
+WHERE lower("u"."Username") = @__ToLower_0
+LIMIT 1
+2026-10-28 23:14:12.841 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__deviceId_0='?' (Size = 32), @__user_Id_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."CreatedUtc", "d"."IsRevoked", "d"."LastSeenUtc", "d"."Name", "d"."UserId"
+FROM "Devices" AS "d"
+WHERE "d"."Id" = @__deviceId_0 AND "d"."UserId" = @__user_Id_1
+LIMIT 1
+2026-10-28 23:14:12.957 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 32), @p1='?' (DbType = DateTime), @p2='?' (DbType = Boolean), @p3='?' (DbType = DateTime), @p4='?' (Size = 13), @p5='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Devices" ("Id", "CreatedUtc", "IsRevoked", "LastSeenUtc", "Name", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-10-28 23:14:12.958 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (Size = 32), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 64), @p6='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "RefreshTokens" ("CreatedUtc", "DeviceId", "ExpiresUtc", "ReplacedByTokenId", "RevokedUtc", "TokenHash", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
+RETURNING "Id";
+2026-10-28 23:14:12.962 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p1='?' (DbType = Int32), @p0='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+UPDATE "Users" SET "LastLoginUtc" = @p0
+WHERE "Id" = @p1
+RETURNING 1;
+2026-10-28 23:14:12.968 +00:00 [INF] User 'clienttestadmin' logged in successfully on device '886aa857044f4bf1ae19ecea744daa9d'
+2026-10-28 23:14:12.999 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 5), @p1='?' (Size = 13), @p2='?' (Size = 32), @p3='?' (Size = 35), @p4='?', @p5='?' (Size = 7), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-28 23:14:13.009 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 23:14:13.015 +00:00 [INF] Writing value of type 'LoginResponse' as Json.
+2026-10-28 23:14:13.025 +00:00 [INF] Executed endpoint 'HTTP: POST api/auth/login'
+2026-10-28 23:14:13.027 +00:00 [INF] HTTP POST /api/auth/login responded 200 in 468.6138 ms
+2026-10-28 23:14:13.033 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost/api/auth/login - 200 null application/json; charset=utf-8 588.4281ms
+2026-10-28 23:14:13.047 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost/api/auth/me - null null
+2026-10-28 23:14:13.098 +00:00 [INF] Executing endpoint 'HTTP: GET api/auth/me'
+2026-10-28 23:14:13.198 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."CreatedUtc", "u"."IsDisabled", "u"."LastLoginUtc", "u"."PasswordHash", "u"."Role", "u"."Username"
+FROM "Users" AS "u"
+WHERE "u"."Id" = @__userId_0 AND NOT ("u"."IsDisabled")
+LIMIT 1
+2026-10-28 23:14:13.199 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 23:14:13.199 +00:00 [INF] Writing value of type 'UserDto' as Json.
+2026-10-28 23:14:13.199 +00:00 [INF] Executed endpoint 'HTTP: GET api/auth/me'
+2026-10-28 23:14:13.199 +00:00 [INF] HTTP GET /api/auth/me responded 200 in 145.5356 ms
+2026-10-28 23:14:13.200 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost/api/auth/me - 200 null application/json; charset=utf-8 153.118ms
+2026-10-28 23:14:13.204 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost/api/directories - application/json; charset=utf-8 null
+2026-10-28 23:14:13.210 +00:00 [INF] Executing endpoint 'HTTP: POST api/directories'
+2026-10-28 23:14:13.224 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 11)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-28 23:14:13.230 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."UserId", "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-28 23:14:13.244 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@p0='?' (DbType = Int32), @p1='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "UserCounters" ("UserId", "LastChangeSeq")
+VALUES (@p0, @p1);
+2026-10-28 23:14:13.311 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 15), @p1='?', @p2='?' (Size = 32), @p3='?' (Size = 17), @p4='?' (Size = 11), @p5='?' (Size = 7), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-28 23:14:13.311 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 32), @p1='?' (DbType = Int64), @p2='?' (DbType = DateTime), @p3='?' (DbType = Boolean), @p4='?' (DbType = Boolean), @p5='?' (DbType = DateTime), @p6='?' (Size = 11), @p7='?' (Size = 11), @p8='?', @p9='?' (DbType = Int64), @p10='?' (DbType = DateTime), @p11='?' (Size = 32), @p12='?' (DbType = Int32), @p13='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Files" ("Id", "ChangeSeq", "DeletedAtUtc", "IsDeleted", "IsDirectory", "LastModifiedUtc", "Path", "PathKey", "Sha256", "Size", "UploadedAtUtc", "UploadedByDeviceId", "UserId", "Version")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13);
+2026-10-28 23:14:13.314 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 23:14:13.322 +00:00 [INF] Writing value of type 'FileDto' as Json.
+2026-10-28 23:14:13.325 +00:00 [INF] Executed endpoint 'HTTP: POST api/directories'
+2026-10-28 23:14:13.326 +00:00 [INF] HTTP POST /api/directories responded 200 in 119.3564 ms
+2026-10-28 23:14:13.326 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost/api/directories - 200 null application/json; charset=utf-8 122.0308ms
+2026-10-28 23:14:13.331 +00:00 [INF] Request starting HTTP/1.1 PUT http://localhost/api/files?path=notes%2Fdaily%2Fentry1.txt - application/octet-stream 39
+2026-10-28 23:14:13.334 +00:00 [INF] Executing endpoint 'HTTP: PUT api/files'
+2026-10-28 23:14:13.360 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__command_UserId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 22)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__command_UserId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-28 23:14:13.361 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."UserId", "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-28 23:14:13.364 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p1='?' (DbType = Int32), @p0='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+UPDATE "UserCounters" SET "LastChangeSeq" = @p0
+WHERE "UserId" = @p1
+RETURNING 1;
+2026-10-28 23:14:13.398 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__fileId_0='?' (Size = 32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."BlobRelativePath", "f"."CreatedUtc", "f"."DeviceId", "f"."FileId", "f"."Sha256", "f"."Size", "f"."Version"
+FROM "FileVersions" AS "f"
+WHERE "f"."FileId" = @__fileId_0
+ORDER BY "f"."Version" DESC
+LIMIT -1 OFFSET @__p_1
+2026-10-28 23:14:13.406 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 6), @p1='?', @p2='?' (Size = 32), @p3='?' (Size = 40), @p4='?' (Size = 22), @p5='?' (Size = 7), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-28 23:14:13.407 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 44), @p1='?' (DbType = DateTime), @p2='?' (Size = 32), @p3='?' (Size = 32), @p4='?' (Size = 64), @p5='?' (DbType = Int64), @p6='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "FileVersions" ("BlobRelativePath", "CreatedUtc", "DeviceId", "FileId", "Sha256", "Size", "Version")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
+RETURNING "Id";
+2026-10-28 23:14:13.408 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 32), @p1='?' (DbType = Int64), @p2='?' (DbType = DateTime), @p3='?' (DbType = Boolean), @p4='?' (DbType = Boolean), @p5='?' (DbType = DateTime), @p6='?' (Size = 22), @p7='?' (Size = 22), @p8='?' (Size = 64), @p9='?' (DbType = Int64), @p10='?' (DbType = DateTime), @p11='?' (Size = 32), @p12='?' (DbType = Int32), @p13='?' (DbType = Int64)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Files" ("Id", "ChangeSeq", "DeletedAtUtc", "IsDeleted", "IsDirectory", "LastModifiedUtc", "Path", "PathKey", "Sha256", "Size", "UploadedAtUtc", "UploadedByDeviceId", "UserId", "Version")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9, @p10, @p11, @p12, @p13);
+2026-10-28 23:14:13.413 +00:00 [INF] Setting HTTP status code 201.
+2026-10-28 23:14:13.413 +00:00 [INF] Writing value of type 'FileDto' as Json.
+2026-10-28 23:14:13.414 +00:00 [INF] Executed endpoint 'HTTP: PUT api/files'
+2026-10-28 23:14:13.415 +00:00 [INF] HTTP PUT /api/files responded 201 in 82.4316 ms
+2026-10-28 23:14:13.417 +00:00 [INF] Request finished HTTP/1.1 PUT http://localhost/api/files?path=notes%2Fdaily%2Fentry1.txt - 201 null application/json; charset=utf-8 86.0871ms
+2026-10-28 23:14:13.424 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost/api/files/meta?path=notes%2Fdaily%2Fentry1.txt - null null
+2026-10-28 23:14:13.425 +00:00 [INF] Executing endpoint 'HTTP: GET api/files/meta'
+2026-10-28 23:14:13.438 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 22)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-28 23:14:13.438 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 23:14:13.439 +00:00 [INF] Writing value of type 'FileDto' as Json.
+2026-10-28 23:14:13.439 +00:00 [INF] Executed endpoint 'HTTP: GET api/files/meta'
+2026-10-28 23:14:13.439 +00:00 [INF] HTTP GET /api/files/meta responded 200 in 13.7462 ms
+2026-10-28 23:14:13.439 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost/api/files/meta?path=notes%2Fdaily%2Fentry1.txt - 200 null application/json; charset=utf-8 15.43ms
+2026-10-28 23:14:13.441 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost/api/files/48291ded75f34f84b3dc84bb2775262e/content - null null
+2026-10-28 23:14:13.443 +00:00 [INF] Executing endpoint 'HTTP: GET api/files/{id}/content'
+2026-10-28 23:14:13.450 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__fileId_1='?' (Size = 32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND "f"."Id" = @__fileId_1
+LIMIT 1
+2026-10-28 23:14:13.452 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 8), @p1='?' (Size = 13), @p2='?' (Size = 32), @p3='?' (Size = 24), @p4='?' (Size = 22), @p5='?' (Size = 7), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-28 23:14:13.454 +00:00 [INF] Sending file with download name 'entry1.txt'.
+2026-10-28 23:14:13.463 +00:00 [INF] Executed endpoint 'HTTP: GET api/files/{id}/content'
+2026-10-28 23:14:13.463 +00:00 [INF] HTTP GET /api/files/48291ded75f34f84b3dc84bb2775262e/content responded 200 in 20.7149 ms
+2026-10-28 23:14:13.463 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost/api/files/48291ded75f34f84b3dc84bb2775262e/content - 200 39 application/octet-stream 21.8742ms
+2026-10-28 23:14:13.464 +00:00 [INF] Request starting HTTP/1.1 PUT http://localhost/api/files?path=notes%2Fdaily%2Fentry1.txt - application/octet-stream 16
+2026-10-28 23:14:13.466 +00:00 [INF] Executing endpoint 'HTTP: PUT api/files'
+2026-10-28 23:14:13.479 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__command_UserId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 22)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__command_UserId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-28 23:14:13.482 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 8), @p1='?' (Size = 13), @p2='?' (Size = 32), @p3='?' (Size = 51), @p4='?' (Size = 22), @p5='?' (Size = 8), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-28 23:14:13.484 +00:00 [INF] Setting HTTP status code 409.
+2026-10-28 23:14:13.495 +00:00 [INF] Writing value of type 'ConflictDto' as Json.
+2026-10-28 23:14:13.500 +00:00 [INF] Executed endpoint 'HTTP: PUT api/files'
+2026-10-28 23:14:13.500 +00:00 [INF] HTTP PUT /api/files responded 409 in 34.8331 ms
+2026-10-28 23:14:13.500 +00:00 [INF] Request finished HTTP/1.1 PUT http://localhost/api/files?path=notes%2Fdaily%2Fentry1.txt - 409 null application/json; charset=utf-8 35.8666ms
+2026-10-28 23:14:13.509 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost/api/auth/logout - null null
+2026-10-28 23:14:13.510 +00:00 [INF] Executing endpoint 'HTTP: POST api/auth/logout'
+2026-10-28 23:14:13.520 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__deviceId_1='?' (Size = 32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "r"."Id", "r"."CreatedUtc", "r"."DeviceId", "r"."ExpiresUtc", "r"."ReplacedByTokenId", "r"."RevokedUtc", "r"."TokenHash", "r"."UserId"
+FROM "RefreshTokens" AS "r"
+WHERE "r"."UserId" = @__userId_0 AND "r"."DeviceId" = @__deviceId_1 AND "r"."RevokedUtc" IS NULL
+2026-10-28 23:14:13.521 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p1='?' (DbType = Int32), @p0='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+UPDATE "RefreshTokens" SET "RevokedUtc" = @p0
+WHERE "Id" = @p1
+RETURNING 1;
+2026-10-28 23:14:13.523 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 23:14:13.523 +00:00 [INF] Executed endpoint 'HTTP: POST api/auth/logout'
+2026-10-28 23:14:13.523 +00:00 [INF] HTTP POST /api/auth/logout responded 200 in 14.2691 ms
+2026-10-28 23:14:13.524 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost/api/auth/logout - 200 null null 14.8292ms
+2026-10-28 23:14:13.528 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost/api/status - null null
+2026-10-28 23:14:13.528 +00:00 [INF] Executing endpoint 'HTTP: GET api/status'
+2026-10-28 23:14:13.533 +00:00 [INF] Setting HTTP status code 200.
+2026-10-28 23:14:13.534 +00:00 [INF] Writing value of type 'StatusResponse' as Json.
+2026-10-28 23:14:13.535 +00:00 [INF] Executed endpoint 'HTTP: GET api/status'
+2026-10-28 23:14:13.535 +00:00 [INF] HTTP GET /api/status responded 200 in 7.0582 ms
+2026-10-28 23:14:13.535 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost/api/status - 200 null application/json; charset=utf-8 7.5388ms

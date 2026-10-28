@@ -44,6 +44,8 @@ public partial class LogsViewModel : ViewModelBase, IDisposable
         "Download",
         "Conflict",
         "Delete",
+        "Restore",
+        "Purge",
         "Move",
         "Login",
         "Error"

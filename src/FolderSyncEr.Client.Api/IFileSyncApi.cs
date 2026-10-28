@@ -21,6 +21,15 @@ public record UploadResult(
     string? ErrorMessage
 );
 
+/// <summary>Outcome of a restore / permanent-delete call against the server trash.</summary>
+public record TrashActionResult<T>(
+    bool IsSuccess,
+    bool IsConflict,
+    bool IsNotFound,
+    T? Value,
+    string? ErrorMessage
+);
+
 public interface IFileSyncApi
 {
     string ServerUrl { get; set; }
@@ -57,6 +66,12 @@ public interface IFileSyncApi
     Task<FileDto?> MoveFileAsync(string fromPath, string toPath, string? ifMatchSha256 = null, CancellationToken ct = default);
     Task<StorageInfoDto> GetStorageInfoAsync(CancellationToken ct = default);
     Task<Stream> ExportFolderZipAsync(CancellationToken ct = default);
+
+    // Deleted items (trash)
+    Task<IReadOnlyList<DeletedItemDto>> ListDeletedItemsAsync(CancellationToken ct = default);
+    Task<TrashActionResult<RestoreResponse>> RestoreDeletedItemAsync(string id, string? targetPath = null, CancellationToken ct = default);
+    Task<TrashActionResult<PurgeResponse>> PurgeDeletedItemAsync(string id, CancellationToken ct = default);
+    Task<PurgeResponse> EmptyTrashAsync(CancellationToken ct = default);
     Task<PagedResult<ActivityLogDto>> GetLogsAsync(
         int page = 1,
         int pageSize = 50,

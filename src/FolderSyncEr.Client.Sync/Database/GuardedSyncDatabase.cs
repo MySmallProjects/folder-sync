@@ -67,6 +67,13 @@ public sealed class GuardedSyncDatabase : ISyncDatabase
             {
                 state.ETag = dto.Version.ToString();
             }
+            else if (string.IsNullOrEmpty(state.LocalHash) && string.IsNullOrEmpty(state.RemoteHash))
+            {
+                // Completed deletion: remove the state entry so a later server-side restore
+                // is detected as a new remote item and downloaded rather than re-deleted.
+                await _inner.DeleteSyncStateAsync(state.Path, cancellationToken);
+                return;
+            }
         }
 
         await _inner.UpdateSyncStateAsync(state, cancellationToken);

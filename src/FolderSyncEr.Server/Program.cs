@@ -39,6 +39,7 @@ builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddSingleton<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<ITrashService, TrashService>();
 builder.Services.AddScoped<ILogService, LogService>();
 builder.Services.AddScoped<ISettingsService, SettingsService>();
 
@@ -158,6 +159,7 @@ app.UseAuthorization();
 app.MapStatusEndpoints();
 app.MapAuthEndpoints();
 app.MapFileEndpoints();
+app.MapTrashEndpoints();
 app.MapLogEndpoints();
 app.MapSettingEndpoints();
 app.MapDeviceEndpoints();

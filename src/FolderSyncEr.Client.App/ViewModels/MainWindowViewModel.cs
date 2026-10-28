@@ -11,6 +11,13 @@ using FolderSyncEr.Client.Sync.Coordinator;
 
 namespace FolderSyncEr.Client.App.ViewModels;
 
+public enum TrayIconState
+{
+    Disconnected,
+    Active,
+    Synced
+}
+
 public partial class MainWindowViewModel : ViewModelBase, IDisposable
 {
     private readonly ISecretStore _secretStore;
@@ -21,6 +28,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     public LoginViewModel Login { get; }
     public FolderSelectionViewModel Folder { get; }
     public FileListViewModel FileList { get; }
+    public DeletedFilesViewModel DeletedFiles { get; }
     public LogsViewModel Logs { get; }
     public SettingsViewModel Settings { get; }
     public ConflictPromptViewModel ConflictPrompt { get; }
@@ -29,6 +37,19 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
 
     [ObservableProperty]
     private int _selectedTabIndex;
+
+    // Tab order in MainWindow.axaml
+    public const int FilesTabIndex = 0;
+    public const int DeletedFilesTabIndex = 1;
+    public const int AccountTabIndex = 4;
+
+    partial void OnSelectedTabIndexChanged(int value)
+    {
+        if (value == DeletedFilesTabIndex && Login.IsLoggedIn)
+        {
+            _ = DeletedFiles.RefreshCommand.ExecuteAsync(null);
+        }
+    }
 
     [ObservableProperty]
     private string _secretStoreDescription;
@@ -54,6 +75,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private bool _isSynchronizing;
 
+    partial void OnIsSynchronizingChanged(bool value) => OnPropertyChanged(nameof(CurrentTrayIconState));
+
     [ObservableProperty]
     private bool _isPaused;
 
@@ -71,6 +94,18 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     private string _lastSyncText = "Never";
 
     public bool IsReadyForSync => Connection.IsConnected && Login.IsLoggedIn && Folder.IsFolderSelected;
+
+    public TrayIconState CurrentTrayIconState
+    {
+        get
+        {
+            if (!Connection.IsConnected)
+                return TrayIconState.Disconnected;
+            if (Login.IsLoggedIn && Folder.IsFolderSelected && !IsSynchronizing && FileList.AreAllFilesInSync)
+                return TrayIconState.Synced;
+            return TrayIconState.Active;
+        }
+    }
 
     public MainWindowViewModel(
         ISecretStore secretStore,
@@ -90,6 +125,11 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         ConflictPrompt = new ConflictPromptViewModel();
 
         FileList = new FileListViewModel(_api, () => Folder.SelectedFolderPath);
+
+        DeletedFiles = new DeletedFilesViewModel(
+            _api,
+            () => Folder.SelectedFolderPath,
+            () => SyncNowAsync());
 
         Logs = new LogsViewModel(_api);
 
@@ -124,9 +164,21 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         }
 
         // Auto-switch tabs or update sync readiness
+        FileList.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(FileList.AreAllFilesInSync))
+            {
+                OnPropertyChanged(nameof(CurrentTrayIconState));
+            }
+        };
         Connection.PropertyChanged += (_, e) =>
         {
             OnPropertyChanged(nameof(IsReadyForSync));
+            OnPropertyChanged(nameof(CurrentTrayIconState));
+            if (e.PropertyName == nameof(Connection.IsConnected) && Connection.IsConnected && Coordinator == null)
+            {
+                RebuildCoordinator();
+            }
             if (e.PropertyName == nameof(Connection.ServerUrl))
             {
                 if (!string.IsNullOrWhiteSpace(Connection.ServerUrl))
@@ -153,12 +205,20 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                 }
             }
         };
-        Login.PropertyChanged += (_, _) =>
+        Login.PropertyChanged += (_, e) =>
         {
             OnPropertyChanged(nameof(IsReadyForSync));
-            if (Login.IsLoggedIn && Folder.IsFolderSelected)
+            OnPropertyChanged(nameof(CurrentTrayIconState));
+            if (e.PropertyName == nameof(Login.IsLoggedIn) && Login.IsLoggedIn)
             {
-                RebuildCoordinator();
+                if (!Connection.IsConnected)
+                {
+                    _ = Connection.CheckConnectionCommand.ExecuteAsync(null);
+                }
+                if (Folder.IsFolderSelected)
+                {
+                    RebuildCoordinator();
+                }
             }
         };
         Folder.PropertyChanged += (_, e) =>
@@ -168,6 +228,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                 Settings.CurrentSyncFolder = Folder.SelectedFolderPath ?? string.Empty;
             }
             OnPropertyChanged(nameof(IsReadyForSync));
+            OnPropertyChanged(nameof(CurrentTrayIconState));
             if (Folder.IsFolderSelected && Login.IsLoggedIn)
             {
                 RebuildCoordinator();
@@ -214,7 +275,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
 
         await Connection.CheckConnectionCommand.ExecuteAsync(null);
 
-        if (IsReadyForSync)
+        if (Login.IsLoggedIn && Folder.IsFolderSelected)
         {
             RebuildCoordinator();
             await FileList.RefreshCommand.ExecuteAsync(null);
@@ -222,13 +283,13 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         }
         else
         {
-            SelectedTabIndex = 3; // Account & Connection tab
+            SelectedTabIndex = AccountTabIndex; // Account & Connection tab
         }
     }
 
     public void RebuildCoordinator()
     {
-        if (!IsReadyForSync || string.IsNullOrWhiteSpace(Folder.SelectedFolderPath))
+        if (!Login.IsLoggedIn || !Folder.IsFolderSelected || string.IsNullOrWhiteSpace(Folder.SelectedFolderPath))
             return;
 
         try
@@ -268,12 +329,31 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                 {
                     IsSynchronizing = false;
                     LastSyncText = DateTime.UtcNow.ToString("HH:mm:ss 'UTC'");
-                    SyncStatusSummary = e.Result.Success
-                        ? $"In Sync ({e.Result.ItemsProcessed} items, {e.Result.Duration.TotalSeconds:0.#}s)"
-                        : $"Sync error: {e.Result.ErrorMessage}";
+                    if (e.Result.Success)
+                    {
+                        Connection.IsConnected = true;
+                        SyncStatusSummary = $"In Sync ({e.Result.ItemsProcessed} items, {e.Result.Duration.TotalSeconds:0.#}s)";
+                    }
+                    else
+                    {
+                        if (e.Result.ErrorMessage != null &&
+                            e.Result.ErrorMessage.StartsWith("Server unreachable", StringComparison.OrdinalIgnoreCase))
+                        {
+                            Connection.IsConnected = false;
+                        }
+                        SyncStatusSummary = $"Sync error: {e.Result.ErrorMessage}";
+                    }
+
+                    OnPropertyChanged(nameof(CurrentTrayIconState));
 
                     // Refresh file list safely on the UI thread
                     _ = FileList.RefreshCommand.ExecuteAsync(null);
+
+                    // Local deletions that were just pushed should show up in the Deleted Files tab
+                    if (SelectedTabIndex == DeletedFilesTabIndex)
+                    {
+                        _ = DeletedFiles.RefreshCommand.ExecuteAsync(null);
+                    }
                 }
 
                 if (Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
@@ -288,6 +368,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
 
             Coordinator.StartBackgroundSync(TimeSpan.FromSeconds(Settings.SyncIntervalSeconds));
             SyncStatusSummary = "Background sync active.";
+            _ = Coordinator.RunSyncAsync();
         }
         catch (Exception ex)
         {

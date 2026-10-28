@@ -27,6 +27,11 @@ public static class ApiRoutes
     public const string Move = "api/files/move";
     public const string Storage = "api/storage";
 
+    // Deleted items (trash) - list, restore, and permanently delete tombstoned files/folders
+    public const string Trash = "api/trash";
+    public const string TrashItem = "api/trash/{id}";
+    public const string TrashRestore = "api/trash/{id}/restore";
+
     public const string Logs = "api/logs";
     public const string ClientLogs = "api/logs/client";
 

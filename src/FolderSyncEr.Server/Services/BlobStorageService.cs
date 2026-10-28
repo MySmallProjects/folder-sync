@@ -80,6 +80,33 @@ public class BlobStorageService : IBlobStorageService
         return Task.FromResult(relativeBlobPath);
     }
 
+    public async Task<string?> CopyBlobAsync(int userId, string fileId, long version, string sourceBlobRelativePath, CancellationToken cancellationToken)
+    {
+        var sourceFullPath = Path.Combine(_storageRoot, sourceBlobRelativePath);
+        if (!File.Exists(sourceFullPath))
+        {
+            return null;
+        }
+
+        var prefix = fileId.Length >= 2 ? fileId[..2] : "00";
+        var relativeDir = Path.Combine(userId.ToString(), prefix, fileId);
+        Directory.CreateDirectory(Path.Combine(_storageRoot, relativeDir));
+
+        var relativeBlobPath = Path.Combine(relativeDir, $"{version}.blob");
+        var targetFullPath = Path.Combine(_storageRoot, relativeBlobPath);
+
+        // Copy via a temp name so a partially written blob is never served
+        var tempTarget = targetFullPath + ".copying";
+        await using (var src = new FileStream(sourceFullPath, FileMode.Open, FileAccess.Read, FileShare.Read, 81920, useAsync: true))
+        await using (var dst = new FileStream(tempTarget, FileMode.Create, FileAccess.Write, FileShare.None, 81920, useAsync: true))
+        {
+            await src.CopyToAsync(dst, cancellationToken);
+        }
+        File.Move(tempTarget, targetFullPath, overwrite: true);
+
+        return relativeBlobPath;
+    }
+
     public Stream? OpenRead(string blobRelativePath)
     {
         var fullPath = Path.Combine(_storageRoot, blobRelativePath);

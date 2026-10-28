@@ -304,6 +304,66 @@ public class FileSyncApiClient : IFileSyncApi
         return await response.Content.ReadAsStreamAsync(ct);
     }
 
+    public async Task<IReadOnlyList<DeletedItemDto>> ListDeletedItemsAsync(CancellationToken ct = default)
+    {
+        var uri = BuildUri(ApiRoutes.Trash);
+        using var response = await _httpClient.GetAsync(uri, ct);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<List<DeletedItemDto>>(cancellationToken: ct)) ?? new List<DeletedItemDto>();
+    }
+
+    public async Task<TrashActionResult<RestoreResponse>> RestoreDeletedItemAsync(string id, string? targetPath = null, CancellationToken ct = default)
+    {
+        var uri = BuildUri($"{ApiRoutes.Trash}/{Uri.EscapeDataString(id)}/restore");
+        using var response = await _httpClient.PostAsJsonAsync(uri, new RestoreRequest(targetPath), ct);
+        return await ToTrashActionResultAsync<RestoreResponse>(response, ct);
+    }
+
+    public async Task<TrashActionResult<PurgeResponse>> PurgeDeletedItemAsync(string id, CancellationToken ct = default)
+    {
+        var uri = BuildUri($"{ApiRoutes.Trash}/{Uri.EscapeDataString(id)}");
+        using var response = await _httpClient.DeleteAsync(uri, ct);
+        return await ToTrashActionResultAsync<PurgeResponse>(response, ct);
+    }
+
+    public async Task<PurgeResponse> EmptyTrashAsync(CancellationToken ct = default)
+    {
+        var uri = BuildUri(ApiRoutes.Trash);
+        using var response = await _httpClient.DeleteAsync(uri, ct);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<PurgeResponse>(cancellationToken: ct))!;
+    }
+
+    /// <summary>Minimal RFC 7807 problem document shape for reading server error details.</summary>
+    private sealed record ProblemBody(string? Title, string? Detail);
+
+    private static async Task<TrashActionResult<T>> ToTrashActionResultAsync<T>(HttpResponseMessage response, CancellationToken ct)
+    {
+        if (response.IsSuccessStatusCode)
+        {
+            var value = await response.Content.ReadFromJsonAsync<T>(cancellationToken: ct);
+            return new TrashActionResult<T>(true, false, false, value, null);
+        }
+
+        string? detail = null;
+        try
+        {
+            var problem = await response.Content.ReadFromJsonAsync<ProblemBody>(cancellationToken: ct);
+            detail = problem?.Detail ?? problem?.Title;
+        }
+        catch
+        {
+            // Body was not a problem document
+        }
+
+        return new TrashActionResult<T>(
+            false,
+            response.StatusCode == System.Net.HttpStatusCode.Conflict,
+            response.StatusCode == System.Net.HttpStatusCode.NotFound,
+            default,
+            detail ?? $"Server returned {(int)response.StatusCode} {response.ReasonPhrase}");
+    }
+
     public async Task<PagedResult<ActivityLogDto>> GetLogsAsync(
         int page = 1,
         int pageSize = 50,
