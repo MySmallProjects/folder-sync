@@ -28,10 +28,12 @@ FolderSyncEr/
 │   ├── FolderSyncEr.Server/            # Web API backend, EF Core DB, blob store
 │   ├── FolderSyncEr.Client.Platform/   # OS-native ISecretStore (Windows Credential Manager, Linux Secret Service, fallback)
 │   ├── FolderSyncEr.Client.Api/        # Typed HTTP API client with auth token manager and auto-refresh handler
+│   ├── FolderSyncEr.Client.Sync/       # SharpSync integration: RestRemoteStorage, SafeLocalStorage, GuardedSyncDatabase, PolicyConflictResolver, SyncCoordinator
 │   └── FolderSyncEr.Client.App/        # Avalonia UI MVVM desktop application
 └── tests/
     ├── FolderSyncEr.Server.IntegrationTests/ # End-to-end Web API integration tests
-    └── FolderSyncEr.Client.Tests/            # Client unit & integration tests (auth, secret store, API client)
+    ├── FolderSyncEr.Client.Tests/            # Client platform & API integration tests
+    └── FolderSyncEr.Client.Sync.Tests/       # Sync engine, adapter, conflict resolver & decorator tests
 ```
 
 ---
@@ -92,6 +94,23 @@ dotnet run --project src/FolderSyncEr.Client.App
   - **Fallback**: Platform-independent AES-256-GCM encrypted file (`~/.config/foldersyncer/secrets.enc.bin` or `/tmp/foldersyncer/`) restricted to `0600` POSIX file permissions.
 - **Sync Folder Picker**: Select and validate local folder paths, enforcing write permissions and blocking system root directories.
 
+### 3. Sync Engine & Safety Decorators (Phase 3 Integration)
+- **Engine**: Powered by `Oire.SharpSync (1.0.4)` running purely on the desktop client.
+- **`RestRemoteStorage : ISyncStorage`**: Custom remote storage adapter translating SharpSync operations into REST calls (`IFileSyncApi`).
+  - `ListItemsAsync`: Serves instantly from an in-memory `RemoteSnapshot` without per-directory HTTP network requests (Mitigating R2).
+  - `ComputeHashAsync`: Serves Base64 SHA-256 directly from `RemoteSnapshot` without downloading file content (Mitigating R2/R9).
+  - `WriteFileAsync`: Streams data to `PUT /api/files` with `If-Match: "<baseSha256>"` or `If-None-Match: *`. Intercepts HTTP 409 conflict responses, notifies `RunFailureRegistry`, and aborts erroneous sync states.
+- **`SafeLocalStorage : ISyncStorage`**:
+  - **Atomic Writes**: Writes incoming content to `.foldersyncer/tmp/<guid>.tmp` before atomic move/replace, ensuring no partial files are left on disk (Mitigating R3).
+  - **Safe Trash Deletion**: Instead of destructive `File.Delete`, files and directories are safely preserved under `.foldersyncer/trash/<yyyyMMddTHHmmssZ>/...` (Mitigating R4).
+  - **Hash Caching**: Caches file hashes by `(path, size, mtimeUtc)` to eliminate expensive SHA-256 recomputation across scans for unchanged local files (Mitigating R9).
+- **`GuardedSyncDatabase : ISyncDatabase`**: Wraps `SqliteSyncDatabase`, intercepting `UpdateSyncStateAsync` to suppress false `SyncStatus.Synced` records when a file operation failed or conflicted during the run (Mitigating R1). Stamps remote server versions into `SyncState.ETag` for seamless UI display.
+- **`PolicyConflictResolver : IConflictResolver`**: Configurable conflict resolution:
+  - `KeepBoth`: Copies the local file to `name (conflict <device> <yyyyMMddTHHmmssZ>).ext` and downloads the server version as the primary file, preventing data loss.
+  - `NewestWins`: Automatically compares local vs remote last modified UTC timestamps.
+  - `Prompt`: Triggers `IConflictPromptHandler` to allow interactive decision (Keep Local / Keep Server / Keep Both).
+- **`SyncCoordinator`**: Top-level coordinator managing `FileSystemWatcher` debounced change detection, periodic background scans, pre-sync untracked seeding (Mitigating R8), and pause/resume lifecycle controls.
+
 ---
 
 ## Running the Tests
@@ -115,6 +134,11 @@ To run with detailed test log output:
 ```bash
 dotnet test --logger "console;verbosity=normal"
 ```
+
+### Test Suites
+- **`FolderSyncEr.Server.IntegrationTests` (17 tests)**: Full ASP.NET Core Web API server tests against SQLite EF Core, verifying JWT auth, token rotation, streaming uploads/downloads, atomic writes, optimistic concurrency, and soft delete tombstones.
+- **`FolderSyncEr.Client.Tests` (10 tests)**: Client platform tests verifying OS secret stores (`ISecretStore`), token management with 401 automatic single-flight token refresh, and Avalonia view model validation.
+- **`FolderSyncEr.Client.Sync.Tests` (27 tests)**: SharpSync integration tests verifying `RestRemoteStorage`, `SafeLocalStorage` (atomic writes + trash recovery + hash cache), `GuardedSyncDatabase` (R1 failure suppression + version tagging), `PolicyConflictResolver` (keep-both, newest-wins, prompt), and `SyncCoordinator`.
 
 ### Integration Test Credentials
 The test suite in `FolderSyncEr.Server.IntegrationTests` configures a dedicated test admin account per test fixture:
