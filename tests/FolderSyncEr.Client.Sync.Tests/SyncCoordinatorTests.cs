@@ -100,6 +100,9 @@ public class SyncCoordinatorTests : IDisposable
         public Task<StorageInfoDto> GetStorageInfoAsync(CancellationToken ct = default) =>
             Task.FromResult(new StorageInfoDto(10000, 1000, 50000));
 
+        public Task<Stream> ExportFolderZipAsync(CancellationToken ct = default) =>
+            Task.FromResult<Stream>(new MemoryStream());
+
         public Task<PagedResult<ActivityLogDto>> GetLogsAsync(int page = 1, int pageSize = 50, string? action = null, string? result = null, string? path = null, DateTime? fromUtc = null, DateTime? toUtc = null, CancellationToken ct = default) =>
             throw new NotImplementedException();
     }

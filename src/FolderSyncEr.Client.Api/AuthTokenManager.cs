@@ -36,6 +36,9 @@ public class AuthTokenManager
     private AuthSession? _currentSession;
     private string? _deviceId;
 
+    public AuthSession? CurrentSession => _currentSession;
+    public string? CachedDeviceId => _deviceId;
+
     public AuthTokenManager(ISecretStore secretStore, ILogger<AuthTokenManager> logger)
     {
         _secretStore = secretStore;

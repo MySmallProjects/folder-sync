@@ -30,6 +30,12 @@ public partial class LoginViewModel : ViewModelBase
     [ObservableProperty]
     private string? _errorMessage;
 
+    public bool HasErrorMessage => !string.IsNullOrEmpty(ErrorMessage);
+
+    partial void OnErrorMessageChanged(string? value) => OnPropertyChanged(nameof(HasErrorMessage));
+
+    public string? DeviceId => _tokenManager.CurrentSession?.DeviceId;
+
     public LoginViewModel(IFileSyncApi api, AuthTokenManager tokenManager)
     {
         _api = api;

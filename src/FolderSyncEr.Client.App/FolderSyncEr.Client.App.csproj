@@ -11,6 +11,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.3.9" />
     <PackageReference Include="Avalonia.Desktop" Version="11.3.9" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.9" />
@@ -23,6 +27,7 @@
     <ProjectReference Include="..\FolderSyncEr.Contracts\FolderSyncEr.Contracts.csproj" />
     <ProjectReference Include="..\FolderSyncEr.Client.Platform\FolderSyncEr.Client.Platform.csproj" />
     <ProjectReference Include="..\FolderSyncEr.Client.Api\FolderSyncEr.Client.Api.csproj" />
+    <ProjectReference Include="..\FolderSyncEr.Client.Sync\FolderSyncEr.Client.Sync.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

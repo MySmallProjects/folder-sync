@@ -85,14 +85,40 @@ From the solution root directory:
 dotnet run --project src/FolderSyncEr.Client.App
 ```
 
-### 2. Client Features (Phase 2 Skeleton)
+### 2. Client Features (Phase 2 & Phase 4 Full UI)
 - **Status & Latency Checker**: Real-time roundtrip ping and server UTC time verification against `/api/status`.
 - **Authentication**: JWT login with automatic token refresh on expiry, session persistence across restarts, and secure logout.
 - **OS-Native Secret Storage (`ISecretStore`)**:
   - **Windows**: Windows Credential Manager (`advapi32.dll` CredWriteW/CredReadW/CredDeleteW) with fallback to DPAPI `ProtectedData`.
   - **Linux / Ubuntu**: FreeDesktop Secret Service via `libsecret-1.so.0` (SecretValue / secret_password_store_sync).
   - **Fallback**: Platform-independent AES-256-GCM encrypted file (`~/.config/foldersyncer/secrets.enc.bin` or `/tmp/foldersyncer/`) restricted to `0600` POSIX file permissions.
-- **Sync Folder Picker**: Select and validate local folder paths, enforcing write permissions and blocking system root directories.
+- **Synced Files View**:
+  - Displays relative path, local size and UTC last-modified time, server version and SHA-256 prefix, server size and UTC last-modified time.
+  - Colored sync status badges: **In sync** (green), **Local newer** (blue), **Server newer** (purple), **Conflict** (orange), **Error** (red).
+  - Search box and quick filter dropdown ("All", "In sync", "Local newer", "Server newer", "Conflict", "Errors").
+- **Activity Logs Viewer**:
+  - Paged server-side audit logs fetched directly from `/api/logs`.
+  - Auto-refresh toggle (polls every 4 seconds when active).
+  - Filter by action (`Upload`, `Download`, `Conflict`, `Delete`, `Move`, `Login`, `Error`) and result (`Success`, `Failure`, `Conflict`, `Rejected`).
+- **Interactive Conflict Dialog**:
+  - Modal overlay appearing when a conflict is encountered under the `Prompt` policy.
+  - Side-by-side comparison cards (Size, Last Modified UTC, SHA-256 prefix, Originating Device).
+  - Interactive decision actions: **Keep Local**, **Keep Server**, and **Keep Both (Rename Loser)**.
+- **Settings & Administration**:
+  - **Change Synced Folder**: Path validation with an explicit warning dialog explaining how changing the sync directory affects the local sync state database.
+  - **Conflict Policy Selection**: Choose between `KeepBoth` (automatic loser rename), `NewestWins` (UTC timestamp comparison), or `Prompt` (interactive modal).
+  - **Sync Interval**: Configurable periodic background scan frequency (seconds).
+  - **Close-to-Tray**: Configurable toggle to minimize to notification tray on window close.
+  - **Admin Folder Archive**: One-click download of the user's remote files bundled as a compressed ZIP archive (`GET /api/files/export`).
+- **System Tray Integration (`TrayIcon`)**:
+  - Tray menu options: **Open FolderSyncEr**, **Sync Now**, **Pause / Resume Sync**, and **Quit**.
+  - **Linux Desktop Environment Caveats**:
+    - Default GNOME Shell on Ubuntu does not display system tray icons out of the box unless the AppIndicator / Ayatana extension (`gnome-shell-extension-appindicator`) is enabled:
+      ```bash
+      sudo apt install gnome-shell-extension-appindicator
+      ```
+    - In desktop environments with native notification area support (KDE Plasma, XFCE, Cinnamon, MATE) or when the GNOME extension is enabled, Avalonia's `TrayIcon` integrates into the top/bottom system panel.
+    - If no tray notification area is present, the window close-to-tray behavior can be toggled off in the Settings tab, allowing standard window exit.
 
 ### 3. Sync Engine & Safety Decorators (Phase 3 Integration)
 - **Engine**: Powered by `Oire.SharpSync (1.0.4)` running purely on the desktop client.
@@ -135,9 +161,9 @@ To run with detailed test log output:
 dotnet test --logger "console;verbosity=normal"
 ```
 
-### Test Suites
-- **`FolderSyncEr.Server.IntegrationTests` (17 tests)**: Full ASP.NET Core Web API server tests against SQLite EF Core, verifying JWT auth, token rotation, streaming uploads/downloads, atomic writes, optimistic concurrency, and soft delete tombstones.
-- **`FolderSyncEr.Client.Tests` (10 tests)**: Client platform tests verifying OS secret stores (`ISecretStore`), token management with 401 automatic single-flight token refresh, and Avalonia view model validation.
+### Test Suites (59 Tests Total)
+- **`FolderSyncEr.Server.IntegrationTests` (17 tests)**: Full ASP.NET Core Web API server tests against SQLite EF Core, verifying JWT auth, token rotation, streaming uploads/downloads, atomic writes, optimistic concurrency, soft delete tombstones, and admin ZIP export.
+- **`FolderSyncEr.Client.Tests` (15 tests)**: Client platform and UI viewmodel tests verifying OS secret stores (`ISecretStore`), token management with 401 automatic single-flight token refresh, `FileListViewModel` (local/remote merge & badge logic), `LogsViewModel` (filters & pagination), `ConflictPromptViewModel` (interactive resolution), and `SettingsViewModel` (folder migration warning & ZIP export).
 - **`FolderSyncEr.Client.Sync.Tests` (27 tests)**: SharpSync integration tests verifying `RestRemoteStorage`, `SafeLocalStorage` (atomic writes + trash recovery + hash cache), `GuardedSyncDatabase` (R1 failure suppression + version tagging), `PolicyConflictResolver` (keep-both, newest-wins, prompt), and `SyncCoordinator`.
 
 ### Integration Test Credentials

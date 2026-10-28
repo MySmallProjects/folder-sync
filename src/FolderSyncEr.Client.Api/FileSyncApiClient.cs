@@ -295,6 +295,14 @@ public class FileSyncApiClient : IFileSyncApi
         return (await response.Content.ReadFromJsonAsync<StorageInfoDto>(cancellationToken: ct))!;
     }
 
+    public async Task<Stream> ExportFolderZipAsync(CancellationToken ct = default)
+    {
+        var uri = BuildUri("api/files/export");
+        var response = await _httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, ct);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadAsStreamAsync(ct);
+    }
+
     public async Task<PagedResult<ActivityLogDto>> GetLogsAsync(
         int page = 1,
         int pageSize = 50,

@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using Avalonia;
 using FolderSyncEr.Client.Api;
 using FolderSyncEr.Client.App.ViewModels;
@@ -12,38 +14,63 @@ internal class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        var services = new ServiceCollection();
-
-        // Logging
-        services.AddLogging(builder =>
+        AppDomain.CurrentDomain.UnhandledException += (s, e) =>
         {
-            builder.AddConsole();
-            builder.SetMinimumLevel(LogLevel.Information);
-        });
+            var ex = e.ExceptionObject as Exception;
+            var msg = $"[FATAL UNHANDLED] {DateTime.UtcNow:O} {ex?.ToString() ?? e.ExceptionObject?.ToString()}";
+            Console.Error.WriteLine(msg);
+            try { File.WriteAllText("crash.log", msg); } catch { }
+        };
 
-        // Platform & Secrets
-        services.AddSingleton<ISecretStore>(sp =>
+        TaskScheduler.UnobservedTaskException += (s, e) =>
         {
-            var logger = sp.GetService<ILogger<ISecretStore>>();
-            return SecretStoreFactory.Create(logger);
-        });
+            var msg = $"[UNOBSERVED TASK EXCEPTION] {DateTime.UtcNow:O} {e.Exception}";
+            Console.Error.WriteLine(msg);
+            try { File.WriteAllText("crash.log", msg); } catch { }
+        };
 
-        // API & Auth
-        services.AddSingleton<AuthTokenManager>();
-        services.AddTransient<AuthHeaderHandler>();
+        try
+        {
+            var services = new ServiceCollection();
 
-        services.AddHttpClient<IFileSyncApi, FileSyncApiClient>()
-            .AddHttpMessageHandler<AuthHeaderHandler>();
+            // Logging
+            services.AddLogging(builder =>
+            {
+                builder.AddConsole();
+                builder.SetMinimumLevel(LogLevel.Information);
+            });
 
-        // ViewModels
-        services.AddTransient<ConnectionCheckViewModel>();
-        services.AddTransient<LoginViewModel>();
-        services.AddTransient<FolderSelectionViewModel>();
-        services.AddTransient<MainWindowViewModel>();
+            // Platform & Secrets
+            services.AddSingleton<ISecretStore>(sp =>
+            {
+                var logger = sp.GetService<ILogger<ISecretStore>>();
+                return SecretStoreFactory.Create(logger);
+            });
 
-        App.Services = services.BuildServiceProvider();
+            // API & Auth
+            services.AddSingleton<AuthTokenManager>();
+            services.AddTransient<AuthHeaderHandler>();
 
-        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+            services.AddHttpClient<IFileSyncApi, FileSyncApiClient>()
+                .AddHttpMessageHandler<AuthHeaderHandler>();
+
+            // ViewModels
+            services.AddTransient<ConnectionCheckViewModel>();
+            services.AddTransient<LoginViewModel>();
+            services.AddTransient<FolderSelectionViewModel>();
+            services.AddTransient<MainWindowViewModel>();
+
+            App.Services = services.BuildServiceProvider();
+
+            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        }
+        catch (Exception ex)
+        {
+            var msg = $"[STARTUP FATAL ERROR] {DateTime.UtcNow:O} {ex}";
+            Console.Error.WriteLine(msg);
+            try { File.WriteAllText("crash.log", msg); } catch { }
+            throw;
+        }
     }
 
     public static AppBuilder BuildAvaloniaApp()

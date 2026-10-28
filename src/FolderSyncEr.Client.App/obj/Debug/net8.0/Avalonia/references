@@ -18,9 +18,14 @@
 /home/user/.nuget/packages/avalonia.win32/11.3.9/lib/net8.0/Avalonia.Win32.Automation.dll
 /home/user/.nuget/packages/avalonia.win32/11.3.9/lib/net8.0/Avalonia.Win32.dll
 /home/user/.nuget/packages/avalonia.x11/11.3.9/lib/net8.0/Avalonia.X11.dll
+/home/user/.nuget/packages/awssdk.core/4.0.102.4/lib/net8.0/AWSSDK.Core.dll
+/home/user/.nuget/packages/awssdk.s3/4.0.103.1/lib/net8.0/AWSSDK.S3.dll
+/home/user/.nuget/packages/bouncycastle.cryptography/2.7.0/lib/net6.0/BouncyCastle.Cryptography.dll
 /home/user/.nuget/packages/communitytoolkit.mvvm/8.3.2/lib/net8.0/CommunityToolkit.Mvvm.dll
+/home/user/.nuget/packages/fluentftp/54.2.0/lib/net8.0/FluentFTP.dll
 /home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/obj/Debug/net8.0/ref/FolderSyncEr.Client.Api.dll
 /home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Platform/obj/Debug/net8.0/ref/FolderSyncEr.Client.Platform.dll
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Sync/obj/Debug/net8.0/ref/FolderSyncEr.Client.Sync.dll
 /home/user/Documents/FolderSyncEr/src/FolderSyncEr.Contracts/obj/Debug/net8.0/ref/FolderSyncEr.Contracts.dll
 /home/user/.nuget/packages/harfbuzzsharp/8.3.1.1/lib/net8.0/HarfBuzzSharp.dll
 /home/user/.nuget/packages/microcom.runtime/0.11.0/lib/net5.0/MicroCom.Runtime.dll
@@ -28,12 +33,12 @@
 /home/user/.nuget/packages/microsoft.extensions.configuration.abstractions/8.0.0/lib/net8.0/Microsoft.Extensions.Configuration.Abstractions.dll
 /home/user/.nuget/packages/microsoft.extensions.configuration.binder/8.0.2/lib/net8.0/Microsoft.Extensions.Configuration.Binder.dll
 /home/user/.nuget/packages/microsoft.extensions.configuration/8.0.0/lib/net8.0/Microsoft.Extensions.Configuration.dll
-/home/user/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/8.0.2/lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll
+/home/user/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/10.0.12/lib/net8.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll
 /home/user/.nuget/packages/microsoft.extensions.dependencyinjection/8.0.1/lib/net8.0/Microsoft.Extensions.DependencyInjection.dll
 /home/user/.nuget/packages/microsoft.extensions.diagnostics.abstractions/8.0.1/lib/net8.0/Microsoft.Extensions.Diagnostics.Abstractions.dll
 /home/user/.nuget/packages/microsoft.extensions.diagnostics/8.0.1/lib/net8.0/Microsoft.Extensions.Diagnostics.dll
 /home/user/.nuget/packages/microsoft.extensions.http/8.0.1/lib/net8.0/Microsoft.Extensions.Http.dll
-/home/user/.nuget/packages/microsoft.extensions.logging.abstractions/8.0.2/lib/net8.0/Microsoft.Extensions.Logging.Abstractions.dll
+/home/user/.nuget/packages/microsoft.extensions.logging.abstractions/10.0.12/lib/net8.0/Microsoft.Extensions.Logging.Abstractions.dll
 /home/user/.nuget/packages/microsoft.extensions.logging.configuration/8.0.1/lib/net8.0/Microsoft.Extensions.Logging.Configuration.dll
 /home/user/.nuget/packages/microsoft.extensions.logging.console/8.0.1/lib/net8.0/Microsoft.Extensions.Logging.Console.dll
 /home/user/.nuget/packages/microsoft.extensions.logging/8.0.1/lib/net8.0/Microsoft.Extensions.Logging.dll
@@ -46,7 +51,12 @@
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.32/ref/net8.0/Microsoft.Win32.Registry.dll
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.32/ref/net8.0/mscorlib.dll
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.32/ref/net8.0/netstandard.dll
+/home/user/.nuget/packages/ssh.net/2026.0.0/lib/net8.0/Renci.SshNet.dll
+/home/user/.nuget/packages/oire.sharpsync/1.0.4/lib/net8.0/SharpSync.dll
 /home/user/.nuget/packages/skiasharp/2.88.9/lib/net6.0/SkiaSharp.dll
+/home/user/.nuget/packages/sqlite-net-pcl/1.11.285/lib/net8.0/SQLite-net.dll
+/home/user/.nuget/packages/sqlitepclraw.core/3.0.3/lib/net8.0/SQLitePCLRaw.core.dll
+/home/user/.nuget/packages/sqlitepclraw.provider.e_sqlite3/3.0.3/lib/net8.0/SQLitePCLRaw.provider.e_sqlite3.dll
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.32/ref/net8.0/System.AppContext.dll
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.32/ref/net8.0/System.Buffers.dll
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.32/ref/net8.0/System.Collections.Concurrent.dll
@@ -68,7 +78,7 @@
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.32/ref/net8.0/System.Data.dll
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.32/ref/net8.0/System.Diagnostics.Contracts.dll
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.32/ref/net8.0/System.Diagnostics.Debug.dll
-/usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.32/ref/net8.0/System.Diagnostics.DiagnosticSource.dll
+/home/user/.nuget/packages/system.diagnostics.diagnosticsource/10.0.12/lib/net8.0/System.Diagnostics.DiagnosticSource.dll
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.32/ref/net8.0/System.Diagnostics.FileVersionInfo.dll
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.32/ref/net8.0/System.Diagnostics.Process.dll
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.32/ref/net8.0/System.Diagnostics.StackTrace.dll
@@ -205,4 +215,5 @@
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.32/ref/net8.0/System.Xml.XPath.dll
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.32/ref/net8.0/System.Xml.XPath.XDocument.dll
 /home/user/.nuget/packages/tmds.dbus.protocol/0.21.2/lib/net8.0/Tmds.DBus.Protocol.dll
+/home/user/.nuget/packages/webdav.client/2.9.0/lib/netstandard2.0/WebDav.Client.dll
 /usr/lib/dotnet/packs/Microsoft.NETCore.App.Ref/8.0.32/ref/net8.0/WindowsBase.dll

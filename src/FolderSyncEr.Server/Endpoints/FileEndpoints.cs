@@ -1,7 +1,9 @@
 using System.Security.Claims;
 using FolderSyncEr.Contracts;
+using FolderSyncEr.Server.Data;
 using FolderSyncEr.Server.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace FolderSyncEr.Server.Endpoints;
 
@@ -356,6 +358,47 @@ public static class FileEndpoints
             ));
         })
         .WithName("PatchFileLastModified");
+
+        // GET /api/files/export (Admin inspection / archive download)
+        group.MapGet("files/export", async (
+            ClaimsPrincipal user,
+            ServerDbContext db,
+            IBlobStorageService blobStorage,
+            CancellationToken ct) =>
+        {
+            var userId = GetUserId(user);
+            var files = await db.Files.AsNoTracking()
+                .Where(f => f.UserId == userId && !f.IsDeleted && !f.IsDirectory)
+                .ToListAsync(ct);
+
+            var memStream = new MemoryStream();
+            using (var archive = new System.IO.Compression.ZipArchive(memStream, System.IO.Compression.ZipArchiveMode.Create, leaveOpen: true))
+            {
+                foreach (var file in files)
+                {
+                    var entry = archive.CreateEntry(file.Path, System.IO.Compression.CompressionLevel.Fastest);
+                    entry.LastWriteTime = file.LastModifiedUtc;
+                    using var entryStream = entry.Open();
+                    try
+                    {
+                        var prefix = file.Id.Length >= 2 ? file.Id[..2] : "00";
+                        var relativeBlobPath = Path.Combine(userId.ToString(), prefix, file.Id, $"{file.Version}.blob");
+                        using var blobStream = blobStorage.OpenRead(relativeBlobPath);
+                        if (blobStream != null)
+                        {
+                            await blobStream.CopyToAsync(entryStream, ct);
+                        }
+                    }
+                    catch
+                    {
+                        // Blob missing, continue
+                    }
+                }
+            }
+            memStream.Position = 0;
+            return Results.File(memStream, "application/zip", $"foldersyncer-export-{DateTime.UtcNow:yyyyMMddHHmmss}.zip");
+        })
+        .WithName("ExportUserFilesZip");
 
         // GET /api/storage
         group.MapGet("storage", async (

@@ -1,0 +1,87 @@
+# Project: Cross-device file sync (desktop PC, laptop, server)
+
+You are a senior .NET engineer. Help me design and build a file-sync system in two parts: an ASP.NET Core Web API server and a cross-platform Avalonia desktop client. Work in phases (see "Delivery plan") and keep each phase compiling and runnable before moving on.
+
+## Tech stack
+- .NET 8 (LTS) for both projects, in a single solution with a shared contracts project for DTOs.
+- Server: ASP.NET Core Web API, SQLite (EF Core or Dapper, your recommendation with a one-line justification).
+- Client: Avalonia UI (MVVM, using CommunityToolkit.Mvvm or ReactiveUI, your choice). It must run on Windows and Ubuntu.
+
+## Sync engine: SharpSync (client side only)
+- Use the NuGet package **Oire.SharpSync** (pure .NET, Apache 2.0). Note that other unrelated projects share the name "SharpSync" (a C#-to-TypeScript generator, an older CSync wrapper). Do not use those.
+- SharpSync runs **only in the desktop client**. The server does not run it. The server is a storage and metadata service that the client's sync engine talks to.
+- Before writing any code, read the library's current docs/source and report back on:
+  1. Whether it supports a custom remote storage backend (an interface I implement), and the exact interface and method signatures.
+  2. What it already provides that I should not reimplement: change detection, its own SQLite state database, conflict events and pluggable resolvers, progress events, pause/resume, bandwidth throttling, FileSystemWatcher integration, selective sync, activity history.
+  3. How I should structure a **custom remote storage adapter** that translates its storage calls (list, read, write, delete, metadata) into calls to my REST API.
+- Then give me a recommendation with the tradeoffs:
+  - **Option A:** custom adapter over my REST API (keeps my server-side versions, hashes, logs, 409 conflict responses).
+  - **Option B:** make the server speak a standard protocol the library already supports (WebDAV or SFTP), with no custom adapter, at the cost of the custom API features.
+  Wait for my choice before building the sync layer. This document assumes Option A unless I say otherwise.
+- Do not invent library APIs. If you are unsure of a signature, say so.
+
+## Part 1: Server (Web API)
+
+### Data (SQLite)
+- Users: id, username, password hash (Argon2id or PBKDF2 via ASP.NET Identity hasher), created/last-login UTC.
+- Files metadata: id, user id, relative path, size, SHA-256 hash, version number, last-modified UTC, uploaded-at UTC, uploaded-by device, deleted flag (soft delete/tombstone).
+- Devices (optional but preferred): id, name, last-seen UTC.
+- Sync/activity log: timestamp UTC, user, device, action (upload/download/conflict/delete/login/error), file path, result, message.
+- API settings: key/value table (e.g. max upload size, storage root path, log retention).
+
+### Behaviour
+- Files are stored on disk under a configurable root, per user. Metadata lives in SQLite.
+- Authentication: login endpoint returning a short-lived JWT plus a refresh token. All other endpoints require auth except the status endpoint.
+- Endpoints (propose exact routes, then implement). Design them so they map cleanly onto the storage operations SharpSync's backend interface needs (list, metadata, read, write, delete, and any move/rename):
+  - `GET /api/status` (anonymous): service up, version, UTC server time, DB reachable.
+  - `POST /api/auth/login`, `POST /api/auth/refresh`
+  - `GET /api/files` (list metadata, with an optional `since` filter)
+  - `GET /api/files/{id}` or by path (download, support range/streaming)
+  - `PUT /api/files` (upload, streamed, with the client's base version for optimistic concurrency)
+  - `DELETE /api/files/{id}`
+  - `GET /api/logs` (paged and filterable, scoped to the current user)
+  - `GET/PUT /api/settings` (admin only)
+- Uploads must use streaming (no loading whole files into memory), validate paths to prevent traversal, verify the hash after upload, and write atomically (temp file, then move).
+- Return a 409 Conflict with both the server and client version info when the base version doesn't match.
+- Include Swagger/OpenAPI, structured logging (Serilog to console and file), rate limiting on login, and HTTPS configuration notes.
+
+## Part 2: Desktop client (Avalonia)
+
+### Core flow
+1. The user picks a folder to sync.
+2. The user logs in to the API (server URL, username, password).
+3. Credentials/tokens are stored securely using OS-native storage: Windows Credential Manager/DPAPI, and libsecret (Secret Service) on Ubuntu. Never store plaintext. Define an `ISecretStore` abstraction with per-OS implementations, plus a clearly flagged fallback if libsecret isn't available.
+4. Sync logic (driven by SharpSync, with my custom remote adapter):
+   - Remote files that are missing or newer on the server get downloaded.
+   - Local files that are new or newer get uploaded.
+   - Detect changes by hash plus version, not just timestamps, to avoid clock-skew problems. Use UTC everywhere.
+   - Use SharpSync's own state database for last-synced state if it provides one. Only add a separate client-side SQLite DB for what SharpSync doesn't cover (for example UI-facing file status, server version numbers, app settings). Tell me which you chose and why, so state isn't duplicated or can't drift out of sync.
+   - Handle deletions with tombstones and make the behaviour explicit (don't silently delete user data; use a trash/recycle folder or ask).
+5. Conflicts: use SharpSync's conflict event and pluggable resolver mechanism, with a configurable policy:
+   - Auto: keep both (rename the loser as `name (conflict <device> <UTC timestamp>).ext`) or newest-wins.
+   - Prompt: show a dialog comparing local vs server (size, modified UTC, hash) with Keep Local / Keep Server / Keep Both.
+
+### UI features
+- File list view: each file shows its local version and server version (version number and hash prefix), last-modified UTC datetime for both, and a sync status (In sync, Local newer, Server newer, Conflict, Uploading, Error). Sortable and filterable.
+- Connection indicator with a "Check connection" button (calls `/api/status`, shows latency and server time).
+- Server log viewer: pulls from `/api/logs`, with auto-refresh and filters (errors only, uploads, etc.), so I can verify uploads are succeeding.
+- Settings: change the synced folder (with a confirmation about what happens to the existing sync state), server URL, conflict policy, sync interval.
+- System tray: minimize to tray, tray menu (Open, Sync now, Pause, Quit), and an option to close-to-tray. Note any Linux desktop-environment caveats for tray icons.
+- Background sync: use SharpSync's file system watcher integration (with debouncing) plus a periodic full scan. Bind progress to the UI using its item-level and byte-level progress events. The UI must never block, and sync operations must be cancellable. Use its pause/resume for the tray "Pause" action if available.
+
+## Non-functional requirements
+- Clean architecture: separate the sync layer (SharpSync plus my remote adapter), API client, storage/secrets and UI. The remote adapter and conflict-decision logic must be unit-testable without UI or a real network (fake the API client).
+- Resilience: retries with backoff, safe-to-retry transfers, no partial files left behind, and handling of locked or in-use files.
+- Security: TLS only in production, no secrets in logs, input validation, and least-privilege file access.
+- Handle cross-platform path differences (case sensitivity, separators, invalid filename characters).
+- Add unit tests for the remote adapter and conflict handling, and integration tests for key API endpoints.
+
+## Delivery plan
+1. Before coding, output: the SharpSync findings and Option A vs B recommendation (see above), a short architecture overview, the proposed DB schema, the API route table with a mapping to SharpSync's storage operations, the sync/conflict decision table, and a list of assumptions and open questions. Then wait for my confirmation.
+2. Phase 1: server skeleton (auth, status, DB, file upload/download/list).
+3. Phase 2: client skeleton (login, secure credential storage, folder selection, connection check).
+4. Phase 3: SharpSync integration (custom remote adapter, sync run, conflict handling).
+5. Phase 4: full UI (file list with versions, logs viewer, settings, tray).
+6. Phase 5: tests, hardening, and packaging notes (Windows and Ubuntu).
+
+For each phase, give the folder structure, the full code for new or changed files, and run/test instructions. Flag anything you're unsure about, and don't invent library APIs.

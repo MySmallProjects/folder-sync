@@ -20,9 +20,16 @@ public partial class MainWindow : Window
 
     private async void OnLoaded(object? sender, RoutedEventArgs e)
     {
-        if (DataContext is MainWindowViewModel vm)
+        try
         {
-            await vm.InitializeAsync();
+            if (DataContext is MainWindowViewModel vm)
+            {
+                await vm.InitializeAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"[INIT ERROR] Failed to initialize MainWindowViewModel: {ex}");
         }
     }
 

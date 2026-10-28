@@ -55,6 +55,7 @@ public interface IFileSyncApi
     Task<bool> DeleteFileAsync(string id, string? ifMatchSha256 = null, long? baseVersion = null, CancellationToken ct = default);
     Task<FileDto?> MoveFileAsync(string fromPath, string toPath, string? ifMatchSha256 = null, CancellationToken ct = default);
     Task<StorageInfoDto> GetStorageInfoAsync(CancellationToken ct = default);
+    Task<Stream> ExportFolderZipAsync(CancellationToken ct = default);
     Task<PagedResult<ActivityLogDto>> GetLogsAsync(
         int page = 1,
         int pageSize = 50,
