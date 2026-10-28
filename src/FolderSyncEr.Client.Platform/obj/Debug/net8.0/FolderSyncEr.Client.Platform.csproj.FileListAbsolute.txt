@@ -1,0 +1,12 @@
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Platform/bin/Debug/net8.0/FolderSyncEr.Client.Platform.deps.json
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Platform/bin/Debug/net8.0/FolderSyncEr.Client.Platform.dll
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Platform/bin/Debug/net8.0/FolderSyncEr.Client.Platform.pdb
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Platform/obj/Debug/net8.0/FolderSyncEr.Client.Platform.csproj.AssemblyReference.cache
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Platform/obj/Debug/net8.0/FolderSyncEr.Client.Platform.GeneratedMSBuildEditorConfig.editorconfig
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Platform/obj/Debug/net8.0/FolderSyncEr.Client.Platform.AssemblyInfoInputs.cache
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Platform/obj/Debug/net8.0/FolderSyncEr.Client.Platform.AssemblyInfo.cs
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Platform/obj/Debug/net8.0/FolderSyncEr.Client.Platform.csproj.CoreCompileInputs.cache
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Platform/obj/Debug/net8.0/FolderSyncEr.Client.Platform.dll
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Platform/obj/Debug/net8.0/refint/FolderSyncEr.Client.Platform.dll
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Platform/obj/Debug/net8.0/FolderSyncEr.Client.Platform.pdb
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Platform/obj/Debug/net8.0/ref/FolderSyncEr.Client.Platform.dll

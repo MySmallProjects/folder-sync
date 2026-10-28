@@ -22,12 +22,16 @@ A cross-device file synchronization system built with .NET 8, featuring:
 FolderSyncEr/
 ├── FolderSyncEr.sln
 ├── README.md                           # This document
+├── Directory.Build.targets             # Build settings (disables telemetry)
 ├── src/
 │   ├── FolderSyncEr.Contracts/         # Shared DTOs, route/header constants, PathRules
 │   ├── FolderSyncEr.Server/            # Web API backend, EF Core DB, blob store
-│   └── (FolderSyncEr.Client.*/)        # Desktop client components (Phases 2-4)
+│   ├── FolderSyncEr.Client.Platform/   # OS-native ISecretStore (Windows Credential Manager, Linux Secret Service, fallback)
+│   ├── FolderSyncEr.Client.Api/        # Typed HTTP API client with auth token manager and auto-refresh handler
+│   └── FolderSyncEr.Client.App/        # Avalonia UI MVVM desktop application
 └── tests/
-    └── FolderSyncEr.Server.IntegrationTests/ # End-to-end Web API integration tests
+    ├── FolderSyncEr.Server.IntegrationTests/ # End-to-end Web API integration tests
+    └── FolderSyncEr.Client.Tests/            # Client unit & integration tests (auth, secret store, API client)
 ```
 
 ---
@@ -67,6 +71,26 @@ Key configuration sections in `src/FolderSyncEr.Server/appsettings.json`:
 - `Jwt:Secret`: Secret key used for signing JWT access tokens (must be at least 256 bits).
 - `Jwt:ExpiryMinutes`: Lifetime of access tokens (defaults to `15` minutes).
 - `Jwt:RefreshExpiryDays`: Lifetime of rotating refresh tokens (defaults to `30` days).
+
+---
+
+## Running the Desktop Client (Avalonia)
+
+### 1. Run the Client Application
+From the solution root directory:
+
+```bash
+dotnet run --project src/FolderSyncEr.Client.App
+```
+
+### 2. Client Features (Phase 2 Skeleton)
+- **Status & Latency Checker**: Real-time roundtrip ping and server UTC time verification against `/api/status`.
+- **Authentication**: JWT login with automatic token refresh on expiry, session persistence across restarts, and secure logout.
+- **OS-Native Secret Storage (`ISecretStore`)**:
+  - **Windows**: Windows Credential Manager (`advapi32.dll` CredWriteW/CredReadW/CredDeleteW) with fallback to DPAPI `ProtectedData`.
+  - **Linux / Ubuntu**: FreeDesktop Secret Service via `libsecret-1.so.0` (SecretValue / secret_password_store_sync).
+  - **Fallback**: Platform-independent AES-256-GCM encrypted file (`~/.config/foldersyncer/secrets.enc.bin` or `/tmp/foldersyncer/`) restricted to `0600` POSIX file permissions.
+- **Sync Folder Picker**: Select and validate local folder paths, enforcing write permissions and blocking system root directories.
 
 ---
 

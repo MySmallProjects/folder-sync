@@ -1,0 +1,17 @@
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/bin/Debug/net8.0/FolderSyncEr.Client.Api.deps.json
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/bin/Debug/net8.0/FolderSyncEr.Client.Api.dll
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/bin/Debug/net8.0/FolderSyncEr.Client.Api.pdb
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/bin/Debug/net8.0/FolderSyncEr.Client.Platform.dll
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/bin/Debug/net8.0/FolderSyncEr.Contracts.dll
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/bin/Debug/net8.0/FolderSyncEr.Contracts.pdb
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/bin/Debug/net8.0/FolderSyncEr.Client.Platform.pdb
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/obj/Debug/net8.0/FolderSyncEr.Client.Api.csproj.AssemblyReference.cache
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/obj/Debug/net8.0/FolderSyncEr.Client.Api.GeneratedMSBuildEditorConfig.editorconfig
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/obj/Debug/net8.0/FolderSyncEr.Client.Api.AssemblyInfoInputs.cache
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/obj/Debug/net8.0/FolderSyncEr.Client.Api.AssemblyInfo.cs
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/obj/Debug/net8.0/FolderSyncEr.Client.Api.csproj.CoreCompileInputs.cache
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/obj/Debug/net8.0/FolderSyncEr.Client.Api.csproj.CopyComplete
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/obj/Debug/net8.0/FolderSyncEr.Client.Api.dll
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/obj/Debug/net8.0/refint/FolderSyncEr.Client.Api.dll
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/obj/Debug/net8.0/FolderSyncEr.Client.Api.pdb
+/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/obj/Debug/net8.0/ref/FolderSyncEr.Client.Api.dll

@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <!-- Disable Avalonia build telemetry attempting to write to read-only user directories in build/test environments -->
+    <UsedAvaloniaProducts></UsedAvaloniaProducts>
+  </PropertyGroup>
+</Project>
+

@@ -1,0 +1,283 @@
+{
+  "format": 1,
+  "restore": {
+    "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.App/FolderSyncEr.Client.App.csproj": {}
+  },
+  "projects": {
+    "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/FolderSyncEr.Client.Api.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/FolderSyncEr.Client.Api.csproj",
+        "projectName": "FolderSyncEr.Client.Api",
+        "projectPath": "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/FolderSyncEr.Client.Api.csproj",
+        "packagesPath": "/home/user/.nuget/packages/",
+        "outputPath": "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/user/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Platform/FolderSyncEr.Client.Platform.csproj": {
+                "projectPath": "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Platform/FolderSyncEr.Client.Platform.csproj"
+              },
+              "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Contracts/FolderSyncEr.Contracts.csproj": {
+                "projectPath": "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Contracts/FolderSyncEr.Contracts.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.Extensions.Http": {
+              "target": "Package",
+              "version": "[8.0.1, )"
+            },
+            "Microsoft.Extensions.Logging.Abstractions": {
+              "target": "Package",
+              "version": "[8.0.2, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.132/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.App/FolderSyncEr.Client.App.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.App/FolderSyncEr.Client.App.csproj",
+        "projectName": "FolderSyncEr.Client.App",
+        "projectPath": "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.App/FolderSyncEr.Client.App.csproj",
+        "packagesPath": "/home/user/.nuget/packages/",
+        "outputPath": "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.App/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/user/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {
+              "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/FolderSyncEr.Client.Api.csproj": {
+                "projectPath": "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Api/FolderSyncEr.Client.Api.csproj"
+              },
+              "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Platform/FolderSyncEr.Client.Platform.csproj": {
+                "projectPath": "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Platform/FolderSyncEr.Client.Platform.csproj"
+              },
+              "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Contracts/FolderSyncEr.Contracts.csproj": {
+                "projectPath": "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Contracts/FolderSyncEr.Contracts.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Avalonia": {
+              "target": "Package",
+              "version": "[11.3.9, )"
+            },
+            "Avalonia.Desktop": {
+              "target": "Package",
+              "version": "[11.3.9, )"
+            },
+            "Avalonia.Themes.Fluent": {
+              "target": "Package",
+              "version": "[11.3.9, )"
+            },
+            "CommunityToolkit.Mvvm": {
+              "target": "Package",
+              "version": "[8.3.2, )"
+            },
+            "Microsoft.Extensions.DependencyInjection": {
+              "target": "Package",
+              "version": "[8.0.1, )"
+            },
+            "Microsoft.Extensions.Logging.Console": {
+              "target": "Package",
+              "version": "[8.0.1, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.132/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Platform/FolderSyncEr.Client.Platform.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Platform/FolderSyncEr.Client.Platform.csproj",
+        "projectName": "FolderSyncEr.Client.Platform",
+        "projectPath": "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Platform/FolderSyncEr.Client.Platform.csproj",
+        "packagesPath": "/home/user/.nuget/packages/",
+        "outputPath": "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Client.Platform/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/user/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.Extensions.Logging.Abstractions": {
+              "target": "Package",
+              "version": "[8.0.2, )"
+            },
+            "System.Security.Cryptography.ProtectedData": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.132/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Contracts/FolderSyncEr.Contracts.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Contracts/FolderSyncEr.Contracts.csproj",
+        "projectName": "FolderSyncEr.Contracts",
+        "projectPath": "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Contracts/FolderSyncEr.Contracts.csproj",
+        "packagesPath": "/home/user/.nuget/packages/",
+        "outputPath": "/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Contracts/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/user/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.132/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

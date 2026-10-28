@@ -1,0 +1,193 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:FolderSyncEr.Client.App.ViewModels"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="700"
+        x:Class="FolderSyncEr.Client.App.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Icon="/Assets/avalonia-logo.ico"
+        Title="FolderSyncEr — Cross-Device File Sync"
+        Width="860" Height="740"
+        WindowStartupLocation="CenterScreen">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <StackPanel Margin="24" Spacing="20">
+            <!-- App Header -->
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Grid.Column="0" Spacing="4">
+                    <TextBlock Text="FolderSyncEr" FontSize="26" FontWeight="SemiBold" Foreground="#60A5FA"/>
+                    <TextBlock Text="Cross-device file sync client for Windows and Ubuntu" FontSize="13" Foreground="#9CA3AF"/>
+                </StackPanel>
+
+                <!-- Security & Storage Badge -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <Border CornerRadius="16" Padding="12,6"
+                            Background="{Binding IsSecretStoreInsecure, Converter={x:Null}}"
+                            BorderBrush="#374151" BorderThickness="1">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="{Binding IsSecretStoreInsecure, Converter={x:Null}}" />
+                            <TextBlock Text="Storage:" FontWeight="Medium" Foreground="#9CA3AF"/>
+                            <TextBlock Text="{Binding SecretStoreDescription}"
+                                       Foreground="{Binding IsSecretStoreInsecure, Converter={x:Null}}"
+                                       FontWeight="SemiBold"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+
+            <!-- Card 1: Server Connection Check -->
+            <Border Background="#1F2937" CornerRadius="12" Padding="20" BorderBrush="#374151" BorderThickness="1">
+                <StackPanel Spacing="16" DataContext="{Binding Connection}">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="1. Server Connection" FontSize="18" FontWeight="SemiBold" Foreground="#F3F4F6"/>
+                        <Border Grid.Column="1" CornerRadius="12" Padding="10,4"
+                                Background="{Binding IsConnected, Converter={x:Null}}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <Ellipse Width="8" Height="8"
+                                         Fill="{Binding IsConnected, Converter={x:Null}}"/>
+                                <TextBlock Text="{Binding StatusText}" FontWeight="Medium" FontSize="12"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
+                        <TextBox Grid.Column="0" Text="{Binding ServerUrl, Mode=TwoWay}"
+                                 Watermark="Server URL (e.g. http://localhost:5000)"
+                                 Margin="0,0,12,0"/>
+                        <Button Grid.Column="1" Content="Check Connection"
+                                Command="{Binding CheckConnectionCommand}"
+                                IsEnabled="{Binding !IsChecking}"
+                                Background="#2563EB" Foreground="White"
+                                FontWeight="Medium" Padding="16,8"/>
+                    </Grid>
+
+                    <!-- Connection metrics -->
+                    <Grid ColumnDefinitions="*,*,*" Margin="0,4,0,0">
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="LATENCY" FontSize="11" Foreground="#9CA3AF" FontWeight="Medium"/>
+                            <TextBlock Text="{Binding LatencyText}" FontSize="15" FontWeight="SemiBold" Foreground="#F3F4F6"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="SERVER TIME (UTC)" FontSize="11" Foreground="#9CA3AF" FontWeight="Medium"/>
+                            <TextBlock Text="{Binding ServerTimeText}" FontSize="15" FontWeight="SemiBold" Foreground="#F3F4F6"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="API HEALTH" FontSize="11" Foreground="#9CA3AF" FontWeight="Medium"/>
+                            <TextBlock Text="{Binding StatusText}" FontSize="15" FontWeight="SemiBold" Foreground="#F3F4F6"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <TextBlock Text="{Binding ErrorMessage}" Foreground="#EF4444" FontSize="12"
+                               IsVisible="{Binding ErrorMessage, Converter={x:Null}}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Card 2: Account Login -->
+            <Border Background="#1F2937" CornerRadius="12" Padding="20" BorderBrush="#374151" BorderThickness="1">
+                <StackPanel Spacing="16" DataContext="{Binding Login}">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="2. Authentication" FontSize="18" FontWeight="SemiBold" Foreground="#F3F4F6"/>
+                        <TextBlock Grid.Column="1" Text="Tokens stored in OS Secret Store" FontSize="12" Foreground="#9CA3AF" VerticalAlignment="Center"/>
+                    </Grid>
+
+                    <!-- If Logged In -->
+                    <StackPanel Spacing="12" IsVisible="{Binding IsLoggedIn}">
+                        <Border Background="#111827" CornerRadius="8" Padding="16">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <StackPanel Grid.Column="0" Spacing="4">
+                                    <TextBlock Text="Active Session" FontSize="12" Foreground="#10B981" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding LoggedInUserText}" FontSize="16" FontWeight="SemiBold" Foreground="#F9FAFB"/>
+                                </StackPanel>
+                                <Button Grid.Column="1" Content="Sign Out"
+                                        Command="{Binding LogoutCommand}"
+                                        Background="#DC2626" Foreground="White"
+                                        Padding="14,6" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- If Not Logged In -->
+                    <StackPanel Spacing="12" IsVisible="{Binding !IsLoggedIn}">
+                        <Grid ColumnDefinitions="*,*,*">
+                            <StackPanel Grid.Column="0" Margin="0,0,8,0" Spacing="4">
+                                <TextBlock Text="Username" FontSize="12" Foreground="#D1D5DB"/>
+                                <TextBox Text="{Binding Username, Mode=TwoWay}" Watermark="Username"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Margin="8,0,8,0" Spacing="4">
+                                <TextBlock Text="Password" FontSize="12" Foreground="#D1D5DB"/>
+                                <TextBox Text="{Binding Password, Mode=TwoWay}" PasswordChar="•" Watermark="Password"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2" Margin="8,0,0,0" Spacing="4">
+                                <TextBlock Text="Device Name" FontSize="12" Foreground="#D1D5DB"/>
+                                <TextBox Text="{Binding DeviceName, Mode=TwoWay}" Watermark="Device Name"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <Button Content="Log In"
+                                Command="{Binding LoginCommand}"
+                                IsEnabled="{Binding !IsLoggingIn}"
+                                HorizontalAlignment="Left"
+                                Background="#2563EB" Foreground="White"
+                                FontWeight="Medium" Padding="20,8"/>
+
+                        <TextBlock Text="{Binding ErrorMessage}" Foreground="#EF4444" FontSize="12"
+                                   IsVisible="{Binding ErrorMessage, Converter={x:Null}}"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Card 3: Sync Folder Selection -->
+            <Border Background="#1F2937" CornerRadius="12" Padding="20" BorderBrush="#374151" BorderThickness="1">
+                <StackPanel Spacing="16" DataContext="{Binding Folder}">
+                    <TextBlock Text="3. Sync Folder" FontSize="18" FontWeight="SemiBold" Foreground="#F3F4F6"/>
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Grid.Column="0" Text="{Binding SelectedFolderPath, Mode=OneWay}"
+                                 IsReadOnly="True"
+                                 Watermark="No sync folder selected"
+                                 Margin="0,0,12,0"/>
+                        <Button Grid.Column="1" x:Name="PickFolderButton" Content="Browse Folder..."
+                                Background="#374151" Foreground="White"
+                                FontWeight="Medium" Padding="16,8"/>
+                    </Grid>
+
+                    <TextBlock Text="{Binding FolderStatusText}" FontSize="13" Foreground="#9CA3AF"/>
+                    <TextBlock Text="{Binding ErrorMessage}" Foreground="#EF4444" FontSize="12"
+                               IsVisible="{Binding ErrorMessage, Converter={x:Null}}"/>
+                </StackPanel>
+            </Border>
+
+            <!-- Card 4: Status Readiness Summary -->
+            <Border Background="#111827" CornerRadius="12" Padding="16" BorderBrush="#374151" BorderThickness="1">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="16">
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Connection.IsConnected, Converter={x:Null}}" />
+                            <TextBlock Text="Server Online" FontSize="13" Foreground="#D1D5DB"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Login.IsLoggedIn, Converter={x:Null}}" />
+                            <TextBlock Text="Authenticated" FontSize="13" Foreground="#D1D5DB"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Folder.IsFolderSelected, Converter={x:Null}}" />
+                            <TextBlock Text="Folder Selected" FontSize="13" Foreground="#D1D5DB"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Border Grid.Column="2" CornerRadius="8" Padding="12,6"
+                            Background="{Binding IsReadyForSync, Converter={x:Null}}">
+                        <TextBlock Text="{Binding IsReadyForSync, Converter={x:Null}}"
+                                   FontWeight="SemiBold" FontSize="13"/>
+                    </Border>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Window>
+
