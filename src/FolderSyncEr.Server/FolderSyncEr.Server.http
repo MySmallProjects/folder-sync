@@ -1,0 +1,6 @@
+@FolderSyncEr.Server_HostAddress = http://localhost:5293
+
+GET {{FolderSyncEr.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
