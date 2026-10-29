@@ -1,0 +1,26 @@
+[Unit]
+Description=FolderSyncEr Sync Server Web API
+After=network.target
+
+[Service]
+Type=simple
+User=foldersyncer
+Group=foldersyncer
+WorkingDirectory=/opt/foldersyncer-server
+ExecStart=/opt/foldersyncer-server/FolderSyncEr.Server --urls "http://127.0.0.1:5000"
+Restart=always
+RestartSec=5
+KillSignal=SIGINT
+SyslogIdentifier=foldersyncer-server
+Environment=DOTNET_PRINT_TELEMETRY_MESSAGE=false
+Environment=ASPNETCORE_ENVIRONMENT=Production
+
+# Security Hardening
+ProtectSystem=full
+ProtectHome=true
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+

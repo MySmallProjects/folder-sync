@@ -140,7 +140,7 @@ public sealed class SyncCoordinator : IDisposable
 
         _currentSnapshot = new RemoteSnapshot();
         _guardedDb = new GuardedSyncDatabase(rawDb, _failureRegistry, _currentSnapshot, _loggerFactory.CreateLogger<GuardedSyncDatabase>());
-        _localStorage = new SafeLocalStorage(_localFolderPath, _loggerFactory.CreateLogger<SafeLocalStorage>());
+        _localStorage = new SafeLocalStorage(_localFolderPath, _loggerFactory.CreateLogger<SafeLocalStorage>(), _failureRegistry);
         _remoteStorage = new RestRemoteStorage(
             _api,
             _currentSnapshot,

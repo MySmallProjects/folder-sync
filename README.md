@@ -215,10 +215,10 @@ To run with detailed test log output:
 dotnet test --logger "console;verbosity=normal"
 ```
 
-### Test Suites (74 Tests Total)
-- **`FolderSyncEr.Server.IntegrationTests` (19 tests)**: Full ASP.NET Core Web API server tests against SQLite EF Core, verifying JWT auth, token rotation, device management & revocation, streaming uploads/downloads, atomic writes, optimistic concurrency, soft delete tombstones, and admin ZIP export.
-- **`FolderSyncEr.Client.Tests` (28 tests)**: Client platform and UI viewmodel tests verifying OS secret stores (`ISecretStore`), daily rolling file logger (`ClientFileLoggerProvider`) with 30-day pruning, token management with 401 automatic single-flight token refresh and offline resilience, `FileListViewModel` (local/remote merge & badge logic), `LogsViewModel` (filters & pagination), `ConflictPromptViewModel` (interactive resolution), `SettingsViewModel` (folder migration warning, URL persistence, `StartMinimized`, `settings.json` & log file links, and ZIP export), `ClientSettingsManager` (atomic JSON loading & saving), `LoginViewModel` (active devices list & remote device sign-out), and `ConnectionCheckViewModel` (explicit URL save & persistence).
-- **`FolderSyncEr.Client.Sync.Tests` (27 tests)**: SharpSync integration tests verifying `RestRemoteStorage`, `SafeLocalStorage` (atomic writes + trash recovery + hash cache), `GuardedSyncDatabase` (R1 failure suppression + version tagging), `PolicyConflictResolver` (keep-both, newest-wins, prompt), and `SyncCoordinator`.
+### Test Suites (140 Tests Total)
+- **`FolderSyncEr.Server.IntegrationTests` (22 tests)**: Full ASP.NET Core Web API server tests against SQLite EF Core, verifying JWT auth, token rotation, device management & revocation, streaming uploads/downloads, atomic writes, optimistic concurrency, soft delete tombstones, and admin ZIP export.
+- **`FolderSyncEr.Client.Tests` (31 tests)**: Client platform and UI viewmodel tests verifying OS secret stores (`ISecretStore`), daily rolling file logger (`ClientFileLoggerProvider`) with 30-day pruning, token management with 401 automatic single-flight token refresh and offline resilience, `FileListViewModel` (local/remote merge & badge logic), `LogsViewModel` (filters & pagination), `ConflictPromptViewModel` (interactive resolution), `SettingsViewModel` (folder migration warning, URL persistence, `StartMinimized`, `settings.json` & log file links, and ZIP export), `ClientSettingsManager` (atomic JSON loading & saving), `LoginViewModel` (active devices list & remote device sign-out), and `ConnectionCheckViewModel` (explicit URL save & persistence).
+- **`FolderSyncEr.Client.Sync.Tests` (87 tests)**: SharpSync integration and hardening tests verifying `RestRemoteStorage`, `SafeLocalStorage` (atomic writes + trash recovery + hash cache + sharing violation resilience), `GuardedSyncDatabase` (R1 failure suppression + version tagging), `PolicyConflictResolver` (keep-both, newest-wins, prompt), `SyncCoordinator` (cooldown debounce, max wait ceiling, single-flight sync), and exhaustive cross-platform path validation rules (`PathRules`).
 
 ### Integration Test Credentials
 The test suite in `FolderSyncEr.Server.IntegrationTests` configures a dedicated test admin account per test fixture:
@@ -274,4 +274,143 @@ All endpoints require a Bearer token (`Authorization: Bearer <token>`) except `/
 4. **Optimistic Concurrency**:
    - `If-Match: "<baseSha256>"`: Verifies the client's base hash before updating. If changed on the server, responds with `409 Conflict` containing both `client` and `server` version metadata.
    - `If-None-Match: *`: Ensures file does not already exist when uploading a newly created local file.
+
+---
+
+## Phase 5: Hardening, Packaging, and Deployment
+
+### 1. System Hardening & Resilience
+
+#### A. Cross-Platform Path Rules & Security (`PathRules.cs`)
+Files synced between Linux, Windows, and macOS encounter distinct filesystem constraints. FolderSyncEr enforces strict path validation both on the server and on the client before persisting any item:
+- **Path Separators**: All backslashes (`\`) are normalized to forward slashes (`/`), and leading/trailing slashes are trimmed.
+- **Unicode Normalization Form C**: Canonical composition (`FormC`) is enforced so visually identical filenames have identical byte encodings across OS platforms.
+- **Directory Traversal Protection**: Any path segment equal to `.` or `..` is rejected.
+- **Control Character Rejection**: ASCII control characters (`0x00`-`0x1F`, including `\0`, `\r`, `\n`, `\t`) are blocked.
+- **Illegal Character Filtering**: Windows-disallowed characters (`<`, `>`, `:`, `"`, `|`, `?`, `*`) are blocked on all platforms.
+- **Trailing Dots and Spaces**: Segments ending with a period or space (e.g. `file.` or `dir `) are rejected because they cause silent truncation or corruption on Windows.
+- **Windows Reserved Device Names**: `CON`, `PRN`, `AUX`, `NUL`, `COM1`-`COM9`, `LPT1`-`LPT9`, `CONIN$`, and `CONOUT$` are rejected regardless of file extension (e.g., `aux.txt` or `nul.json`).
+- **Path Length Guard**: Relative paths exceeding 1,024 characters are rejected upfront.
+
+#### B. Locked File & Sharing Violation Resilience
+When a local application (e.g. text editor, office suite, or torrent client) opens a file for writing or locks it exclusively:
+- `SafeLocalStorage` opens files with `FileShare.ReadWrite` to allow computing hashes or reading content without conflicting with non-exclusive writers.
+- If an exclusive lock or sharing violation occurs (`IOException` or `UnauthorizedAccessException`), the operation fails gracefully and registers the path in `RunFailureRegistry`.
+- `GuardedSyncDatabase` intercepts database updates and suppresses committing sync state for any item recorded in `RunFailureRegistry`, ensuring SharpSync does not incorrectly stamp locked or partially-read files as "Synced".
+
+#### C. Network Failure & Session Resilience
+- **Automatic Token Refresh**: The HTTP pipeline (`AuthHeaderHandler`) intercepts `401 Unauthorized` responses and performs a synchronized, single-flight token exchange (`POST /api/auth/refresh`) using an asynchronous `SemaphoreSlim` mutex. Concurrent in-flight requests wait for the new access token before retrying.
+- **Self-Signed / Private CA SSL Support**: For users running the server on home or enterprise LANs (`https://foldersync.house.lan`), the client includes an **Allow Untrusted SSL/TLS Certificates** toggle in **Settings -> Server Connection URL**.
+- **Update Cooldown Debounce & Max Wait**: Prevents rapid successive sync runs on frequently updated files with trailing-edge debouncing (`UpdateCooldownSeconds`, 1-300s) and a hard ceiling guard (`MaxWaitSeconds`, 1-3600s).
+
+#### D. Production Security Checklist
+- **Enforce TLS**: Set `ASPNETCORE_URLS="https://+:5001;http://+:5000"` or run the server behind a reverse proxy (Caddy / Nginx) terminating TLS.
+- **Secrets Protection**: Access and refresh tokens are stored in the platform's native keychain (`wincred.dll` on Windows, `libsecret` on Linux). Daily client file logs automatically omit sensitive auth tokens and passwords.
+- **Least-Privilege Storage Permissions**: Ensure the server data directory (`storage/`) is owned by the dedicated `foldersyncer` service account with restrictive permissions (`chmod 700 storage`).
+- **Non-Blocking SQLite Backups**: Perform live backups of the server SQLite database using the standard online backup API:
+  ```bash
+  sqlite3 foldersyncer.db "VACUUM INTO 'backup-$(date +%Y%m%d%H%M%S).db';"
+  ```
+
+---
+
+### 2. Packaging & Deployment for Ubuntu / Linux (`linux-x64`)
+
+#### System Requirements
+- Ubuntu 20.04 LTS, 22.04 LTS, or 24.04 LTS (x86_64).
+- Required desktop libraries:
+  ```bash
+  sudo apt update
+  sudo apt install -y libsecret-1-0 libx11-6 libice6 libsm6 libfontconfig1
+  ```
+  *(Optional for GNOME system tray icon support: `gnome-shell-extension-appindicator`)*
+
+#### Automated Linux Build
+Run the Linux packaging script from the repository root:
+```bash
+./scripts/build-linux.sh
+```
+Or for a fully self-contained single-file bundle (including the .NET runtime):
+```bash
+./scripts/build-linux.sh --self-contained
+```
+
+This generates:
+- Distribution archive: `dist/FolderSyncEr-linux-x64.tar.gz`
+- Staging directory: `dist/linux-x64/package/` containing:
+  - `foldersyncer-client` (Desktop UI launcher)
+  - `foldersyncer-server` (Web API backend)
+  - `foldersyncer.desktop` (XDG Desktop Entry)
+  - `icon.png` (High-resolution application icon)
+  - `install.sh` (One-click installer)
+  - `foldersyncer-server.service` (Systemd service unit)
+
+#### One-Click Installation
+Extract and install the package on Ubuntu:
+```bash
+tar -xzf dist/FolderSyncEr-linux-x64.tar.gz -C /tmp/foldersyncer-pkg
+cd /tmp/foldersyncer-pkg
+./install.sh
+```
+- For standard users: Installs binaries to `~/.local/bin`, the desktop launcher to `~/.local/share/applications`, and the icon to `~/.local/share/icons/hicolor/256x256/apps`.
+- For system-wide install (`sudo ./install.sh`): Installs to `/usr/local/bin` and `/usr/local/share/...`.
+
+#### Running Server as a Headless Systemd Service
+To run the server continuously in the background on Ubuntu Server:
+```bash
+# 1. Create a dedicated service user and directory
+sudo useradd -r -s /bin/false foldersyncer || true
+sudo mkdir -p /opt/foldersyncer-server
+sudo cp -r dist/linux-x64/package/* /opt/foldersyncer-server/
+sudo chown -R foldersyncer:foldersyncer /opt/foldersyncer-server
+
+# 2. Install and enable the systemd service
+sudo cp packaging/systemd/foldersyncer-server.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable --now foldersyncer-server
+
+# 3. Check server status and logs
+sudo systemctl status foldersyncer-server
+sudo journalctl -u foldersyncer-server -f
+```
+
+#### Reverse Proxy Configuration (HTTPS)
+- **Caddy**: Copy `packaging/caddy/Caddyfile.example` to `/etc/caddy/Caddyfile` for automatic Let's Encrypt TLS.
+- **Nginx**: Copy `packaging/nginx/nginx.conf.example` to `/etc/nginx/sites-available/foldersyncer.conf` and symlink to `sites-enabled`.
+
+---
+
+### 3. Packaging & Deployment for Windows (`win-x64`)
+
+#### System Requirements
+- Windows 10 (version 1809 or higher), Windows 11, or Windows Server 2016+.
+- Native credential storage via Windows Credential Manager (`wincred.dll`).
+
+#### Automated Windows Build
+Run the Windows build script from PowerShell or Command Prompt:
+
+**Using PowerShell:**
+```powershell
+.\scripts\build-windows.ps1 -SelfContained
+```
+
+**Using Batch:**
+```cmd
+scripts\build-windows.bat
+```
+
+This compiles self-contained single-file executables into `dist\win-x64\package\`:
+- `FolderSyncEr.Client.exe`: Standalone desktop client with Avalonia UI and system tray integration.
+- `FolderSyncEr.Server.exe`: Standalone Web API server.
+- `appsettings.json`: Server configuration file.
+
+#### Running on Windows
+1. **Desktop Client**: Double-click `FolderSyncEr.Client.exe`. The application can minimize to the system notification tray and optionally start minimized on Windows login.
+2. **Server as a Windows Service**: Run using NSSM (Non-Sucking Service Manager) or Windows Task Scheduler:
+   ```cmd
+   nssm.exe install FolderSyncErServer "C:\FolderSyncEr\FolderSyncEr.Server.exe"
+   nssm.exe set FolderSyncErServer AppDirectory "C:\FolderSyncEr"
+   nssm.exe start FolderSyncErServer
+   ```
+
 

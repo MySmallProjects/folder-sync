@@ -8,7 +8,7 @@
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
     <VersionMajor>1</VersionMajor>
-    <VersionMinor>0</VersionMinor>
+    <VersionMinor>1</VersionMinor>
     <BuildVersionFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\build.version'))</BuildVersionFile>
   </PropertyGroup>
 

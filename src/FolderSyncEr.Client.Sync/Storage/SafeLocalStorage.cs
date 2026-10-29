@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using FolderSyncEr.Client.Sync.Registry;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Oire.SharpSync.Core;
@@ -18,29 +19,33 @@ namespace FolderSyncEr.Client.Sync.Storage;
 /// 1. Atomic writes (temp-then-move) to prevent partial files (Mitigating Risk R3).
 /// 2. Trash bin retention (.foldersyncer/trash/) instead of hard deletes (Mitigating Risk R4).
 /// 3. In-memory hash caching (path + size + mtime) to avoid re-reading unchanged files (Mitigating Risk R9).
+/// 4. Failure registration on locked or inaccessible files (Mitigating Risk R1).
 /// </summary>
 public sealed class SafeLocalStorage : ISyncStorage
 {
     private readonly string _rootPath;
     private readonly ISyncStorage _inner;
     private readonly ILogger<SafeLocalStorage> _logger;
+    private readonly RunFailureRegistry? _failureRegistry;
     private readonly ConcurrentDictionary<string, HashCacheEntry> _hashCache = new(StringComparer.OrdinalIgnoreCase);
 
     private record HashCacheEntry(long Size, DateTime LastModifiedUtc, string Base64Hash);
 
-    public SafeLocalStorage(string rootPath, ILogger<SafeLocalStorage>? logger = null)
+    public SafeLocalStorage(string rootPath, ILogger<SafeLocalStorage>? logger = null, RunFailureRegistry? failureRegistry = null)
     {
         _rootPath = Path.GetFullPath(rootPath ?? throw new ArgumentNullException(nameof(rootPath)));
         _logger = logger ?? NullLogger<SafeLocalStorage>.Instance;
+        _failureRegistry = failureRegistry;
         _inner = new LocalFileStorage(_rootPath, _logger);
         _inner.ProgressChanged += (s, e) => ProgressChanged?.Invoke(this, e);
     }
 
-    public SafeLocalStorage(ISyncStorage innerStorage, string rootPath, ILogger<SafeLocalStorage>? logger = null)
+    public SafeLocalStorage(ISyncStorage innerStorage, string rootPath, ILogger<SafeLocalStorage>? logger = null, RunFailureRegistry? failureRegistry = null)
     {
         _rootPath = Path.GetFullPath(rootPath ?? throw new ArgumentNullException(nameof(rootPath)));
         _inner = innerStorage ?? throw new ArgumentNullException(nameof(innerStorage));
         _logger = logger ?? NullLogger<SafeLocalStorage>.Instance;
+        _failureRegistry = failureRegistry;
         _inner.ProgressChanged += (s, e) => ProgressChanged?.Invoke(this, e);
     }
 
@@ -67,7 +72,20 @@ public sealed class SafeLocalStorage : ISyncStorage
 
     public Task<Stream> ReadFileAsync(string path, CancellationToken cancellationToken)
     {
-        return _inner.ReadFileAsync(path, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+        var fullPath = Path.Combine(_rootPath, path.Replace('/', Path.DirectorySeparatorChar));
+        try
+        {
+            // Open with FileShare.ReadWrite to allow reading even when another process has the file open
+            var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 81920, useAsync: true);
+            return Task.FromResult<Stream>(stream);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to read local file '{Path}': {Message}", path, ex.Message);
+            _failureRegistry?.RecordFailure(path, ex);
+            throw;
+        }
     }
 
     public async Task WriteFileAsync(string path, Stream content, CancellationToken cancellationToken)
@@ -122,8 +140,10 @@ public sealed class SafeLocalStorage : ISyncStorage
             // Invalidate hash cache for this path
             _hashCache.TryRemove(path, out _);
         }
-        catch
+        catch (Exception ex)
         {
+            _logger.LogWarning(ex, "Failed to write local file '{Path}': {Message}", path, ex.Message);
+            _failureRegistry?.RecordFailure(path, ex);
             if (File.Exists(tempFilePath))
             {
                 try { File.Delete(tempFilePath); } catch { /* ignore cleanup errors */ }
@@ -137,16 +157,25 @@ public sealed class SafeLocalStorage : ISyncStorage
         cancellationToken.ThrowIfCancellationRequested();
 
         var fullPath = Path.Combine(_rootPath, path.Replace('/', Path.DirectorySeparatorChar));
-        if (File.Exists(fullPath))
+        try
         {
-            // Move to trash folder instead of permanent delete
-            MoveToTrash(fullPath, path);
-            _hashCache.TryRemove(path, out _);
+            if (File.Exists(fullPath))
+            {
+                // Move to trash folder instead of permanent delete
+                MoveToTrash(fullPath, path);
+                _hashCache.TryRemove(path, out _);
+            }
+            else if (Directory.Exists(fullPath))
+            {
+                // For directories, also safely move to trash
+                MoveToTrash(fullPath, path);
+            }
         }
-        else if (Directory.Exists(fullPath))
+        catch (Exception ex)
         {
-            // For directories, also safely move to trash
-            MoveToTrash(fullPath, path);
+            _logger.LogWarning(ex, "Failed to safely delete local path '{Path}': {Message}", path, ex.Message);
+            _failureRegistry?.RecordFailure(path, ex);
+            throw;
         }
 
         return Task.CompletedTask;
@@ -189,13 +218,22 @@ public sealed class SafeLocalStorage : ISyncStorage
         }
 
         // Compute hash and cache it
-        using (var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read, 81920, useAsync: true))
-        using (var sha256 = SHA256.Create())
+        try
         {
-            var hashBytes = await sha256.ComputeHashAsync(stream, cancellationToken);
-            var base64 = Convert.ToBase64String(hashBytes);
-            _hashCache[path] = new HashCacheEntry(size, mtimeUtc, base64);
-            return base64;
+            using (var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 81920, useAsync: true))
+            using (var sha256 = SHA256.Create())
+            {
+                var hashBytes = await sha256.ComputeHashAsync(stream, cancellationToken);
+                var base64 = Convert.ToBase64String(hashBytes);
+                _hashCache[path] = new HashCacheEntry(size, mtimeUtc, base64);
+                return base64;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to compute hash for local file '{Path}': {Message}", path, ex.Message);
+            _failureRegistry?.RecordFailure(path, ex);
+            throw;
         }
     }
 

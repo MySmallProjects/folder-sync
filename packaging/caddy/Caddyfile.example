@@ -1,0 +1,19 @@
+# /etc/caddy/Caddyfile
+# Production reverse proxy for FolderSyncEr Server with automatic HTTPS
+
+foldersync.example.com {
+    # Automatic TLS with Let's Encrypt / ZeroSSL
+    # For internal LAN self-signed or internal CA, use: tls internal
+
+    # Support large file uploads (up to 10GB or adjust as needed)
+    request_body {
+        max_size 10GB
+    }
+
+    reverse_proxy 127.0.0.1:5000 {
+        header_up X-Real-IP {remote_host}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Forwarded-Proto {scheme}
+    }
+}
+

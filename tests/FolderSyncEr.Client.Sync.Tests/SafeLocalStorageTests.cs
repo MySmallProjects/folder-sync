@@ -75,6 +75,44 @@ public class SafeLocalStorageTests : IDisposable
         Assert.Equal(hash1, hash2);
     }
 
+    [Fact]
+    public async Task ReadFileAsync_WhenFileIsLocked_RecordsFailureInRegistry()
+    {
+        var failureRegistry = new FolderSyncEr.Client.Sync.Registry.RunFailureRegistry();
+        var storageWithRegistry = new SafeLocalStorage(_testDir, failureRegistry: failureRegistry);
+
+        var relativePath = "locked.txt";
+        var fullPath = Path.Combine(_testDir, relativePath);
+        await File.WriteAllTextAsync(fullPath, "Locked file content");
+
+        // Open with FileShare.None to simulate exclusive lock from another process
+        using (var lockStream = new FileStream(fullPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+        {
+            await Assert.ThrowsAnyAsync<IOException>(() => storageWithRegistry.ReadFileAsync(relativePath, default));
+            Assert.True(failureRegistry.HasFailed(relativePath));
+            Assert.True(failureRegistry.TryGetFailure(relativePath, out var ex));
+            Assert.IsAssignableFrom<IOException>(ex);
+        }
+    }
+
+    [Fact]
+    public async Task ComputeHashAsync_WhenFileIsLocked_RecordsFailureInRegistry()
+    {
+        var failureRegistry = new FolderSyncEr.Client.Sync.Registry.RunFailureRegistry();
+        var storageWithRegistry = new SafeLocalStorage(_testDir, failureRegistry: failureRegistry);
+
+        var relativePath = "locked_hash.txt";
+        var fullPath = Path.Combine(_testDir, relativePath);
+        await File.WriteAllTextAsync(fullPath, "Locked file content for hash");
+
+        // Open with FileShare.None to simulate exclusive lock from another process
+        using (var lockStream = new FileStream(fullPath, FileMode.Open, FileAccess.ReadWrite, FileShare.None))
+        {
+            await Assert.ThrowsAnyAsync<IOException>(() => storageWithRegistry.ComputeHashAsync(relativePath, default));
+            Assert.True(failureRegistry.HasFailed(relativePath));
+        }
+    }
+
     public void Dispose()
     {
         try

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=FolderSyncEr
+Comment=Real-time Cross-Device File Synchronization Client
+Exec=foldersyncer-client
+Icon=foldersyncer
+Terminal=false
+Type=Application
+Categories=Network;FileTransfer;Utility;
+StartupNotify=true
+

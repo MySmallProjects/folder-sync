@@ -9,7 +9,8 @@ public static class PathRules
     {
         "CON", "PRN", "AUX", "NUL",
         "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
-        "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
+        "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
+        "CONIN$", "CONOUT$"
     };
 
     public static string NormalizePath(string path)
@@ -31,13 +32,47 @@ public static class PathRules
 
     public static bool TryValidatePath(string rawPath, out string normalizedPath, out string errorMessage)
     {
-        normalizedPath = NormalizePath(rawPath);
-
-        if (string.IsNullOrEmpty(normalizedPath))
+        if (string.IsNullOrWhiteSpace(rawPath))
         {
+            normalizedPath = string.Empty;
             errorMessage = "Path cannot be empty.";
             return false;
         }
+
+        if (rawPath.Any(char.IsControl))
+        {
+            normalizedPath = string.Empty;
+            errorMessage = "Path contains illegal control characters.";
+            return false;
+        }
+
+        // Check raw segments before trimming to catch trailing spaces or dots
+        var rawSegments = rawPath.Replace('\\', '/').Trim('/').Split('/');
+        foreach (var rawSegment in rawSegments)
+        {
+            if (string.IsNullOrWhiteSpace(rawSegment))
+            {
+                normalizedPath = string.Empty;
+                errorMessage = "Path cannot contain empty segments or consecutive slashes.";
+                return false;
+            }
+
+            if (rawSegment == "." || rawSegment == "..")
+            {
+                normalizedPath = string.Empty;
+                errorMessage = "Relative path traversal ('..' or '.') is not allowed.";
+                return false;
+            }
+
+            if (rawSegment.EndsWith('.') || rawSegment.EndsWith(' '))
+            {
+                normalizedPath = string.Empty;
+                errorMessage = $"Segment '{rawSegment}' cannot end with a period or space.";
+                return false;
+            }
+        }
+
+        normalizedPath = NormalizePath(rawPath);
 
         if (normalizedPath.Length > 1024)
         {
@@ -51,6 +86,12 @@ public static class PathRules
             if (string.IsNullOrWhiteSpace(segment))
             {
                 errorMessage = "Path cannot contain empty segments or consecutive slashes.";
+                return false;
+            }
+
+            if (segment.Any(char.IsControl))
+            {
+                errorMessage = $"Segment '{segment}' contains illegal control characters.";
                 return false;
             }
 
