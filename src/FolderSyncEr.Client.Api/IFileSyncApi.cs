@@ -38,6 +38,8 @@ public interface IFileSyncApi
     Task<LoginResponse> LoginAsync(string username, string password, string deviceName, CancellationToken ct = default);
     Task LogoutAsync(CancellationToken ct = default);
     Task<UserDto?> GetMeAsync(CancellationToken ct = default);
+    Task<IReadOnlyList<DeviceDto>> GetDevicesAsync(CancellationToken ct = default) => Task.FromResult<IReadOnlyList<DeviceDto>>(Array.Empty<DeviceDto>());
+    Task<bool> RevokeDeviceAsync(string deviceId, CancellationToken ct = default) => Task.FromResult(true);
 
     Task<FileListResponse> ListFilesAsync(
         long? sinceSeq = null,

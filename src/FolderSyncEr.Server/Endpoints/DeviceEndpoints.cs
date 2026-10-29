@@ -18,7 +18,7 @@ public static class DeviceEndpoints
             var userId = GetUserId(user);
             var devices = await db.Devices
                 .AsNoTracking()
-                .Where(d => d.UserId == userId)
+                .Where(d => d.UserId == userId && !d.IsRevoked)
                 .OrderByDescending(d => d.LastSeenUtc)
                 .Select(d => new DeviceDto(d.Id, d.UserId, d.Name, d.CreatedUtc, d.LastSeenUtc, d.IsRevoked))
                 .ToListAsync(ct);

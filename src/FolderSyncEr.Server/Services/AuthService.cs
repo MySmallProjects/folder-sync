@@ -166,6 +166,13 @@ public class AuthService : IAuthService
 
         storedToken.RevokedUtc = DateTime.UtcNow;
         storedToken.ReplacedByTokenId = newRefreshToken.Id;
+
+        var device = await _db.Devices.FirstOrDefaultAsync(d => d.UserId == user.Id && d.Id == deviceId, cancellationToken);
+        if (device != null)
+        {
+            device.LastSeenUtc = DateTime.UtcNow;
+        }
+
         await _db.SaveChangesAsync(cancellationToken);
 
         return new LoginResponse(
@@ -179,6 +186,12 @@ public class AuthService : IAuthService
 
     public async Task<bool> LogoutDeviceAsync(int userId, string deviceId, CancellationToken cancellationToken)
     {
+        var device = await _db.Devices.FirstOrDefaultAsync(d => d.UserId == userId && d.Id == deviceId, cancellationToken);
+        if (device != null)
+        {
+            device.IsRevoked = true;
+        }
+
         var tokens = await _db.RefreshTokens
             .Where(r => r.UserId == userId && r.DeviceId == deviceId && r.RevokedUtc == null)
             .ToListAsync(cancellationToken);

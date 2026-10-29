@@ -1,4 +1,4 @@
-[UNOBSERVED TASK EXCEPTION] 2026-10-28T23:52:15.6744647Z System.AggregateException: A Task's exception(s) were not observed either by Waiting on the Task or accessing its Exception property. As a result, the unobserved exception was rethrown by the finalizer thread. (Cannot access a disposed object.
+[UNOBSERVED TASK EXCEPTION] 2026-10-29T00:35:18.7930923Z System.AggregateException: A Task's exception(s) were not observed either by Waiting on the Task or accessing its Exception property. As a result, the unobserved exception was rethrown by the finalizer thread. (Cannot access a disposed object.
 Object name: 'System.Threading.SemaphoreSlim'.)
  ---> System.ObjectDisposedException: Cannot access a disposed object.
 Object name: 'System.Threading.SemaphoreSlim'.

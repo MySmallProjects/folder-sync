@@ -129,6 +129,23 @@ public class FileSyncApiClient : IFileSyncApi
         return await response.Content.ReadFromJsonAsync<UserDto>(cancellationToken: ct);
     }
 
+    public async Task<IReadOnlyList<DeviceDto>> GetDevicesAsync(CancellationToken ct = default)
+    {
+        var uri = BuildUri(ApiRoutes.Devices);
+        using var response = await _httpClient.GetAsync(uri, ct);
+        response.EnsureSuccessStatusCode();
+        return (await response.Content.ReadFromJsonAsync<List<DeviceDto>>(cancellationToken: ct)) ?? new List<DeviceDto>();
+    }
+
+    public async Task<bool> RevokeDeviceAsync(string deviceId, CancellationToken ct = default)
+    {
+        var uri = BuildUri($"{ApiRoutes.Devices}/{Uri.EscapeDataString(deviceId)}");
+        using var response = await _httpClient.DeleteAsync(uri, ct);
+        if (response.StatusCode == HttpStatusCode.NotFound) return false;
+        response.EnsureSuccessStatusCode();
+        return true;
+    }
+
     public async Task<FileListResponse> ListFilesAsync(
         long? sinceSeq = null,
         DateTime? since = null,

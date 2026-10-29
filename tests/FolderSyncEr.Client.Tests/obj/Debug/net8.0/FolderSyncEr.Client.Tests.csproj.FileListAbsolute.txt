@@ -582,3 +582,4 @@
 /home/user/Documents/FolderSyncEr/tests/FolderSyncEr.Client.Tests/bin/Debug/net8.0/runtimes/linux-x86/native/libe_sqlite3.a
 /home/user/Documents/FolderSyncEr/tests/FolderSyncEr.Client.Tests/bin/Debug/net8.0/FolderSyncEr.Client.Sync.dll
 /home/user/Documents/FolderSyncEr/tests/FolderSyncEr.Client.Tests/bin/Debug/net8.0/FolderSyncEr.Client.Sync.pdb
+/home/user/Documents/FolderSyncEr/tests/FolderSyncEr.Client.Tests/bin/Debug/net8.0/FolderSyncEr.Server.staticwebassets.runtime.json

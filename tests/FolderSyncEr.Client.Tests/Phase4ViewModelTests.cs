@@ -47,7 +47,17 @@ public class Phase4ViewModelTests
         public string ServerUrl { get; set; } = "http://localhost:5000";
         public List<FileDto> MockFiles { get; } = new();
         public List<ActivityLogDto> MockLogs { get; } = new();
+        public List<DeviceDto> MockDevices { get; } = new();
         public byte[] MockZipBytes { get; set; } = new byte[] { 0x50, 0x4B, 0x03, 0x04 };
+
+        public Task<IReadOnlyList<DeviceDto>> GetDevicesAsync(CancellationToken ct = default) =>
+            Task.FromResult<IReadOnlyList<DeviceDto>>(MockDevices.ToList());
+
+        public Task<bool> RevokeDeviceAsync(string deviceId, CancellationToken ct = default)
+        {
+            var removed = MockDevices.RemoveAll(d => d.Id == deviceId);
+            return Task.FromResult(removed > 0);
+        }
 
         public Task<ApiConnectionStatus> CheckConnectionAsync(CancellationToken ct = default) =>
             Task.FromResult(new ApiConnectionStatus(true, "Healthy", "1.0", DateTime.UtcNow, 5, null));
@@ -775,5 +785,53 @@ public class Phase4ViewModelTests
             if (File.Exists(tempSettingsFile)) File.Delete(tempSettingsFile);
             if (Directory.Exists(tempSyncFolder)) Directory.Delete(tempSyncFolder, recursive: true);
         }
+    }
+
+    [Fact]
+    public async Task LoginViewModel_ListsLoggedInDevices_AndSupportsRevokingOtherDevices()
+    {
+        var api = new FakeFileSyncApi();
+        var secretStore = new TestSecretStore();
+        var tokenManager = new AuthTokenManager(secretStore, Microsoft.Extensions.Logging.Abstractions.NullLogger<AuthTokenManager>.Instance);
+
+        await tokenManager.SaveSessionAsync(new AuthSession
+        {
+            ServerUrl = "http://localhost:5000",
+            DeviceId = "dev-current-123",
+            Username = "admin",
+            Role = "Admin",
+            AccessToken = "token",
+            AccessTokenExpiresUtc = DateTime.UtcNow.AddMinutes(15),
+            RefreshToken = "refresh",
+            RefreshTokenExpiresUtc = DateTime.UtcNow.AddDays(7)
+        });
+
+        var now = DateTime.UtcNow;
+        api.MockDevices.Add(new DeviceDto("dev-other-999", 1, "Work Desktop", now.AddDays(-2), now.AddMinutes(-5), false));
+        api.MockDevices.Add(new DeviceDto("dev-current-123", 1, "My Ubuntu Laptop", now.AddDays(-5), now, false));
+
+        var loginVm = new LoginViewModel(api, tokenManager);
+        await loginVm.InitializeSessionAsync();
+
+        Assert.True(loginVm.IsLoggedIn);
+        Assert.Equal("dev-current-123", loginVm.DeviceId);
+        Assert.Contains("My Ubuntu Laptop (dev-current-123)", loginVm.CurrentDeviceDisplay);
+        Assert.Equal(2, loginVm.LoggedInDevices.Count);
+
+        // Current device should be listed first and marked IsCurrentDevice = true
+        var first = loginVm.LoggedInDevices[0];
+        Assert.Equal("dev-current-123", first.Id);
+        Assert.True(first.IsCurrentDevice);
+        Assert.False(first.CanRevoke);
+
+        // Second device is another logged-in device and can be revoked
+        var second = loginVm.LoggedInDevices[1];
+        Assert.Equal("dev-other-999", second.Id);
+        Assert.False(second.IsCurrentDevice);
+        Assert.True(second.CanRevoke);
+
+        await second.RevokeCommand.ExecuteAsync(null);
+        Assert.Single(loginVm.LoggedInDevices);
+        Assert.Equal("dev-current-123", loginVm.LoggedInDevices[0].Id);
     }
 }

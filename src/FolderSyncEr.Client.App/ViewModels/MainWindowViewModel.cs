@@ -49,6 +49,10 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         {
             _ = DeletedFiles.RefreshCommand.ExecuteAsync(null);
         }
+        else if (value == AccountTabIndex && Login.IsLoggedIn)
+        {
+            _ = Login.RefreshDevicesCommand.ExecuteAsync(null);
+        }
     }
 
     [ObservableProperty]

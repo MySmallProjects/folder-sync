@@ -1,9 +1,39 @@
+using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FolderSyncEr.Client.Api;
 using FolderSyncEr.Client.Platform;
+using FolderSyncEr.Contracts;
 
 namespace FolderSyncEr.Client.App.ViewModels;
+
+public partial class LoggedInDeviceItemViewModel : ViewModelBase
+{
+    public string Id { get; }
+    public string Name { get; }
+    public DateTime CreatedUtc { get; }
+    public DateTime LastSeenUtc { get; }
+    public bool IsCurrentDevice { get; }
+    public bool CanRevoke => !IsCurrentDevice;
+
+    public string DisplayIdText => $"ID: {Id}";
+    public string LastSeenText => $"Last seen: {LastSeenUtc:yyyy-MM-dd HH:mm:ss} UTC";
+
+    public IAsyncRelayCommand RevokeCommand { get; }
+
+    public LoggedInDeviceItemViewModel(
+        DeviceDto dto,
+        bool isCurrentDevice,
+        Func<LoggedInDeviceItemViewModel, Task> onRevoke)
+    {
+        Id = dto.Id;
+        Name = string.IsNullOrWhiteSpace(dto.Name) ? "Unnamed Device" : dto.Name;
+        CreatedUtc = dto.CreatedUtc;
+        LastSeenUtc = dto.LastSeenUtc;
+        IsCurrentDevice = isCurrentDevice;
+        RevokeCommand = new AsyncRelayCommand(() => onRevoke(this));
+    }
+}
 
 public partial class LoginViewModel : ViewModelBase
 {
@@ -20,6 +50,8 @@ public partial class LoginViewModel : ViewModelBase
     [ObservableProperty]
     private string _deviceName = Environment.MachineName;
 
+    partial void OnDeviceNameChanged(string value) => OnPropertyChanged(nameof(CurrentDeviceDisplay));
+
     [ObservableProperty]
     private bool _isLoggingIn;
 
@@ -32,11 +64,20 @@ public partial class LoginViewModel : ViewModelBase
     [ObservableProperty]
     private string? _errorMessage;
 
+    [ObservableProperty]
+    private bool _isLoadingDevices;
+
+    public ObservableCollection<LoggedInDeviceItemViewModel> LoggedInDevices { get; } = new();
+
     public bool HasErrorMessage => !string.IsNullOrEmpty(ErrorMessage);
 
     partial void OnErrorMessageChanged(string? value) => OnPropertyChanged(nameof(HasErrorMessage));
 
     public string? DeviceId => _tokenManager.CurrentSession?.DeviceId;
+
+    public string CurrentDeviceDisplay => string.IsNullOrWhiteSpace(DeviceId)
+        ? DeviceName
+        : $"{DeviceName} ({DeviceId})";
 
     public LoginViewModel(IFileSyncApi api, AuthTokenManager tokenManager, ClientSettingsManager? settingsManager = null)
     {
@@ -64,7 +105,10 @@ public partial class LoginViewModel : ViewModelBase
                 _api.ServerUrl = session.ServerUrl;
             }
             IsLoggedIn = true;
-            LoggedInUserText = $"{session.Username} ({session.Role}) on {session.DeviceId[..Math.Min(8, session.DeviceId.Length)]}";
+            LoggedInUserText = $"{session.Username} ({session.Role})";
+            OnPropertyChanged(nameof(DeviceId));
+            OnPropertyChanged(nameof(CurrentDeviceDisplay));
+            await RefreshDevicesAsync();
         }
     }
 
@@ -95,6 +139,9 @@ public partial class LoginViewModel : ViewModelBase
             IsLoggedIn = true;
             LoggedInUserText = $"{response.User.Username} ({response.User.Role})";
             Password = string.Empty; // Clear password from memory after successful login
+            OnPropertyChanged(nameof(DeviceId));
+            OnPropertyChanged(nameof(CurrentDeviceDisplay));
+            await RefreshDevicesAsync();
         }
         catch (Exception ex)
         {
@@ -104,6 +151,65 @@ public partial class LoginViewModel : ViewModelBase
         finally
         {
             IsLoggingIn = false;
+        }
+    }
+
+    [RelayCommand]
+    public async Task RefreshDevicesAsync()
+    {
+        if (!IsLoggedIn)
+        {
+            return;
+        }
+
+        IsLoadingDevices = true;
+        try
+        {
+            var devices = await _api.GetDevicesAsync();
+            var currentId = DeviceId;
+
+            // Update DeviceName from the server record for the current device if available
+            var currentRecord = devices.FirstOrDefault(d => string.Equals(d.Id, currentId, StringComparison.OrdinalIgnoreCase));
+            if (currentRecord != null && !string.IsNullOrWhiteSpace(currentRecord.Name))
+            {
+                DeviceName = currentRecord.Name;
+            }
+
+            LoggedInDevices.Clear();
+            foreach (var d in devices
+                .OrderByDescending(x => string.Equals(x.Id, currentId, StringComparison.OrdinalIgnoreCase))
+                .ThenByDescending(x => x.LastSeenUtc))
+            {
+                var isCurrent = string.Equals(d.Id, currentId, StringComparison.OrdinalIgnoreCase);
+                LoggedInDevices.Add(new LoggedInDeviceItemViewModel(d, isCurrent, RevokeDeviceAsync));
+            }
+
+            OnPropertyChanged(nameof(DeviceId));
+            OnPropertyChanged(nameof(CurrentDeviceDisplay));
+        }
+        catch
+        {
+            // Keep existing device list if server is temporarily unreachable
+        }
+        finally
+        {
+            IsLoadingDevices = false;
+        }
+    }
+
+    private async Task RevokeDeviceAsync(LoggedInDeviceItemViewModel item)
+    {
+        try
+        {
+            var ok = await _api.RevokeDeviceAsync(item.Id);
+            if (ok)
+            {
+                LoggedInDevices.Remove(item);
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Could not revoke device '{item.Name}': {ex.Message}";
         }
     }
 
@@ -118,7 +224,9 @@ public partial class LoginViewModel : ViewModelBase
         {
             IsLoggedIn = false;
             LoggedInUserText = string.Empty;
+            LoggedInDevices.Clear();
+            OnPropertyChanged(nameof(DeviceId));
+            OnPropertyChanged(nameof(CurrentDeviceDisplay));
         }
     }
 }
-
