@@ -486,3 +486,4 @@
 /home/user/Documents/FolderSyncEr/tests/FolderSyncEr.Server.IntegrationTests/bin/Debug/net8.0/runtimes/win/lib/net8.0/System.Diagnostics.EventLog.Messages.dll
 /home/user/Documents/FolderSyncEr/tests/FolderSyncEr.Server.IntegrationTests/bin/Debug/net8.0/runtimes/win/lib/net8.0/System.Diagnostics.EventLog.dll
 /home/user/Documents/FolderSyncEr/tests/FolderSyncEr.Server.IntegrationTests/obj/Debug/net8.0/MvcTestingAppManifest.json
+/home/user/Documents/FolderSyncEr/tests/FolderSyncEr.Server.IntegrationTests/bin/Debug/net8.0/FolderSyncEr.Server.staticwebassets.runtime.json

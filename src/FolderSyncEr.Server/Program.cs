@@ -149,6 +149,10 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = "swagger";
 });
 
+// Serve embedded web file viewer at root (wwwroot/index.html, app.js)
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.UseSerilogRequestLogging();
 
 app.UseRateLimiter();

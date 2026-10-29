@@ -1,0 +1,2195 @@
+2026-10-29 00:00:01.063 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:00:01.074 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:00:01.074 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:00:01.075 +00:00 [INF] HTTP GET /api/logs responded 401 in 1.1880 ms
+2026-10-29 00:00:01.075 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 12.2161ms
+2026-10-29 00:00:05.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:00:05.063 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:00:05.064 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:00:05.064 +00:00 [INF] HTTP GET /api/logs responded 401 in 1.4700 ms
+2026-10-29 00:00:05.064 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 2.8128ms
+2026-10-29 00:00:09.063 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:00:09.065 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:00:09.067 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:00:09.067 +00:00 [INF] HTTP GET /api/logs responded 401 in 2.1223 ms
+2026-10-29 00:00:09.068 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 4.6118ms
+2026-10-29 00:00:13.060 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:00:13.062 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:00:13.062 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:00:13.062 +00:00 [INF] HTTP GET /api/logs responded 401 in 1.4068 ms
+2026-10-29 00:00:13.062 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 2.0294ms
+2026-10-29 00:00:17.062 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:00:17.064 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:00:17.105 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:00:17.105 +00:00 [INF] HTTP GET /api/logs responded 401 in 41.4310 ms
+2026-10-29 00:00:17.108 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 45.8028ms
+2026-10-29 00:00:21.062 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:00:21.063 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:00:21.064 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:00:21.064 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.9371 ms
+2026-10-29 00:00:21.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 3.1057ms
+2026-10-29 00:00:25.062 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:00:25.063 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:00:25.064 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:00:25.064 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.8531 ms
+2026-10-29 00:00:25.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 3.2224ms
+2026-10-29 00:00:29.062 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:00:29.064 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:00:29.065 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:00:29.065 +00:00 [INF] HTTP GET /api/logs responded 401 in 1.9103 ms
+2026-10-29 00:00:29.067 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 4.9839ms
+2026-10-29 00:00:33.062 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:00:33.064 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:00:33.064 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:00:33.065 +00:00 [INF] HTTP GET /api/logs responded 401 in 1.6299 ms
+2026-10-29 00:00:33.066 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 3.9177ms
+2026-10-29 00:00:37.063 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:00:37.064 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:00:37.065 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:00:37.065 +00:00 [INF] HTTP GET /api/logs responded 401 in 1.6737 ms
+2026-10-29 00:00:37.066 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 3.3714ms
+2026-10-29 00:00:41.062 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:00:41.063 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:00:41.063 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:00:41.064 +00:00 [INF] HTTP GET /api/logs responded 401 in 1.3324 ms
+2026-10-29 00:00:41.064 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 2.5789ms
+2026-10-29 00:00:45.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:00:45.062 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:00:45.062 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:00:45.062 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.8589 ms
+2026-10-29 00:00:45.063 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 2.4346ms
+2026-10-29 00:00:49.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:00:49.065 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:00:49.065 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:00:49.066 +00:00 [INF] HTTP GET /api/logs responded 401 in 1.3291 ms
+2026-10-29 00:00:49.066 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 4.9928ms
+2026-10-29 00:00:53.060 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:00:53.061 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:00:53.064 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:00:53.064 +00:00 [INF] HTTP GET /api/logs responded 401 in 2.6272 ms
+2026-10-29 00:00:53.064 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 4.1718ms
+2026-10-29 00:00:57.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:00:57.062 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:00:57.063 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:00:57.063 +00:00 [INF] HTTP GET /api/logs responded 401 in 1.3402 ms
+2026-10-29 00:00:57.063 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 2.6816ms
+2026-10-29 00:01:01.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:01:01.062 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:01:01.063 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:01:01.063 +00:00 [INF] HTTP GET /api/logs responded 401 in 1.2046 ms
+2026-10-29 00:01:01.064 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 2.8401ms
+2026-10-29 00:01:05.062 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:01:05.066 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:01:05.066 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:01:05.067 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.8113 ms
+2026-10-29 00:01:05.067 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 5.6565ms
+2026-10-29 00:01:09.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:01:09.063 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:01:09.063 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:01:09.064 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.9694 ms
+2026-10-29 00:01:09.064 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 3.1516ms
+2026-10-29 00:01:13.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:01:13.062 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:01:13.101 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:01:13.101 +00:00 [INF] HTTP GET /api/logs responded 401 in 39.7157 ms
+2026-10-29 00:01:13.102 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 40.9152ms
+2026-10-29 00:01:17.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:01:17.065 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:01:17.065 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:01:17.066 +00:00 [INF] HTTP GET /api/logs responded 401 in 1.3539 ms
+2026-10-29 00:01:17.066 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 4.9574ms
+2026-10-29 00:01:21.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:01:21.062 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:01:21.062 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:01:21.062 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.7130 ms
+2026-10-29 00:01:21.063 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 1.8117ms
+2026-10-29 00:01:25.062 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:01:25.063 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:01:25.064 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:01:25.064 +00:00 [INF] HTTP GET /api/logs responded 401 in 1.0889 ms
+2026-10-29 00:01:25.064 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 2.5303ms
+2026-10-29 00:01:29.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:01:29.062 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:01:29.063 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:01:29.064 +00:00 [INF] HTTP GET /api/logs responded 401 in 2.1360 ms
+2026-10-29 00:01:29.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 4.521ms
+2026-10-29 00:01:33.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:01:33.063 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:01:33.063 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:01:33.064 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.8627 ms
+2026-10-29 00:01:33.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 3.3026ms
+2026-10-29 00:01:37.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:01:37.062 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:01:37.063 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:01:37.064 +00:00 [INF] HTTP GET /api/logs responded 401 in 1.7625 ms
+2026-10-29 00:01:37.066 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 4.9537ms
+2026-10-29 00:01:41.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:01:41.064 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:01:41.064 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:01:41.065 +00:00 [INF] HTTP GET /api/logs responded 401 in 1.0172 ms
+2026-10-29 00:01:41.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 3.8521ms
+2026-10-29 00:01:45.062 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:01:45.063 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:01:45.063 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:01:45.063 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.6818 ms
+2026-10-29 00:01:45.064 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 1.9345ms
+2026-10-29 00:01:49.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:01:49.062 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:01:49.062 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:01:49.062 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.7182 ms
+2026-10-29 00:01:49.063 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 1.8813ms
+2026-10-29 00:01:53.062 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:01:53.063 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:01:53.063 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:01:53.063 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.7164 ms
+2026-10-29 00:01:53.064 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 1.9881ms
+2026-10-29 00:01:57.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:01:57.062 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:01:57.062 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:01:57.063 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.8980 ms
+2026-10-29 00:01:57.064 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 2.8441ms
+2026-10-29 00:02:01.062 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:02:01.064 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:02:01.064 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:02:01.066 +00:00 [INF] HTTP GET /api/logs responded 401 in 2.7968 ms
+2026-10-29 00:02:01.067 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 5.0388ms
+2026-10-29 00:02:05.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:02:05.062 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:02:05.063 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:02:05.063 +00:00 [INF] HTTP GET /api/logs responded 401 in 1.2522 ms
+2026-10-29 00:02:05.064 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 3.0655ms
+2026-10-29 00:02:09.062 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:02:09.063 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:02:09.064 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:02:09.064 +00:00 [INF] HTTP GET /api/logs responded 401 in 1.1539 ms
+2026-10-29 00:02:09.064 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 2.2944ms
+2026-10-29 00:02:13.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:02:13.061 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:02:13.061 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:02:13.061 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.5835 ms
+2026-10-29 00:02:13.061 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 2.2101ms
+2026-10-29 00:02:17.062 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:02:17.064 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:02:17.064 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:02:17.064 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.7669 ms
+2026-10-29 00:02:17.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 2.3184ms
+2026-10-29 00:02:21.062 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:02:21.063 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:02:21.064 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:02:21.064 +00:00 [INF] HTTP GET /api/logs responded 401 in 1.3104 ms
+2026-10-29 00:02:21.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 3.0104ms
+2026-10-29 00:02:25.062 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:02:25.063 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:02:25.064 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:02:25.064 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.7373 ms
+2026-10-29 00:02:25.064 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 2.1124ms
+2026-10-29 00:02:29.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:02:29.059 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:02:29.060 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:02:29.060 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.3145 ms
+2026-10-29 00:02:29.060 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 0.8754ms
+2026-10-29 00:02:33.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:02:33.062 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:02:33.063 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:02:33.063 +00:00 [INF] HTTP GET /api/logs responded 401 in 1.0108 ms
+2026-10-29 00:02:33.063 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 2.2149ms
+2026-10-29 00:02:37.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:02:37.062 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:02:37.063 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:02:37.064 +00:00 [INF] HTTP GET /api/logs responded 401 in 2.2535 ms
+2026-10-29 00:02:37.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 3.4618ms
+2026-10-29 00:02:41.065 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:02:41.065 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:02:41.066 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:02:41.066 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.7121 ms
+2026-10-29 00:02:41.066 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 1.7227ms
+2026-10-29 00:02:45.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:02:45.059 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:02:45.060 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:02:45.060 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.3335 ms
+2026-10-29 00:02:45.060 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 1.0383ms
+2026-10-29 00:02:49.060 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:02:49.061 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:02:49.061 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:02:49.061 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.2251 ms
+2026-10-29 00:02:49.061 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 0.9564ms
+2026-10-29 00:02:53.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:02:53.060 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:02:53.060 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:02:53.060 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.5608 ms
+2026-10-29 00:02:53.061 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 1.3558ms
+2026-10-29 00:02:57.060 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:02:57.060 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:02:57.062 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:02:57.062 +00:00 [INF] HTTP GET /api/logs responded 401 in 1.6029 ms
+2026-10-29 00:02:57.062 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 2.4851ms
+2026-10-29 00:03:01.060 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:03:01.060 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:03:01.061 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:03:01.061 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.8060 ms
+2026-10-29 00:03:01.062 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 2.0671ms
+2026-10-29 00:03:05.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:03:05.063 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:03:05.065 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:03:05.065 +00:00 [INF] HTTP GET /api/logs responded 401 in 2.3407 ms
+2026-10-29 00:03:05.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 3.2934ms
+2026-10-29 00:03:09.060 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:03:09.060 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:03:09.061 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:03:09.061 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.4837 ms
+2026-10-29 00:03:09.061 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 1.4857ms
+2026-10-29 00:03:13.060 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:03:13.061 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:03:13.061 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:03:13.061 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.3668 ms
+2026-10-29 00:03:13.062 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 1.8746ms
+2026-10-29 00:03:17.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:03:17.062 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:03:17.064 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:03:17.064 +00:00 [INF] HTTP GET /api/logs responded 401 in 1.9042 ms
+2026-10-29 00:03:17.064 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 3.5088ms
+2026-10-29 00:03:21.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:03:21.060 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:03:21.060 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:03:21.060 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.3155 ms
+2026-10-29 00:03:21.060 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 0.8673ms
+2026-10-29 00:03:25.063 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:03:25.065 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:03:25.068 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:03:25.069 +00:00 [INF] HTTP GET /api/logs responded 401 in 3.5276 ms
+2026-10-29 00:03:25.069 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 6.2257ms
+2026-10-29 00:03:29.060 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:03:29.061 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:03:29.061 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:03:29.061 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.3416 ms
+2026-10-29 00:03:29.061 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 1.114ms
+2026-10-29 00:03:33.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:03:33.059 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:03:33.060 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:03:33.060 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.2777 ms
+2026-10-29 00:03:33.060 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 0.9249ms
+2026-10-29 00:03:37.060 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:03:37.061 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:03:37.061 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:03:37.061 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.3898 ms
+2026-10-29 00:03:37.061 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 1.2027ms
+2026-10-29 00:03:41.060 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:03:41.060 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:03:41.061 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:03:41.061 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.9733 ms
+2026-10-29 00:03:41.062 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 2.0718ms
+2026-10-29 00:03:45.060 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:03:45.062 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:03:45.062 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:03:45.062 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.3135 ms
+2026-10-29 00:03:45.062 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 1.8427ms
+2026-10-29 00:03:49.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:03:49.063 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:03:49.063 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:03:49.063 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.7357 ms
+2026-10-29 00:03:49.064 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 2.8709ms
+2026-10-29 00:03:53.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:03:53.060 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:03:53.060 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:03:53.060 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.3914 ms
+2026-10-29 00:03:53.061 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 1.1569ms
+2026-10-29 00:03:57.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:03:57.060 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:03:57.060 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:03:57.060 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.2959 ms
+2026-10-29 00:03:57.060 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 0.951ms
+2026-10-29 00:04:01.066 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:04:01.067 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:04:01.069 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:04:01.071 +00:00 [INF] HTTP GET /api/logs responded 401 in 3.4414 ms
+2026-10-29 00:04:01.071 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 4.7876ms
+2026-10-29 00:04:05.069 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:04:05.070 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:04:05.070 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:04:05.070 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.7424 ms
+2026-10-29 00:04:05.072 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 2.6397ms
+2026-10-29 00:04:09.060 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:04:09.060 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:04:09.060 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:04:09.060 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.3856 ms
+2026-10-29 00:04:09.061 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 1.0109ms
+2026-10-29 00:04:13.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:04:13.062 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:04:13.062 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:04:13.062 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.4213 ms
+2026-10-29 00:04:13.062 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 1.5528ms
+2026-10-29 00:04:17.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:04:17.060 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:04:17.060 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:04:17.060 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.4559 ms
+2026-10-29 00:04:17.061 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 1.3189ms
+2026-10-29 00:04:21.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:04:21.059 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:04:21.059 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:04:21.059 +00:00 [INF] HTTP GET /api/logs responded 401 in 0.2074 ms
+2026-10-29 00:04:21.060 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 0.6231ms
+2026-10-29 00:04:25.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:04:25.062 +00:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2026-10-29 00:04:25.063 +00:00 [INF] AuthenticationScheme: Bearer was challenged.
+2026-10-29 00:04:25.063 +00:00 [INF] HTTP GET /api/logs responded 401 in 1.2039 ms
+2026-10-29 00:04:25.064 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 401 0 null 2.6776ms
+2026-10-29 00:04:27.947 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost:5293/api/auth/login - application/json; charset=utf-8 null
+2026-10-29 00:04:27.955 +00:00 [INF] Executing endpoint 'HTTP: POST api/auth/login'
+2026-10-29 00:04:27.999 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@__ToLower_0='?' (Size = 5)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."CreatedUtc", "u"."IsDisabled", "u"."LastLoginUtc", "u"."PasswordHash", "u"."Role", "u"."Username"
+FROM "Users" AS "u"
+WHERE lower("u"."Username") = @__ToLower_0
+LIMIT 1
+2026-10-29 00:04:28.105 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__deviceId_0='?' (Size = 32), @__user_Id_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."CreatedUtc", "d"."IsRevoked", "d"."LastSeenUtc", "d"."Name", "d"."UserId"
+FROM "Devices" AS "d"
+WHERE "d"."Id" = @__deviceId_0 AND "d"."UserId" = @__user_Id_1
+LIMIT 1
+2026-10-29 00:04:28.152 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 32), @p1='?' (DbType = DateTime), @p2='?' (DbType = Boolean), @p3='?' (DbType = DateTime), @p4='?' (Size = 14), @p5='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Devices" ("Id", "CreatedUtc", "IsRevoked", "LastSeenUtc", "Name", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-10-29 00:04:28.152 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (Size = 32), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 64), @p6='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "RefreshTokens" ("CreatedUtc", "DeviceId", "ExpiresUtc", "ReplacedByTokenId", "RevokedUtc", "TokenHash", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
+RETURNING "Id";
+2026-10-29 00:04:28.153 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p1='?' (DbType = Int32), @p0='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+UPDATE "Users" SET "LastLoginUtc" = @p0
+WHERE "Id" = @p1
+RETURNING 1;
+2026-10-29 00:04:28.187 +00:00 [INF] User 'admin' logged in successfully on device 'dffbe2696ed746689fa78e2c32aca992'
+2026-10-29 00:04:28.190 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 5), @p1='?' (Size = 22), @p2='?' (Size = 32), @p3='?' (Size = 36), @p4='?', @p5='?' (Size = 7), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-29 00:04:28.192 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:04:28.193 +00:00 [INF] Writing value of type 'LoginResponse' as Json.
+2026-10-29 00:04:28.195 +00:00 [INF] Executed endpoint 'HTTP: POST api/auth/login'
+2026-10-29 00:04:28.195 +00:00 [INF] HTTP POST /api/auth/login responded 200 in 246.6264 ms
+2026-10-29 00:04:28.195 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost:5293/api/auth/login - 200 null application/json; charset=utf-8 248.2586ms
+2026-10-29 00:04:28.284 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/status - null null
+2026-10-29 00:04:28.285 +00:00 [INF] Executing endpoint 'HTTP: GET api/status'
+2026-10-29 00:04:28.285 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:04:28.286 +00:00 [INF] Writing value of type 'StatusResponse' as Json.
+2026-10-29 00:04:28.286 +00:00 [INF] Executed endpoint 'HTTP: GET api/status'
+2026-10-29 00:04:28.286 +00:00 [INF] HTTP GET /api/status responded 200 in 0.9884 ms
+2026-10-29 00:04:28.286 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/status - 200 null application/json; charset=utf-8 1.4536ms
+2026-10-29 00:04:28.289 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/files?limit=10000 - null null
+2026-10-29 00:04:28.290 +00:00 [INF] Executing endpoint 'HTTP: GET api/files'
+2026-10-29 00:04:28.291 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-29 00:04:28.293 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND NOT ("f"."IsDeleted")
+ORDER BY "f"."ChangeSeq"
+LIMIT @__p_1
+2026-10-29 00:04:28.293 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:04:28.294 +00:00 [INF] Writing value of type 'FileListResponse' as Json.
+2026-10-29 00:04:28.294 +00:00 [INF] Executed endpoint 'HTTP: GET api/files'
+2026-10-29 00:04:28.295 +00:00 [INF] HTTP GET /api/files responded 200 in 5.1891 ms
+2026-10-29 00:04:28.295 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/files?limit=10000 - 200 null application/json; charset=utf-8 5.9314ms
+2026-10-29 00:04:28.470 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost:5293/api/directories - application/json; charset=utf-8 null
+2026-10-29 00:04:28.471 +00:00 [INF] Executing endpoint 'HTTP: POST api/directories'
+2026-10-29 00:04:28.472 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 11)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-29 00:04:28.473 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:04:28.473 +00:00 [INF] Writing value of type 'FileDto' as Json.
+2026-10-29 00:04:28.473 +00:00 [INF] Executed endpoint 'HTTP: POST api/directories'
+2026-10-29 00:04:28.473 +00:00 [INF] HTTP POST /api/directories responded 200 in 2.1490 ms
+2026-10-29 00:04:28.473 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost:5293/api/directories - 200 null application/json; charset=utf-8 2.9259ms
+2026-10-29 00:04:28.516 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/files?limit=5000 - null null
+2026-10-29 00:04:28.521 +00:00 [INF] Executing endpoint 'HTTP: GET api/files'
+2026-10-29 00:04:28.524 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-29 00:04:28.525 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND NOT ("f"."IsDeleted")
+ORDER BY "f"."ChangeSeq"
+LIMIT @__p_1
+2026-10-29 00:04:28.528 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:04:28.528 +00:00 [INF] Writing value of type 'FileListResponse' as Json.
+2026-10-29 00:04:28.529 +00:00 [INF] Executed endpoint 'HTTP: GET api/files'
+2026-10-29 00:04:28.532 +00:00 [INF] HTTP GET /api/files responded 200 in 11.3099 ms
+2026-10-29 00:04:28.533 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/files?limit=5000 - 200 null application/json; charset=utf-8 17.2571ms
+2026-10-29 00:04:29.062 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:04:29.062 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:04:29.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:04:29.066 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:04:29.068 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:04:29.070 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:04:29.071 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:04:29.072 +00:00 [INF] HTTP GET /api/logs responded 200 in 9.4048 ms
+2026-10-29 00:04:29.074 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 11.9383ms
+2026-10-29 00:04:33.058 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:04:33.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:04:33.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:04:33.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:04:33.064 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:04:33.064 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:04:33.064 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:04:33.064 +00:00 [INF] HTTP GET /api/logs responded 200 in 4.9596 ms
+2026-10-29 00:04:33.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 6.2702ms
+2026-10-29 00:04:37.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:04:37.059 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:04:37.060 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:04:37.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:04:37.063 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:04:37.064 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:04:37.065 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:04:37.066 +00:00 [INF] HTTP GET /api/logs responded 200 in 7.3344 ms
+2026-10-29 00:04:37.067 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 8.4496ms
+2026-10-29 00:04:41.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:04:41.059 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:04:41.060 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:04:41.061 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:04:41.062 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:04:41.062 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:04:41.063 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:04:41.063 +00:00 [INF] HTTP GET /api/logs responded 200 in 3.9564 ms
+2026-10-29 00:04:41.063 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 4.5696ms
+2026-10-29 00:04:45.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:04:45.059 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:04:45.061 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:04:45.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:04:45.064 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:04:45.064 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:04:45.065 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:04:45.065 +00:00 [INF] HTTP GET /api/logs responded 200 in 6.0243 ms
+2026-10-29 00:04:45.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 6.682ms
+2026-10-29 00:04:49.058 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:04:49.059 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:04:49.060 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:04:49.061 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:04:49.061 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:04:49.061 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:04:49.062 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:04:49.062 +00:00 [INF] HTTP GET /api/logs responded 200 in 3.4188 ms
+2026-10-29 00:04:49.062 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 4.2573ms
+2026-10-29 00:04:53.058 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:04:53.059 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:04:53.060 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:04:53.061 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:04:53.062 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:04:53.062 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:04:53.064 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:04:53.066 +00:00 [INF] HTTP GET /api/logs responded 200 in 7.1497 ms
+2026-10-29 00:04:53.067 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 8.4377ms
+2026-10-29 00:04:57.060 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:04:57.061 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:04:57.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:04:57.067 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:04:57.069 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:04:57.069 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:04:57.069 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:04:57.070 +00:00 [INF] HTTP GET /api/logs responded 200 in 8.9379 ms
+2026-10-29 00:04:57.071 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 10.9337ms
+2026-10-29 00:05:01.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:05:01.059 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:01.060 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:05:01.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:05:01.068 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:05:01.069 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:05:01.072 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:01.074 +00:00 [INF] HTTP GET /api/logs responded 200 in 15.2681 ms
+2026-10-29 00:05:01.083 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 24.0084ms
+2026-10-29 00:05:05.058 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:05:05.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:05.061 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:05:05.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:05:05.063 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:05:05.063 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:05:05.063 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:05.064 +00:00 [INF] HTTP GET /api/logs responded 200 in 3.4027 ms
+2026-10-29 00:05:05.064 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 5.8599ms
+2026-10-29 00:05:09.062 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:05:09.070 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:09.074 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:05:09.082 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:05:09.094 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:05:09.094 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:05:09.094 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:09.094 +00:00 [INF] HTTP GET /api/logs responded 200 in 25.0274 ms
+2026-10-29 00:05:09.095 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 32.6257ms
+2026-10-29 00:05:13.065 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:05:13.073 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:13.077 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:05:13.087 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:05:13.100 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:05:13.103 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:05:13.103 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:13.105 +00:00 [INF] HTTP GET /api/logs responded 200 in 35.0841 ms
+2026-10-29 00:05:13.106 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 41.1542ms
+2026-10-29 00:05:17.058 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:05:17.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:17.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:05:17.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:05:17.063 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:05:17.063 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:05:17.064 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:17.064 +00:00 [INF] HTTP GET /api/logs responded 200 in 4.7354 ms
+2026-10-29 00:05:17.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 6.9218ms
+2026-10-29 00:05:21.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:05:21.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:21.061 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:05:21.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:05:21.064 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:05:21.064 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:05:21.064 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:21.064 +00:00 [INF] HTTP GET /api/logs responded 200 in 4.4346 ms
+2026-10-29 00:05:21.064 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 5.1428ms
+2026-10-29 00:05:25.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:05:25.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:25.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:05:25.064 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:05:25.064 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:05:25.065 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:05:25.065 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:25.065 +00:00 [INF] HTTP GET /api/logs responded 200 in 5.2601 ms
+2026-10-29 00:05:25.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 6.2783ms
+2026-10-29 00:05:28.236 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/status - null null
+2026-10-29 00:05:28.237 +00:00 [INF] Executing endpoint 'HTTP: GET api/status'
+2026-10-29 00:05:28.240 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:05:28.240 +00:00 [INF] Writing value of type 'StatusResponse' as Json.
+2026-10-29 00:05:28.241 +00:00 [INF] Executed endpoint 'HTTP: GET api/status'
+2026-10-29 00:05:28.241 +00:00 [INF] HTTP GET /api/status responded 200 in 3.8088 ms
+2026-10-29 00:05:28.242 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/status - 200 null application/json; charset=utf-8 5.3783ms
+2026-10-29 00:05:28.243 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/files?limit=10000 - null null
+2026-10-29 00:05:28.243 +00:00 [INF] Executing endpoint 'HTTP: GET api/files'
+2026-10-29 00:05:28.244 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-29 00:05:28.245 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND NOT ("f"."IsDeleted")
+ORDER BY "f"."ChangeSeq"
+LIMIT @__p_1
+2026-10-29 00:05:28.245 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:05:28.245 +00:00 [INF] Writing value of type 'FileListResponse' as Json.
+2026-10-29 00:05:28.246 +00:00 [INF] Executed endpoint 'HTTP: GET api/files'
+2026-10-29 00:05:28.246 +00:00 [INF] HTTP GET /api/files responded 200 in 2.4874 ms
+2026-10-29 00:05:28.246 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/files?limit=10000 - 200 null application/json; charset=utf-8 3.2739ms
+2026-10-29 00:05:28.255 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost:5293/api/directories - application/json; charset=utf-8 null
+2026-10-29 00:05:28.255 +00:00 [INF] Executing endpoint 'HTTP: POST api/directories'
+2026-10-29 00:05:28.256 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 13)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-29 00:05:28.257 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:05:28.257 +00:00 [INF] Writing value of type 'FileDto' as Json.
+2026-10-29 00:05:28.257 +00:00 [INF] Executed endpoint 'HTTP: POST api/directories'
+2026-10-29 00:05:28.257 +00:00 [INF] HTTP POST /api/directories responded 200 in 1.8525 ms
+2026-10-29 00:05:28.257 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost:5293/api/directories - 200 null application/json; charset=utf-8 2.44ms
+2026-10-29 00:05:28.260 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost:5293/api/directories - application/json; charset=utf-8 null
+2026-10-29 00:05:28.260 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost:5293/api/directories - application/json; charset=utf-8 null
+2026-10-29 00:05:28.261 +00:00 [INF] Executing endpoint 'HTTP: POST api/directories'
+2026-10-29 00:05:28.261 +00:00 [INF] Executing endpoint 'HTTP: POST api/directories'
+2026-10-29 00:05:28.262 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 23)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-29 00:05:28.262 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:05:28.262 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 8)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-29 00:05:28.262 +00:00 [INF] Writing value of type 'FileDto' as Json.
+2026-10-29 00:05:28.263 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:05:28.263 +00:00 [INF] Executed endpoint 'HTTP: POST api/directories'
+2026-10-29 00:05:28.263 +00:00 [INF] HTTP POST /api/directories responded 200 in 2.3805 ms
+2026-10-29 00:05:28.263 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost:5293/api/directories - 200 null application/json; charset=utf-8 3.3553ms
+2026-10-29 00:05:28.263 +00:00 [INF] Writing value of type 'FileDto' as Json.
+2026-10-29 00:05:28.264 +00:00 [INF] Executed endpoint 'HTTP: POST api/directories'
+2026-10-29 00:05:28.264 +00:00 [INF] HTTP POST /api/directories responded 200 in 2.9727 ms
+2026-10-29 00:05:28.264 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost:5293/api/directories - 200 null application/json; charset=utf-8 3.9212ms
+2026-10-29 00:05:28.280 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/files?limit=5000 - null null
+2026-10-29 00:05:28.280 +00:00 [INF] Executing endpoint 'HTTP: GET api/files'
+2026-10-29 00:05:28.281 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-29 00:05:28.281 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND NOT ("f"."IsDeleted")
+ORDER BY "f"."ChangeSeq"
+LIMIT @__p_1
+2026-10-29 00:05:28.282 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:05:28.282 +00:00 [INF] Writing value of type 'FileListResponse' as Json.
+2026-10-29 00:05:28.282 +00:00 [INF] Executed endpoint 'HTTP: GET api/files'
+2026-10-29 00:05:28.282 +00:00 [INF] HTTP GET /api/files responded 200 in 2.1207 ms
+2026-10-29 00:05:28.283 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/files?limit=5000 - 200 null application/json; charset=utf-8 2.6175ms
+2026-10-29 00:05:29.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:05:29.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:29.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:05:29.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:05:29.066 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:05:29.066 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:05:29.067 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:29.067 +00:00 [INF] HTTP GET /api/logs responded 200 in 7.4399 ms
+2026-10-29 00:05:29.068 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 8.84ms
+2026-10-29 00:05:33.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:05:33.061 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:33.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:05:33.064 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:05:33.064 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:05:33.064 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:05:33.065 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:33.065 +00:00 [INF] HTTP GET /api/logs responded 200 in 4.5421 ms
+2026-10-29 00:05:33.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 5.8175ms
+2026-10-29 00:05:37.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:05:37.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:37.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:05:37.064 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:05:37.064 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:05:37.064 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:05:37.064 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:37.065 +00:00 [INF] HTTP GET /api/logs responded 200 in 4.7715 ms
+2026-10-29 00:05:37.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 6.3963ms
+2026-10-29 00:05:41.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:05:41.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:41.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:05:41.064 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:05:41.064 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:05:41.065 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:05:41.065 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:41.065 +00:00 [INF] HTTP GET /api/logs responded 200 in 4.8649 ms
+2026-10-29 00:05:41.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 6.0561ms
+2026-10-29 00:05:45.058 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:05:45.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:45.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:05:45.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:05:45.065 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:05:45.065 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:05:45.066 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:45.066 +00:00 [INF] HTTP GET /api/logs responded 200 in 7.1267 ms
+2026-10-29 00:05:45.067 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 8.9282ms
+2026-10-29 00:05:49.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:05:49.059 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:49.060 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:05:49.061 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:05:49.061 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:05:49.061 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:05:49.062 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:49.062 +00:00 [INF] HTTP GET /api/logs responded 200 in 2.6637 ms
+2026-10-29 00:05:49.062 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 3.6922ms
+2026-10-29 00:05:53.058 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:05:53.059 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:53.061 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:05:53.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:05:53.064 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:05:53.064 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:05:53.065 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:53.065 +00:00 [INF] HTTP GET /api/logs responded 200 in 6.2641 ms
+2026-10-29 00:05:53.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 7.2072ms
+2026-10-29 00:05:57.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:05:57.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:57.101 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:05:57.102 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:05:57.103 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:05:57.103 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:05:57.104 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:05:57.104 +00:00 [INF] HTTP GET /api/logs responded 200 in 44.5641 ms
+2026-10-29 00:05:57.105 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 45.7337ms
+2026-10-29 00:06:01.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:06:01.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:01.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:06:01.064 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:06:01.064 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:06:01.064 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:06:01.065 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:01.065 +00:00 [INF] HTTP GET /api/logs responded 200 in 4.9407 ms
+2026-10-29 00:06:01.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 5.8969ms
+2026-10-29 00:06:05.058 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:06:05.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:05.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:06:05.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:06:05.064 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:06:05.064 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:06:05.064 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:05.064 +00:00 [INF] HTTP GET /api/logs responded 200 in 4.7909 ms
+2026-10-29 00:06:05.064 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 5.9211ms
+2026-10-29 00:06:09.060 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:06:09.061 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:09.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:06:09.065 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:06:09.066 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:06:09.066 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:06:09.066 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:09.066 +00:00 [INF] HTTP GET /api/logs responded 200 in 5.8221 ms
+2026-10-29 00:06:09.067 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 7.0704ms
+2026-10-29 00:06:13.060 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:06:13.061 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:13.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:06:13.065 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:06:13.067 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:06:13.067 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:06:13.068 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:13.069 +00:00 [INF] HTTP GET /api/logs responded 200 in 7.9142 ms
+2026-10-29 00:06:13.070 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 9.7164ms
+2026-10-29 00:06:17.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:06:17.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:17.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:06:17.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:06:17.064 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:06:17.064 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:06:17.064 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:17.065 +00:00 [INF] HTTP GET /api/logs responded 200 in 4.7416 ms
+2026-10-29 00:06:17.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 6.2129ms
+2026-10-29 00:06:21.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:06:21.063 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:21.065 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:06:21.065 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:06:21.066 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:06:21.066 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:06:21.066 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:21.066 +00:00 [INF] HTTP GET /api/logs responded 200 in 3.8861 ms
+2026-10-29 00:06:21.066 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 5.3129ms
+2026-10-29 00:06:25.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:06:25.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:25.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:06:25.064 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:06:25.064 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:06:25.065 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:06:25.065 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:25.065 +00:00 [INF] HTTP GET /api/logs responded 200 in 5.7876 ms
+2026-10-29 00:06:25.066 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 7.082ms
+2026-10-29 00:06:28.234 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/status - null null
+2026-10-29 00:06:28.235 +00:00 [INF] Executing endpoint 'HTTP: GET api/status'
+2026-10-29 00:06:28.238 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:06:28.238 +00:00 [INF] Writing value of type 'StatusResponse' as Json.
+2026-10-29 00:06:28.239 +00:00 [INF] Executed endpoint 'HTTP: GET api/status'
+2026-10-29 00:06:28.239 +00:00 [INF] HTTP GET /api/status responded 200 in 4.4768 ms
+2026-10-29 00:06:28.240 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/status - 200 null application/json; charset=utf-8 6.2109ms
+2026-10-29 00:06:28.244 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/files?limit=10000 - null null
+2026-10-29 00:06:28.245 +00:00 [INF] Executing endpoint 'HTTP: GET api/files'
+2026-10-29 00:06:28.247 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-29 00:06:28.250 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND NOT ("f"."IsDeleted")
+ORDER BY "f"."ChangeSeq"
+LIMIT @__p_1
+2026-10-29 00:06:28.252 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:06:28.253 +00:00 [INF] Writing value of type 'FileListResponse' as Json.
+2026-10-29 00:06:28.254 +00:00 [INF] Executed endpoint 'HTTP: GET api/files'
+2026-10-29 00:06:28.255 +00:00 [INF] HTTP GET /api/files responded 200 in 9.8284 ms
+2026-10-29 00:06:28.255 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/files?limit=10000 - 200 null application/json; charset=utf-8 11.0702ms
+2026-10-29 00:06:28.304 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost:5293/api/directories - application/json; charset=utf-8 null
+2026-10-29 00:06:28.305 +00:00 [INF] Executing endpoint 'HTTP: POST api/directories'
+2026-10-29 00:06:28.306 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 11)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-29 00:06:28.307 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:06:28.307 +00:00 [INF] Writing value of type 'FileDto' as Json.
+2026-10-29 00:06:28.307 +00:00 [INF] Executed endpoint 'HTTP: POST api/directories'
+2026-10-29 00:06:28.307 +00:00 [INF] HTTP POST /api/directories responded 200 in 2.8010 ms
+2026-10-29 00:06:28.308 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost:5293/api/directories - 200 null application/json; charset=utf-8 3.7136ms
+2026-10-29 00:06:28.329 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/files?limit=5000 - null null
+2026-10-29 00:06:28.329 +00:00 [INF] Executing endpoint 'HTTP: GET api/files'
+2026-10-29 00:06:28.330 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-29 00:06:28.331 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND NOT ("f"."IsDeleted")
+ORDER BY "f"."ChangeSeq"
+LIMIT @__p_1
+2026-10-29 00:06:28.332 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:06:28.332 +00:00 [INF] Writing value of type 'FileListResponse' as Json.
+2026-10-29 00:06:28.332 +00:00 [INF] Executed endpoint 'HTTP: GET api/files'
+2026-10-29 00:06:28.332 +00:00 [INF] HTTP GET /api/files responded 200 in 3.0289 ms
+2026-10-29 00:06:28.333 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/files?limit=5000 - 200 null application/json; charset=utf-8 3.9662ms
+2026-10-29 00:06:29.058 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:06:29.059 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:29.061 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:06:29.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:06:29.064 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:06:29.065 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:06:29.065 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:29.066 +00:00 [INF] HTTP GET /api/logs responded 200 in 6.7023 ms
+2026-10-29 00:06:29.066 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 8.0348ms
+2026-10-29 00:06:33.058 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:06:33.059 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:33.060 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:06:33.061 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:06:33.061 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:06:33.062 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:06:33.062 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:33.062 +00:00 [INF] HTTP GET /api/logs responded 200 in 3.7689 ms
+2026-10-29 00:06:33.063 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 4.7928ms
+2026-10-29 00:06:37.058 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:06:37.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:37.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:06:37.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:06:37.064 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:06:37.064 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:06:37.064 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:37.065 +00:00 [INF] HTTP GET /api/logs responded 200 in 5.6866 ms
+2026-10-29 00:06:37.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 7.0556ms
+2026-10-29 00:06:41.058 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:06:41.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:41.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:06:41.064 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:06:41.065 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:06:41.065 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:06:41.066 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:41.066 +00:00 [INF] HTTP GET /api/logs responded 200 in 6.6287 ms
+2026-10-29 00:06:41.067 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 8.2625ms
+2026-10-29 00:06:45.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:06:45.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:45.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:06:45.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:06:45.064 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:06:45.064 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:06:45.064 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:45.064 +00:00 [INF] HTTP GET /api/logs responded 200 in 4.9300 ms
+2026-10-29 00:06:45.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 5.9639ms
+2026-10-29 00:06:49.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:06:49.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:49.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:06:49.064 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:06:49.064 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:06:49.064 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:06:49.065 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:49.067 +00:00 [INF] HTTP GET /api/logs responded 200 in 6.3559 ms
+2026-10-29 00:06:49.067 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 8.3903ms
+2026-10-29 00:06:53.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:06:53.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:53.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:06:53.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:06:53.065 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:06:53.065 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:06:53.066 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:53.067 +00:00 [INF] HTTP GET /api/logs responded 200 in 6.9988 ms
+2026-10-29 00:06:53.068 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 8.5304ms
+2026-10-29 00:06:57.058 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:06:57.059 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:57.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:06:57.064 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:06:57.067 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:06:57.067 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:06:57.067 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:06:57.067 +00:00 [INF] HTTP GET /api/logs responded 200 in 8.5123 ms
+2026-10-29 00:06:57.067 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 9.068ms
+2026-10-29 00:07:01.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:07:01.067 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:01.071 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:07:01.076 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:07:01.080 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:07:01.081 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:07:01.082 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:01.083 +00:00 [INF] HTTP GET /api/logs responded 200 in 15.9888 ms
+2026-10-29 00:07:01.085 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 25.6831ms
+2026-10-29 00:07:05.061 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:07:05.062 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:05.065 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:07:05.066 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:07:05.068 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:07:05.068 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:07:05.069 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:05.069 +00:00 [INF] HTTP GET /api/logs responded 200 in 8.0754 ms
+2026-10-29 00:07:05.070 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 9.5636ms
+2026-10-29 00:07:09.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:07:09.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:09.067 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:07:09.069 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:07:09.070 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:07:09.072 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:07:09.074 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:09.076 +00:00 [INF] HTTP GET /api/logs responded 200 in 15.7101 ms
+2026-10-29 00:07:09.078 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 18.8076ms
+2026-10-29 00:07:13.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:07:13.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:13.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:07:13.064 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:07:13.065 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:07:13.065 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:07:13.066 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:13.066 +00:00 [INF] HTTP GET /api/logs responded 200 in 6.5936 ms
+2026-10-29 00:07:13.067 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 8.3669ms
+2026-10-29 00:07:17.058 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:07:17.059 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:17.061 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:07:17.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:07:17.063 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:07:17.064 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:07:17.065 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:17.065 +00:00 [INF] HTTP GET /api/logs responded 200 in 6.4730 ms
+2026-10-29 00:07:17.067 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 8.4706ms
+2026-10-29 00:07:21.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:07:21.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:21.064 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:07:21.067 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:07:21.068 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:07:21.069 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:07:21.069 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:21.070 +00:00 [INF] HTTP GET /api/logs responded 200 in 9.7867 ms
+2026-10-29 00:07:21.070 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 10.8253ms
+2026-10-29 00:07:25.058 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:07:25.058 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:25.059 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:07:25.060 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:07:25.061 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:07:25.061 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:07:25.061 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:25.063 +00:00 [INF] HTTP GET /api/logs responded 200 in 4.3682 ms
+2026-10-29 00:07:25.063 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 5.2358ms
+2026-10-29 00:07:28.234 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/status - null null
+2026-10-29 00:07:28.235 +00:00 [INF] Executing endpoint 'HTTP: GET api/status'
+2026-10-29 00:07:28.237 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:07:28.238 +00:00 [INF] Writing value of type 'StatusResponse' as Json.
+2026-10-29 00:07:28.238 +00:00 [INF] Executed endpoint 'HTTP: GET api/status'
+2026-10-29 00:07:28.239 +00:00 [INF] HTTP GET /api/status responded 200 in 4.2879 ms
+2026-10-29 00:07:28.240 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/status - 200 null application/json; charset=utf-8 5.9393ms
+2026-10-29 00:07:28.243 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/files?limit=10000 - null null
+2026-10-29 00:07:28.245 +00:00 [INF] Executing endpoint 'HTTP: GET api/files'
+2026-10-29 00:07:28.247 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-29 00:07:28.249 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND NOT ("f"."IsDeleted")
+ORDER BY "f"."ChangeSeq"
+LIMIT @__p_1
+2026-10-29 00:07:28.251 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:07:28.252 +00:00 [INF] Writing value of type 'FileListResponse' as Json.
+2026-10-29 00:07:28.253 +00:00 [INF] Executed endpoint 'HTTP: GET api/files'
+2026-10-29 00:07:28.254 +00:00 [INF] HTTP GET /api/files responded 200 in 9.6108 ms
+2026-10-29 00:07:28.255 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/files?limit=10000 - 200 null application/json; charset=utf-8 12.0942ms
+2026-10-29 00:07:28.267 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost:5293/api/directories - application/json; charset=utf-8 null
+2026-10-29 00:07:28.268 +00:00 [INF] Executing endpoint 'HTTP: POST api/directories'
+2026-10-29 00:07:28.269 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost:5293/api/directories - application/json; charset=utf-8 null
+2026-10-29 00:07:28.269 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 13)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-29 00:07:28.270 +00:00 [INF] Executing endpoint 'HTTP: POST api/directories'
+2026-10-29 00:07:28.270 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:07:28.271 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost:5293/api/directories - application/json; charset=utf-8 null
+2026-10-29 00:07:28.271 +00:00 [INF] Writing value of type 'FileDto' as Json.
+2026-10-29 00:07:28.272 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 8)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-29 00:07:28.273 +00:00 [INF] Executing endpoint 'HTTP: POST api/directories'
+2026-10-29 00:07:28.273 +00:00 [INF] Executed endpoint 'HTTP: POST api/directories'
+2026-10-29 00:07:28.274 +00:00 [INF] HTTP POST /api/directories responded 200 in 5.7183 ms
+2026-10-29 00:07:28.274 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost:5293/api/directories - 200 null application/json; charset=utf-8 7.3353ms
+2026-10-29 00:07:28.275 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 23)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-29 00:07:28.278 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:07:28.274 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:07:28.278 +00:00 [INF] Writing value of type 'FileDto' as Json.
+2026-10-29 00:07:28.279 +00:00 [INF] Executed endpoint 'HTTP: POST api/directories'
+2026-10-29 00:07:28.280 +00:00 [INF] HTTP POST /api/directories responded 200 in 10.4449 ms
+2026-10-29 00:07:28.278 +00:00 [INF] Writing value of type 'FileDto' as Json.
+2026-10-29 00:07:28.280 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost:5293/api/directories - 200 null application/json; charset=utf-8 11.6882ms
+2026-10-29 00:07:28.282 +00:00 [INF] Executed endpoint 'HTTP: POST api/directories'
+2026-10-29 00:07:28.282 +00:00 [INF] HTTP POST /api/directories responded 200 in 9.3231 ms
+2026-10-29 00:07:28.284 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost:5293/api/directories - 200 null application/json; charset=utf-8 12.7977ms
+2026-10-29 00:07:28.308 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/files?limit=5000 - null null
+2026-10-29 00:07:28.310 +00:00 [INF] Executing endpoint 'HTTP: GET api/files'
+2026-10-29 00:07:28.310 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-29 00:07:28.311 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND NOT ("f"."IsDeleted")
+ORDER BY "f"."ChangeSeq"
+LIMIT @__p_1
+2026-10-29 00:07:28.312 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:07:28.312 +00:00 [INF] Writing value of type 'FileListResponse' as Json.
+2026-10-29 00:07:28.312 +00:00 [INF] Executed endpoint 'HTTP: GET api/files'
+2026-10-29 00:07:28.312 +00:00 [INF] HTTP GET /api/files responded 200 in 2.6462 ms
+2026-10-29 00:07:28.312 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/files?limit=5000 - 200 null application/json; charset=utf-8 3.8429ms
+2026-10-29 00:07:29.060 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:07:29.061 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:29.064 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:07:29.065 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:07:29.066 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:07:29.066 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:07:29.066 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:29.066 +00:00 [INF] HTTP GET /api/logs responded 200 in 5.8080 ms
+2026-10-29 00:07:29.067 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 7.0606ms
+2026-10-29 00:07:33.060 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:07:33.061 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:33.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:07:33.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:07:33.064 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:07:33.064 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:07:33.064 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:33.064 +00:00 [INF] HTTP GET /api/logs responded 200 in 3.9238 ms
+2026-10-29 00:07:33.064 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 4.7277ms
+2026-10-29 00:07:37.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:07:37.061 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:37.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:07:37.065 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:07:37.068 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:07:37.071 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:07:37.072 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:37.075 +00:00 [INF] HTTP GET /api/logs responded 200 in 14.5078 ms
+2026-10-29 00:07:37.075 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 16.0772ms
+2026-10-29 00:07:41.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:07:41.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:41.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:07:41.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:07:41.064 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:07:41.064 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:07:41.064 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:41.064 +00:00 [INF] HTTP GET /api/logs responded 200 in 4.6458 ms
+2026-10-29 00:07:41.064 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 5.7433ms
+2026-10-29 00:07:41.795 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/ - null null
+2026-10-29 00:07:41.796 +00:00 [INF] HTTP GET / responded 404 in 0.2259 ms
+2026-10-29 00:07:41.797 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/ - 404 0 null 2.8173ms
+2026-10-29 00:07:41.799 +00:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5293/, Response status code: 404
+2026-10-29 00:07:45.058 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:07:45.059 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:45.061 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:07:45.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:07:45.064 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:07:45.064 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:07:45.065 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:45.065 +00:00 [INF] HTTP GET /api/logs responded 200 in 6.6010 ms
+2026-10-29 00:07:45.066 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 7.8409ms
+2026-10-29 00:07:49.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:07:49.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:49.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:07:49.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:07:49.064 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:07:49.065 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:07:49.066 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:07:49.067 +00:00 [INF] HTTP GET /api/logs responded 200 in 7.8287 ms
+2026-10-29 00:07:49.068 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 9.2169ms
+2026-10-29 00:07:51.733 +00:00 [INF] Application is shutting down...
+2026-10-29 00:07:57.513 +00:00 [INF] Executed DbCommand (10ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*) FROM "sqlite_master" WHERE "type" = 'table' AND "rootpage" IS NOT NULL;
+2026-10-29 00:07:57.796 +00:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "Users" AS "u")
+2026-10-29 00:07:57.860 +00:00 [INF] Executed DbCommand (3ms) [Parameters=[@__k_0='?' (Size = 14)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-29 00:07:57.865 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 15)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-29 00:07:57.866 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 16)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-29 00:07:57.867 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 22)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-29 00:07:57.868 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__k_0='?' (Size = 21)], CommandType='"Text"', CommandTimeout='30']
+SELECT EXISTS (
+    SELECT 1
+    FROM "ApiSettings" AS "a"
+    WHERE "a"."Key" = @__k_0)
+2026-10-29 00:07:57.897 +00:00 [INF] User profile is available. Using '/home/user/.aspnet/DataProtection-Keys' as key repository; keys will not be encrypted at rest.
+2026-10-29 00:07:58.067 +00:00 [INF] Now listening on: http://localhost:5293
+2026-10-29 00:07:58.070 +00:00 [INF] Application started. Press Ctrl+C to shut down.
+2026-10-29 00:07:58.070 +00:00 [INF] Hosting environment: Development
+2026-10-29 00:07:58.070 +00:00 [INF] Content root path: /home/user/Documents/FolderSyncEr/src/FolderSyncEr.Server
+2026-10-29 00:08:01.132 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:08:01.321 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:01.385 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:08:01.412 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:08:01.419 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:01.437 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:08:01.448 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:01.450 +00:00 [INF] HTTP GET /api/logs responded 200 in 226.0035 ms
+2026-10-29 00:08:01.456 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 324.9744ms
+2026-10-29 00:08:05.062 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:08:05.071 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:05.133 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:08:05.135 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:08:05.137 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:05.137 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:08:05.138 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:05.139 +00:00 [INF] HTTP GET /api/logs responded 200 in 72.2659 ms
+2026-10-29 00:08:05.140 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 77.7667ms
+2026-10-29 00:08:09.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:08:09.071 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:09.076 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:08:09.078 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:08:09.079 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:09.079 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:08:09.080 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:09.080 +00:00 [INF] HTTP GET /api/logs responded 200 in 15.2096 ms
+2026-10-29 00:08:09.081 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 21.6308ms
+2026-10-29 00:08:11.993 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/ - null null
+2026-10-29 00:08:12.025 +00:00 [INF] Sending file. Request path: '/index.html'. Physical path: '/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Server/wwwroot/index.html'
+2026-10-29 00:08:12.025 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/index.html - 200 14101 text/html 31.6999ms
+2026-10-29 00:08:12.045 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/app.js - null null
+2026-10-29 00:08:12.057 +00:00 [INF] Sending file. Request path: '/app.js'. Physical path: '/home/user/Documents/FolderSyncEr/src/FolderSyncEr.Server/wwwroot/app.js'
+2026-10-29 00:08:12.060 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/app.js - 200 22166 text/javascript 14.5605ms
+2026-10-29 00:08:12.090 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/favicon.ico - null null
+2026-10-29 00:08:12.092 +00:00 [INF] HTTP GET /favicon.ico responded 404 in 0.3964 ms
+2026-10-29 00:08:12.093 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/favicon.ico - 404 0 null 2.6966ms
+2026-10-29 00:08:12.094 +00:00 [INF] Request reached the end of the middleware pipeline without being handled by application code. Request path: GET http://localhost:5293/favicon.ico, Response status code: 404
+2026-10-29 00:08:12.104 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/status - null null
+2026-10-29 00:08:12.105 +00:00 [INF] Executing endpoint 'HTTP: GET api/status'
+2026-10-29 00:08:12.113 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:12.132 +00:00 [INF] Writing value of type 'StatusResponse' as Json.
+2026-10-29 00:08:12.135 +00:00 [INF] Executed endpoint 'HTTP: GET api/status'
+2026-10-29 00:08:12.136 +00:00 [INF] HTTP GET /api/status responded 200 in 30.6250 ms
+2026-10-29 00:08:12.136 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/status - 200 null application/json; charset=utf-8 31.591ms
+2026-10-29 00:08:13.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:08:13.063 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:13.066 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:08:13.070 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:08:13.073 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:13.073 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:08:13.074 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:13.075 +00:00 [INF] HTTP GET /api/logs responded 200 in 14.5749 ms
+2026-10-29 00:08:13.076 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 16.9354ms
+2026-10-29 00:08:15.392 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost:5293/api/auth/login - application/json 122
+2026-10-29 00:08:15.418 +00:00 [INF] Executing endpoint 'HTTP: POST api/auth/login'
+2026-10-29 00:08:15.488 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__ToLower_0='?' (Size = 5)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."Id", "u"."CreatedUtc", "u"."IsDisabled", "u"."LastLoginUtc", "u"."PasswordHash", "u"."Role", "u"."Username"
+FROM "Users" AS "u"
+WHERE lower("u"."Username") = @__ToLower_0
+LIMIT 1
+2026-10-29 00:08:15.641 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__deviceId_0='?' (Size = 19), @__user_Id_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "d"."Id", "d"."CreatedUtc", "d"."IsRevoked", "d"."LastSeenUtc", "d"."Name", "d"."UserId"
+FROM "Devices" AS "d"
+WHERE "d"."Id" = @__deviceId_0 AND "d"."UserId" = @__user_Id_1
+LIMIT 1
+2026-10-29 00:08:15.794 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 19), @p1='?' (DbType = DateTime), @p2='?' (DbType = Boolean), @p3='?' (DbType = DateTime), @p4='?' (Size = 22), @p5='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "Devices" ("Id", "CreatedUtc", "IsRevoked", "LastSeenUtc", "Name", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5);
+2026-10-29 00:08:15.799 +00:00 [INF] Executed DbCommand (1ms) [Parameters=[@p0='?' (DbType = DateTime), @p1='?' (Size = 19), @p2='?' (DbType = DateTime), @p3='?' (DbType = Int32), @p4='?' (DbType = DateTime), @p5='?' (Size = 64), @p6='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "RefreshTokens" ("CreatedUtc", "DeviceId", "ExpiresUtc", "ReplacedByTokenId", "RevokedUtc", "TokenHash", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6)
+RETURNING "Id";
+2026-10-29 00:08:15.814 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p1='?' (DbType = Int32), @p0='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+UPDATE "Users" SET "LastLoginUtc" = @p0
+WHERE "Id" = @p1
+RETURNING 1;
+2026-10-29 00:08:15.832 +00:00 [INF] User 'admin' logged in successfully on device 'web-viewer-0blci4ah'
+2026-10-29 00:08:15.857 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p0='?' (Size = 5), @p1='?' (Size = 22), @p2='?' (Size = 19), @p3='?' (Size = 44), @p4='?', @p5='?' (Size = 7), @p6='?' (DbType = DateTime), @p7='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+INSERT INTO "ActivityLog" ("Action", "CorrelationId", "DeviceId", "Message", "Path", "Result", "TimestampUtc", "UserId")
+VALUES (@p0, @p1, @p2, @p3, @p4, @p5, @p6, @p7)
+RETURNING "Id";
+2026-10-29 00:08:15.861 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:15.864 +00:00 [INF] Writing value of type 'LoginResponse' as Json.
+2026-10-29 00:08:15.866 +00:00 [INF] Executed endpoint 'HTTP: POST api/auth/login'
+2026-10-29 00:08:15.866 +00:00 [INF] HTTP POST /api/auth/login responded 200 in 472.7869 ms
+2026-10-29 00:08:15.866 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost:5293/api/auth/login - 200 null application/json; charset=utf-8 474.0729ms
+2026-10-29 00:08:15.869 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/files?includeDeleted=false&limit=1000 - null null
+2026-10-29 00:08:15.870 +00:00 [INF] Executing endpoint 'HTTP: GET api/files'
+2026-10-29 00:08:15.887 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-29 00:08:15.909 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND NOT ("f"."IsDeleted")
+ORDER BY "f"."ChangeSeq"
+LIMIT @__p_1
+2026-10-29 00:08:15.912 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:15.916 +00:00 [INF] Writing value of type 'FileListResponse' as Json.
+2026-10-29 00:08:15.920 +00:00 [INF] Executed endpoint 'HTTP: GET api/files'
+2026-10-29 00:08:15.920 +00:00 [INF] HTTP GET /api/files responded 200 in 50.0213 ms
+2026-10-29 00:08:15.921 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/files?includeDeleted=false&limit=1000 - 200 null application/json; charset=utf-8 50.904ms
+2026-10-29 00:08:17.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:08:17.061 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:17.065 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:08:17.066 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:08:17.067 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:17.067 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:08:17.067 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:17.067 +00:00 [INF] HTTP GET /api/logs responded 200 in 6.9759 ms
+2026-10-29 00:08:17.068 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 8.5889ms
+2026-10-29 00:08:21.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:08:21.061 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:21.064 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:08:21.066 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:08:21.068 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:21.069 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:08:21.070 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:21.071 +00:00 [INF] HTTP GET /api/logs responded 200 in 10.7122 ms
+2026-10-29 00:08:21.072 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 12.257ms
+2026-10-29 00:08:25.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:08:25.062 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:25.065 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:08:25.067 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:08:25.068 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:25.069 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:08:25.070 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:25.071 +00:00 [INF] HTTP GET /api/logs responded 200 in 9.7859 ms
+2026-10-29 00:08:25.072 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 12.173ms
+2026-10-29 00:08:28.235 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/status - null null
+2026-10-29 00:08:28.237 +00:00 [INF] Executing endpoint 'HTTP: GET api/status'
+2026-10-29 00:08:28.248 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:28.249 +00:00 [INF] Writing value of type 'StatusResponse' as Json.
+2026-10-29 00:08:28.249 +00:00 [INF] Executed endpoint 'HTTP: GET api/status'
+2026-10-29 00:08:28.250 +00:00 [INF] HTTP GET /api/status responded 200 in 13.7382 ms
+2026-10-29 00:08:28.250 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/status - 200 null application/json; charset=utf-8 15.0394ms
+2026-10-29 00:08:28.251 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/files?limit=10000 - null null
+2026-10-29 00:08:28.252 +00:00 [INF] Executing endpoint 'HTTP: GET api/files'
+2026-10-29 00:08:28.253 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-29 00:08:28.255 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND NOT ("f"."IsDeleted")
+ORDER BY "f"."ChangeSeq"
+LIMIT @__p_1
+2026-10-29 00:08:28.255 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:28.255 +00:00 [INF] Writing value of type 'FileListResponse' as Json.
+2026-10-29 00:08:28.256 +00:00 [INF] Executed endpoint 'HTTP: GET api/files'
+2026-10-29 00:08:28.256 +00:00 [INF] HTTP GET /api/files responded 200 in 4.3723 ms
+2026-10-29 00:08:28.256 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/files?limit=10000 - 200 null application/json; charset=utf-8 5.1698ms
+2026-10-29 00:08:28.262 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost:5293/api/directories - application/json; charset=utf-8 null
+2026-10-29 00:08:28.263 +00:00 [INF] Executing endpoint 'HTTP: POST api/directories'
+2026-10-29 00:08:28.280 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__pathKey_1='?' (Size = 11)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND "f"."PathKey" = @__pathKey_1
+LIMIT 1
+2026-10-29 00:08:28.304 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:28.304 +00:00 [INF] Writing value of type 'FileDto' as Json.
+2026-10-29 00:08:28.305 +00:00 [INF] Executed endpoint 'HTTP: POST api/directories'
+2026-10-29 00:08:28.305 +00:00 [INF] HTTP POST /api/directories responded 200 in 42.8550 ms
+2026-10-29 00:08:28.305 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost:5293/api/directories - 200 null application/json; charset=utf-8 43.3368ms
+2026-10-29 00:08:28.326 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/files?limit=5000 - null null
+2026-10-29 00:08:28.326 +00:00 [INF] Executing endpoint 'HTTP: GET api/files'
+2026-10-29 00:08:28.327 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-29 00:08:28.328 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND NOT ("f"."IsDeleted")
+ORDER BY "f"."ChangeSeq"
+LIMIT @__p_1
+2026-10-29 00:08:28.329 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:28.329 +00:00 [INF] Writing value of type 'FileListResponse' as Json.
+2026-10-29 00:08:28.329 +00:00 [INF] Executed endpoint 'HTTP: GET api/files'
+2026-10-29 00:08:28.329 +00:00 [INF] HTTP GET /api/files responded 200 in 3.4581 ms
+2026-10-29 00:08:28.330 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/files?limit=5000 - 200 null application/json; charset=utf-8 4.1089ms
+2026-10-29 00:08:29.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:08:29.061 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:29.064 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:08:29.065 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:08:29.066 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:29.066 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:08:29.067 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:29.067 +00:00 [INF] HTTP GET /api/logs responded 200 in 6.5753 ms
+2026-10-29 00:08:29.067 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 8.158ms
+2026-10-29 00:08:33.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:08:33.061 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:33.065 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:08:33.068 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:08:33.071 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:33.071 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:08:33.072 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:33.072 +00:00 [INF] HTTP GET /api/logs responded 200 in 12.5895 ms
+2026-10-29 00:08:33.073 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 14.6447ms
+2026-10-29 00:08:37.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:08:37.061 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:37.065 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:08:37.066 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:08:37.067 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:37.067 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:08:37.067 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:37.067 +00:00 [INF] HTTP GET /api/logs responded 200 in 6.8830 ms
+2026-10-29 00:08:37.068 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 8.7165ms
+2026-10-29 00:08:41.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:08:41.061 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:41.064 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:08:41.067 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:08:41.070 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:41.071 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:08:41.072 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:41.073 +00:00 [INF] HTTP GET /api/logs responded 200 in 12.8526 ms
+2026-10-29 00:08:41.075 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 15.8632ms
+2026-10-29 00:08:41.246 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/files?includeDeleted=true&limit=1000 - null null
+2026-10-29 00:08:41.249 +00:00 [INF] Executing endpoint 'HTTP: GET api/files'
+2026-10-29 00:08:41.254 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-29 00:08:41.269 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0
+ORDER BY "f"."ChangeSeq"
+LIMIT @__p_1
+2026-10-29 00:08:41.270 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:41.271 +00:00 [INF] Writing value of type 'FileListResponse' as Json.
+2026-10-29 00:08:41.272 +00:00 [INF] Executed endpoint 'HTTP: GET api/files'
+2026-10-29 00:08:41.272 +00:00 [INF] HTTP GET /api/files responded 200 in 24.1932 ms
+2026-10-29 00:08:41.275 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/files?includeDeleted=true&limit=1000 - 200 null application/json; charset=utf-8 28.6833ms
+2026-10-29 00:08:42.640 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/files?includeDeleted=false&limit=1000 - null null
+2026-10-29 00:08:42.642 +00:00 [INF] Executing endpoint 'HTTP: GET api/files'
+2026-10-29 00:08:42.643 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-29 00:08:42.643 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0 AND NOT ("f"."IsDeleted")
+ORDER BY "f"."ChangeSeq"
+LIMIT @__p_1
+2026-10-29 00:08:42.646 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:42.646 +00:00 [INF] Writing value of type 'FileListResponse' as Json.
+2026-10-29 00:08:42.646 +00:00 [INF] Executed endpoint 'HTTP: GET api/files'
+2026-10-29 00:08:42.646 +00:00 [INF] HTTP GET /api/files responded 200 in 5.1562 ms
+2026-10-29 00:08:42.647 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/files?includeDeleted=false&limit=1000 - 200 null application/json; charset=utf-8 7.0492ms
+2026-10-29 00:08:43.283 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/files?includeDeleted=true&limit=1000 - null null
+2026-10-29 00:08:43.284 +00:00 [INF] Executing endpoint 'HTTP: GET api/files'
+2026-10-29 00:08:43.286 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-29 00:08:43.288 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0
+ORDER BY "f"."ChangeSeq"
+LIMIT @__p_1
+2026-10-29 00:08:43.289 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:43.290 +00:00 [INF] Writing value of type 'FileListResponse' as Json.
+2026-10-29 00:08:43.290 +00:00 [INF] Executed endpoint 'HTTP: GET api/files'
+2026-10-29 00:08:43.291 +00:00 [INF] HTTP GET /api/files responded 200 in 6.5228 ms
+2026-10-29 00:08:43.291 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/files?includeDeleted=true&limit=1000 - 200 null application/json; charset=utf-8 7.9823ms
+2026-10-29 00:08:45.058 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:08:45.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:45.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:08:45.067 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:08:45.068 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:45.070 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:08:45.071 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:45.073 +00:00 [INF] HTTP GET /api/logs responded 200 in 13.5324 ms
+2026-10-29 00:08:45.074 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 15.7189ms
+2026-10-29 00:08:49.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:08:49.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:49.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:08:49.065 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:08:49.066 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:49.066 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:08:49.068 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:49.069 +00:00 [INF] HTTP GET /api/logs responded 200 in 9.0956 ms
+2026-10-29 00:08:49.070 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 11.1421ms
+2026-10-29 00:08:50.283 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/files?includeDeleted=true&limit=1000 - null null
+2026-10-29 00:08:50.285 +00:00 [INF] Executing endpoint 'HTTP: GET api/files'
+2026-10-29 00:08:50.286 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "u"."LastChangeSeq"
+FROM "UserCounters" AS "u"
+WHERE "u"."UserId" = @__userId_0
+LIMIT 1
+2026-10-29 00:08:50.287 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT "f"."Id", "f"."ChangeSeq", "f"."DeletedAtUtc", "f"."IsDeleted", "f"."IsDirectory", "f"."LastModifiedUtc", "f"."Path", "f"."PathKey", "f"."Sha256", "f"."Size", "f"."UploadedAtUtc", "f"."UploadedByDeviceId", "f"."UserId", "f"."Version"
+FROM "Files" AS "f"
+WHERE "f"."UserId" = @__userId_0
+ORDER BY "f"."ChangeSeq"
+LIMIT @__p_1
+2026-10-29 00:08:50.288 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:50.288 +00:00 [INF] Writing value of type 'FileListResponse' as Json.
+2026-10-29 00:08:50.288 +00:00 [INF] Executed endpoint 'HTTP: GET api/files'
+2026-10-29 00:08:50.288 +00:00 [INF] HTTP GET /api/files responded 200 in 4.1531 ms
+2026-10-29 00:08:50.288 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/files?includeDeleted=true&limit=1000 - 200 null application/json; charset=utf-8 5.4771ms
+2026-10-29 00:08:53.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:08:53.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:53.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:08:53.068 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:08:53.069 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:53.070 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:08:53.070 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:53.071 +00:00 [INF] HTTP GET /api/logs responded 200 in 11.1746 ms
+2026-10-29 00:08:53.072 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 13.2284ms
+2026-10-29 00:08:57.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:08:57.061 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:57.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:08:57.065 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:08:57.065 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:57.065 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:08:57.066 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:08:57.066 +00:00 [INF] HTTP GET /api/logs responded 200 in 5.1225 ms
+2026-10-29 00:08:57.066 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 6.5612ms
+2026-10-29 00:08:59.744 +00:00 [INF] Request starting HTTP/1.1 POST http://localhost:5293/api/auth/logout - null 0
+2026-10-29 00:08:59.749 +00:00 [INF] Executing endpoint 'HTTP: POST api/auth/logout'
+2026-10-29 00:08:59.779 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__userId_0='?' (DbType = Int32), @__deviceId_1='?' (Size = 19)], CommandType='"Text"', CommandTimeout='30']
+SELECT "r"."Id", "r"."CreatedUtc", "r"."DeviceId", "r"."ExpiresUtc", "r"."ReplacedByTokenId", "r"."RevokedUtc", "r"."TokenHash", "r"."UserId"
+FROM "RefreshTokens" AS "r"
+WHERE "r"."UserId" = @__userId_0 AND "r"."DeviceId" = @__deviceId_1 AND "r"."RevokedUtc" IS NULL
+2026-10-29 00:08:59.781 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@p1='?' (DbType = Int32), @p0='?' (DbType = DateTime)], CommandType='"Text"', CommandTimeout='30']
+UPDATE "RefreshTokens" SET "RevokedUtc" = @p0
+WHERE "Id" = @p1
+RETURNING 1;
+2026-10-29 00:08:59.785 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:08:59.785 +00:00 [INF] Executed endpoint 'HTTP: POST api/auth/logout'
+2026-10-29 00:08:59.785 +00:00 [INF] HTTP POST /api/auth/logout responded 200 in 37.0767 ms
+2026-10-29 00:08:59.786 +00:00 [INF] Request finished HTTP/1.1 POST http://localhost:5293/api/auth/logout - 200 0 null 41.7486ms
+2026-10-29 00:09:01.060 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:09:01.061 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:09:01.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:09:01.064 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:09:01.065 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:09:01.065 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:09:01.065 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:09:01.066 +00:00 [INF] HTTP GET /api/logs responded 200 in 4.9208 ms
+2026-10-29 00:09:01.066 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 6.5213ms
+2026-10-29 00:09:05.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:09:05.060 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:09:05.061 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:09:05.062 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:09:05.063 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:09:05.063 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:09:05.063 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:09:05.064 +00:00 [INF] HTTP GET /api/logs responded 200 in 3.9022 ms
+2026-10-29 00:09:05.064 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 4.9236ms
+2026-10-29 00:09:09.062 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:09:09.063 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:09:09.064 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:09:09.066 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:09:09.067 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:09:09.068 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:09:09.068 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:09:09.068 +00:00 [INF] HTTP GET /api/logs responded 200 in 6.0187 ms
+2026-10-29 00:09:09.069 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 6.915ms
+2026-10-29 00:09:13.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:09:13.061 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:09:13.066 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:09:13.068 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:09:13.070 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:09:13.071 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:09:13.071 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:09:13.073 +00:00 [INF] HTTP GET /api/logs responded 200 in 12.4152 ms
+2026-10-29 00:09:13.073 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 14.409ms
+2026-10-29 00:09:17.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:09:17.061 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:09:17.065 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:09:17.069 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:09:17.069 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:09:17.070 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:09:17.070 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:09:17.070 +00:00 [INF] HTTP GET /api/logs responded 200 in 10.2466 ms
+2026-10-29 00:09:17.071 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 11.6374ms
+2026-10-29 00:09:21.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:09:21.061 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:09:21.063 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:09:21.064 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:09:21.064 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:09:21.064 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:09:21.065 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:09:21.065 +00:00 [INF] HTTP GET /api/logs responded 200 in 4.8640 ms
+2026-10-29 00:09:21.065 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 6.3576ms
+2026-10-29 00:09:25.059 +00:00 [INF] Request starting HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - null null
+2026-10-29 00:09:25.061 +00:00 [INF] Executing endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:09:25.064 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT COUNT(*)
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+2026-10-29 00:09:25.066 +00:00 [INF] Executed DbCommand (0ms) [Parameters=[@__callerUserId_0='?' (DbType = Int32), @__p_2='?' (DbType = Int32), @__p_1='?' (DbType = Int32)], CommandType='"Text"', CommandTimeout='30']
+SELECT CAST("a"."Id" AS INTEGER), "a"."TimestampUtc", "a"."UserId", "a"."DeviceId", "a"."Action", "a"."Path", "a"."Result", "a"."Message", "a"."CorrelationId"
+FROM "ActivityLog" AS "a"
+WHERE "a"."UserId" = @__callerUserId_0
+ORDER BY "a"."TimestampUtc" DESC
+LIMIT @__p_2 OFFSET @__p_1
+2026-10-29 00:09:25.067 +00:00 [INF] Setting HTTP status code 200.
+2026-10-29 00:09:25.067 +00:00 [INF] Writing value of type 'PagedResult`1' as Json.
+2026-10-29 00:09:25.067 +00:00 [INF] Executed endpoint 'HTTP: GET api/logs/'
+2026-10-29 00:09:25.067 +00:00 [INF] HTTP GET /api/logs responded 200 in 6.6434 ms
+2026-10-29 00:09:25.067 +00:00 [INF] Request finished HTTP/1.1 GET http://localhost:5293/api/logs?page=1&pageSize=100 - 200 null application/json; charset=utf-8 7.7312ms
+2026-10-29 00:09:27.631 +00:00 [INF] Application is shutting down...

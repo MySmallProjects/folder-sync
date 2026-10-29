@@ -137,6 +137,23 @@ public class TrashEndpointTests : IClassFixture<TestServerFixture>
         Assert.DoesNotContain(trashAfter!, i => i.Id == f1.Id || i.Id == f2.Id);
     }
 
+    [Fact]
+    public async Task StaticWebViewer_ServesIndexHtmlAndAppJs()
+    {
+        using var client = _fixture.CreateClient();
+
+        var htmlRes = await client.GetAsync("/");
+        Assert.Equal(HttpStatusCode.OK, htmlRes.StatusCode);
+        var html = await htmlRes.Content.ReadAsStringAsync();
+        Assert.Contains("FolderSyncEr Server Viewer", html);
+
+        var jsRes = await client.GetAsync("/app.js");
+        Assert.Equal(HttpStatusCode.OK, jsRes.StatusCode);
+        var js = await jsRes.Content.ReadAsStringAsync();
+        Assert.Contains("/api/auth/login", js);
+        Assert.Contains("/api/files", js);
+    }
+
     private static async Task<FileDto> UploadFileAsync(HttpClient client, string path, string content)
     {
         using var req = new HttpRequestMessage(HttpMethod.Put, $"{ApiRoutes.Files}?path={Uri.EscapeDataString(path)}");
