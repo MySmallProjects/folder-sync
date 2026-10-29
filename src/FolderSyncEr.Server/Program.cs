@@ -209,6 +209,12 @@ using (var scope = app.Services.CreateScope())
     blobStorage.CleanupTempFiles();
 }
 
+var serverAssembly = typeof(Program).Assembly;
+Log.Information(
+    "FolderSyncEr.Server starting — Version: v{Version}, Compiled: {CompiledUtc:yyyy-MM-dd HH:mm:ss 'UTC'}",
+    FolderSyncEr.Contracts.BuildInfo.GetVersionString(serverAssembly),
+    FolderSyncEr.Contracts.BuildInfo.GetBuildDateUtc(serverAssembly));
+
 app.Run();
 
 // Partial class for WebApplicationFactory in integration tests

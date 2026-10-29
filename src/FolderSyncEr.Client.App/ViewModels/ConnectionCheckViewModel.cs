@@ -27,6 +27,9 @@ public partial class ConnectionCheckViewModel : ViewModelBase
     private string _statusText = "Not checked";
 
     [ObservableProperty]
+    private string _serverVersionText = "-";
+
+    [ObservableProperty]
     private string _latencyText = "-";
 
     [ObservableProperty]
@@ -132,6 +135,7 @@ public partial class ConnectionCheckViewModel : ViewModelBase
             var result = await _api.CheckConnectionAsync();
             IsConnected = result.IsConnected;
             StatusText = result.Status;
+            ServerVersionText = !string.IsNullOrWhiteSpace(result.Version) ? $"v{result.Version}" : "-";
             LatencyText = $"{result.LatencyMs} ms";
             ServerTimeText = result.ServerTimeUtc?.ToString("yyyy-MM-dd HH:mm:ss 'UTC'") ?? "-";
             ServerCompiledText = result.CompiledUtc?.ToString("yyyy-MM-dd HH:mm:ss 'UTC'") ?? "-";
@@ -141,6 +145,7 @@ public partial class ConnectionCheckViewModel : ViewModelBase
         {
             IsConnected = false;
             StatusText = "Error";
+            ServerVersionText = "-";
             LatencyText = "-";
             ServerTimeText = "-";
             ServerCompiledText = "-";

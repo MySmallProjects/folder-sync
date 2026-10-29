@@ -523,20 +523,24 @@
                                     </Grid>
                                     <TextBlock Text="{Binding ErrorMessage}" Foreground="#EF4444" FontSize="12"
                                                IsVisible="{Binding HasErrorMessage}"/>
-                                    <Grid ColumnDefinitions="*,*,*,*" Margin="0,8,0,0">
+                                    <Grid ColumnDefinitions="*,*,*,*,*" Margin="0,8,0,0">
                                         <StackPanel Grid.Column="0">
                                             <TextBlock Text="STATUS" FontSize="10" Foreground="#9CA3AF" FontWeight="Bold"/>
                                             <TextBlock Text="{Binding StatusText}" FontSize="14" FontWeight="SemiBold" Foreground="#F3F4F6"/>
                                         </StackPanel>
                                         <StackPanel Grid.Column="1">
+                                            <TextBlock Text="SERVER VERSION" FontSize="10" Foreground="#9CA3AF" FontWeight="Bold"/>
+                                            <TextBlock Text="{Binding ServerVersionText}" FontSize="14" FontWeight="SemiBold" Foreground="#60A5FA"/>
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2">
                                             <TextBlock Text="LATENCY" FontSize="10" Foreground="#9CA3AF" FontWeight="Bold"/>
                                             <TextBlock Text="{Binding LatencyText}" FontSize="14" FontWeight="SemiBold" Foreground="#F3F4F6"/>
                                         </StackPanel>
-                                        <StackPanel Grid.Column="2">
+                                        <StackPanel Grid.Column="3">
                                             <TextBlock Text="SERVER CLOCK (UTC)" FontSize="10" Foreground="#9CA3AF" FontWeight="Bold"/>
                                             <TextBlock Text="{Binding ServerTimeText}" FontSize="14" FontWeight="SemiBold" Foreground="#F3F4F6"/>
                                         </StackPanel>
-                                        <StackPanel Grid.Column="3">
+                                        <StackPanel Grid.Column="4">
                                             <TextBlock Text="SERVER COMPILED (UTC)" FontSize="10" Foreground="#9CA3AF" FontWeight="Bold"/>
                                             <TextBlock Text="{Binding ServerCompiledText}" FontSize="14" FontWeight="SemiBold" Foreground="#60A5FA"/>
                                         </StackPanel>

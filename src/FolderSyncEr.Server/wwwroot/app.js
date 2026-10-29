@@ -88,7 +88,8 @@ async function checkServerStatus() {
         const res = await fetch('/api/status');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
-        statusBadge.textContent = `Online • v${data.version}`;
+        const compiledStr = data.compiledUtc ? ` • Built ${formatUtc(data.compiledUtc)}` : '';
+        statusBadge.textContent = `Online • v${data.version}${compiledStr}`;
         statusBadge.className = 'badge online';
     } catch {
         statusBadge.textContent = 'Server Offline';
