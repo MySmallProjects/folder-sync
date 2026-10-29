@@ -23,22 +23,41 @@ public class AuthHeaderHandler : DelegatingHandler
             return await base.SendAsync(request, cancellationToken);
         }
 
-        using var refreshClient = new HttpClient();
-        var token = await _tokenManager.GetValidAccessTokenAsync(refreshClient, cancellationToken);
+        var serverBaseUrl = request.RequestUri?.GetLeftPart(UriPartial.Authority);
+        using var refreshClient = InnerHandler != null
+            ? new HttpClient(InnerHandler, disposeHandler: false)
+            : new HttpClient();
+
+        var token = await _tokenManager.GetValidAccessTokenAsync(
+            refreshClient,
+            cancellationToken,
+            forceRefresh: false,
+            serverUrlOverride: serverBaseUrl);
+
         if (!string.IsNullOrEmpty(token))
         {
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
+        else if (_tokenManager.CurrentSession != null)
+        {
+            // A session exists on disk, but token refresh could not reach the server.
+            // Fail fast with HttpRequestException rather than making a second unauthenticated socket call.
+            throw new HttpRequestException($"Server at {serverBaseUrl} is unreachable (unable to refresh access token).");
+        }
 
         var response = await base.SendAsync(request, cancellationToken);
 
-        // If 401, try to refresh once and replay
+        // If 401, force a single-flight refresh against the server and replay if a new token was obtained
         if (response.StatusCode == HttpStatusCode.Unauthorized && !string.IsNullOrEmpty(token))
         {
-            var refreshedToken = await _tokenManager.GetValidAccessTokenAsync(refreshClient, cancellationToken);
+            var refreshedToken = await _tokenManager.GetValidAccessTokenAsync(
+                refreshClient,
+                cancellationToken,
+                forceRefresh: true,
+                serverUrlOverride: serverBaseUrl);
+
             if (!string.IsNullOrEmpty(refreshedToken) && refreshedToken != token)
             {
-                // Clone request for replay if content is replayable
                 request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", refreshedToken);
                 return await base.SendAsync(request, cancellationToken);
             }
@@ -47,4 +66,3 @@ public class AuthHeaderHandler : DelegatingHandler
         return response;
     }
 }
-

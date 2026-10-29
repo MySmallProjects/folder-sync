@@ -834,4 +834,76 @@ public class Phase4ViewModelTests
         Assert.Single(loginVm.LoggedInDevices);
         Assert.Equal("dev-current-123", loginVm.LoggedInDevices[0].Id);
     }
+
+    [Fact]
+    public async Task AuthTokenManager_And_LoginViewModel_HandleOfflineAndRejectedTokenRefreshCleanly()
+    {
+        var tempSettingsFile = Path.Combine(Path.GetTempPath(), $"FolderSyncEr_RefreshSettings_{Guid.NewGuid():N}.json");
+        try
+        {
+            var manager = new ClientSettingsManager(tempSettingsFile);
+            await manager.SaveSettingsAsync(new ClientSettings { ServerUrl = "http://localhost:5006" });
+
+            var api = new FakeFileSyncApi();
+            var secretStore = new TestSecretStore();
+            var tokenManager = new AuthTokenManager(secretStore, Microsoft.Extensions.Logging.Abstractions.NullLogger<AuthTokenManager>.Instance);
+
+            // Session originally saved with stale port 5293 and an expired access token
+            await tokenManager.SaveSessionAsync(new AuthSession
+            {
+                ServerUrl = "http://localhost:5293",
+                DeviceId = "dev-123",
+                Username = "admin",
+                Role = "Admin",
+                AccessToken = "expired-access",
+                AccessTokenExpiresUtc = DateTime.UtcNow.AddMinutes(-10),
+                RefreshToken = "valid-refresh",
+                RefreshTokenExpiresUtc = DateTime.UtcNow.AddDays(7)
+            });
+
+            var loginVm = new LoginViewModel(api, tokenManager, manager);
+            await loginVm.InitializeSessionAsync(fetchDevicesFromServer: false);
+
+            // 1. Stored session ServerUrl should be updated to settings.json URL (http://localhost:5006)
+            var updatedSession = await tokenManager.GetSessionAsync();
+            Assert.NotNull(updatedSession);
+            Assert.Equal("http://localhost:5006", updatedSession!.ServerUrl);
+            Assert.True(loginVm.IsLoggedIn);
+
+            // 2. When server is unreachable (Connection refused), refresh returns null without wiping session
+            using var offlineClient = new HttpClient(new ThrowingHttpMessageHandler(new System.Net.Http.HttpRequestException("Connection refused")));
+            var tokenWhileOffline = await tokenManager.GetValidAccessTokenAsync(offlineClient);
+            Assert.Null(tokenWhileOffline);
+            Assert.NotNull(await tokenManager.GetSessionAsync());
+            Assert.True(loginVm.IsLoggedIn);
+
+            // 3. When server rejects refresh token (401 Unauthorized, e.g. after server reset), session is cleared and LoginViewModel signs out
+            using var unauthorizedClient = new HttpClient(new StatusCodeHttpMessageHandler(System.Net.HttpStatusCode.Unauthorized));
+            var tokenAfterReject = await tokenManager.GetValidAccessTokenAsync(unauthorizedClient);
+            Assert.Null(tokenAfterReject);
+            Assert.Null(await tokenManager.GetSessionAsync());
+            Assert.False(loginVm.IsLoggedIn);
+            Assert.True(loginVm.HasErrorMessage);
+        }
+        finally
+        {
+            if (File.Exists(tempSettingsFile)) File.Delete(tempSettingsFile);
+        }
+    }
+
+    private sealed class ThrowingHttpMessageHandler : System.Net.Http.HttpMessageHandler
+    {
+        private readonly Exception _exception;
+        public ThrowingHttpMessageHandler(Exception exception) => _exception = exception;
+        protected override Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage request, CancellationToken cancellationToken)
+            => Task.FromException<System.Net.Http.HttpResponseMessage>(_exception);
+    }
+
+    private sealed class StatusCodeHttpMessageHandler : System.Net.Http.HttpMessageHandler
+    {
+        private readonly System.Net.HttpStatusCode _statusCode;
+        public StatusCodeHttpMessageHandler(System.Net.HttpStatusCode statusCode) => _statusCode = statusCode;
+        protected override Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage request, CancellationToken cancellationToken)
+            => Task.FromResult(new System.Net.Http.HttpResponseMessage(_statusCode));
+    }
 }

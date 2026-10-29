@@ -14,6 +14,7 @@ namespace FolderSyncEr.Client.App.ViewModels;
 public partial class LogsViewModel : ViewModelBase, IDisposable
 {
     private readonly IFileSyncApi _api;
+    private readonly Func<bool>? _canPoll;
     private Timer? _autoRefreshTimer;
 
     [ObservableProperty]
@@ -60,16 +61,17 @@ public partial class LogsViewModel : ViewModelBase, IDisposable
         "Rejected"
     };
 
-    public LogsViewModel(IFileSyncApi api)
+    public LogsViewModel(IFileSyncApi api, Func<bool>? canPoll = null)
     {
         _api = api ?? throw new ArgumentNullException(nameof(api));
+        _canPoll = canPoll;
 
         // Start auto-refresh timer (every 4 seconds)
         _autoRefreshTimer = new Timer(async _ =>
         {
             try
             {
-                if (AutoRefreshEnabled && !IsLoading)
+                if (AutoRefreshEnabled && !IsLoading && (_canPoll == null || _canPoll()))
                 {
                     await LoadLogsAsync(silent: true);
                 }

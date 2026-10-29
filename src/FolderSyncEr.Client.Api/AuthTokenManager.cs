@@ -39,6 +39,11 @@ public class AuthTokenManager
     public AuthSession? CurrentSession => _currentSession;
     public string? CachedDeviceId => _deviceId;
 
+    /// <summary>
+    /// Raised when a stored session is cleared because the refresh token expired or was rejected by the server.
+    /// </summary>
+    public event EventHandler? SessionExpired;
+
     public AuthTokenManager(ISecretStore secretStore, ILogger<AuthTokenManager> logger)
     {
         _secretStore = secretStore;
@@ -96,13 +101,32 @@ public class AuthTokenManager
         await _secretStore.SetSecretAsync(SessionKey, json, ct);
     }
 
+    public async Task UpdateServerUrlAsync(string serverUrl, CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(serverUrl))
+        {
+            return;
+        }
+
+        var session = await GetSessionAsync(ct);
+        if (session != null && !string.Equals(session.ServerUrl, serverUrl.TrimEnd('/'), StringComparison.OrdinalIgnoreCase))
+        {
+            session.ServerUrl = serverUrl.TrimEnd('/');
+            await SaveSessionAsync(session, ct);
+        }
+    }
+
     public async Task ClearSessionAsync(CancellationToken ct = default)
     {
         _currentSession = null;
         await _secretStore.DeleteSecretAsync(SessionKey, ct);
     }
 
-    public async Task<string?> GetValidAccessTokenAsync(HttpClient httpClient, CancellationToken ct = default)
+    public async Task<string?> GetValidAccessTokenAsync(
+        HttpClient httpClient,
+        CancellationToken ct = default,
+        bool forceRefresh = false,
+        string? serverUrlOverride = null)
     {
         var session = await GetSessionAsync(ct);
         if (session == null)
@@ -110,7 +134,7 @@ public class AuthTokenManager
             return null;
         }
 
-        if (session.IsAccessTokenValid)
+        if (!forceRefresh && session.IsAccessTokenValid)
         {
             return session.AccessToken;
         }
@@ -119,6 +143,7 @@ public class AuthTokenManager
         {
             _logger.LogInformation("Refresh token is expired. User must log in again.");
             await ClearSessionAsync(ct);
+            SessionExpired?.Invoke(this, EventArgs.Empty);
             return null;
         }
 
@@ -126,20 +151,36 @@ public class AuthTokenManager
         await _refreshLock.WaitAsync(ct);
         try
         {
+            session = await GetSessionAsync(ct);
+            if (session == null)
+            {
+                return null;
+            }
+
             // Recheck inside lock
-            if (session.IsAccessTokenValid)
+            if (!forceRefresh && session.IsAccessTokenValid)
             {
                 return session.AccessToken;
             }
 
-            _logger.LogInformation("Refreshing access token with server...");
+            var targetServerUrl = (!string.IsNullOrWhiteSpace(serverUrlOverride)
+                ? serverUrlOverride
+                : session.ServerUrl).TrimEnd('/');
+
+            if (string.IsNullOrWhiteSpace(targetServerUrl))
+            {
+                return null;
+            }
+
+            _logger.LogInformation("Refreshing access token with server ({ServerUrl})...", targetServerUrl);
             var refreshRequest = new RefreshRequest(session.RefreshToken, session.DeviceId);
-            var response = await httpClient.PostAsJsonAsync($"{session.ServerUrl.TrimEnd('/')}/{ApiRoutes.Refresh}", refreshRequest, ct);
+            using var response = await httpClient.PostAsJsonAsync($"{targetServerUrl}/{ApiRoutes.Refresh}", refreshRequest, ct);
 
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogWarning("Token refresh failed with status code {StatusCode}. Clearing session.", response.StatusCode);
+                _logger.LogWarning("Token refresh rejected by server with status code {StatusCode}. Clearing session.", response.StatusCode);
                 await ClearSessionAsync(ct);
+                SessionExpired?.Invoke(this, EventArgs.Empty);
                 return null;
             }
 
@@ -147,9 +188,11 @@ public class AuthTokenManager
             if (loginResponse == null)
             {
                 await ClearSessionAsync(ct);
+                SessionExpired?.Invoke(this, EventArgs.Empty);
                 return null;
             }
 
+            session.ServerUrl = targetServerUrl;
             session.AccessToken = loginResponse.AccessToken;
             session.AccessTokenExpiresUtc = loginResponse.AccessTokenExpiresUtc;
             session.RefreshToken = loginResponse.RefreshToken;
@@ -158,9 +201,19 @@ public class AuthTokenManager
             await SaveSessionAsync(session, ct);
             return session.AccessToken;
         }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogWarning("Could not refresh access token (server unreachable: {Message}). Will retry when server is online.", ex.Message);
+            return null;
+        }
+        catch (TaskCanceledException) when (!ct.IsCancellationRequested)
+        {
+            _logger.LogWarning("Token refresh timed out. Will retry when server is responsive.");
+            return null;
+        }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception during token refresh.");
+            _logger.LogWarning("Unexpected error during token refresh: {Message}", ex.Message);
             return null;
         }
         finally
@@ -169,4 +222,3 @@ public class AuthTokenManager
         }
     }
 }
-

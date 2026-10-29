@@ -41,6 +41,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     // Tab order in MainWindow.axaml
     public const int FilesTabIndex = 0;
     public const int DeletedFilesTabIndex = 1;
+    public const int LogsTabIndex = 2;
     public const int AccountTabIndex = 4;
 
     partial void OnSelectedTabIndexChanged(int value)
@@ -48,6 +49,10 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         if (value == DeletedFilesTabIndex && Login.IsLoggedIn)
         {
             _ = DeletedFiles.RefreshCommand.ExecuteAsync(null);
+        }
+        else if (value == LogsTabIndex && Login.IsLoggedIn && Connection.IsConnected)
+        {
+            _ = Logs.RefreshCommand.ExecuteAsync(null);
         }
         else if (value == AccountTabIndex && Login.IsLoggedIn)
         {
@@ -135,7 +140,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             () => Folder.SelectedFolderPath,
             () => SyncNowAsync());
 
-        Logs = new LogsViewModel(_api);
+        Logs = new LogsViewModel(_api, () => Connection.IsConnected && Login.IsLoggedIn && SelectedTabIndex == LogsTabIndex);
 
         Settings = new SettingsViewModel(
             _api,
@@ -213,15 +218,26 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         {
             OnPropertyChanged(nameof(IsReadyForSync));
             OnPropertyChanged(nameof(CurrentTrayIconState));
-            if (e.PropertyName == nameof(Login.IsLoggedIn) && Login.IsLoggedIn)
+            if (e.PropertyName == nameof(Login.IsLoggedIn))
             {
-                if (!Connection.IsConnected)
+                if (Login.IsLoggedIn)
                 {
-                    _ = Connection.CheckConnectionCommand.ExecuteAsync(null);
+                    if (!Connection.IsConnected)
+                    {
+                        _ = Connection.CheckConnectionCommand.ExecuteAsync(null);
+                    }
+                    if (Folder.IsFolderSelected)
+                    {
+                        RebuildCoordinator();
+                    }
                 }
-                if (Folder.IsFolderSelected)
+                else
                 {
-                    RebuildCoordinator();
+                    Coordinator?.Dispose();
+                    Coordinator = null;
+                    IsSynchronizing = false;
+                    SyncStatusSummary = "Sign in to sync.";
+                    SelectedTabIndex = AccountTabIndex;
                 }
             }
         };
@@ -262,7 +278,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         }
 
         await Connection.InitializeAsync();
-        await Login.InitializeSessionAsync();
+        await Connection.CheckConnectionCommand.ExecuteAsync(null);
+        await Login.InitializeSessionAsync(fetchDevicesFromServer: Connection.IsConnected);
         if (!string.IsNullOrWhiteSpace(_api.ServerUrl))
         {
             Connection.ServerUrl = _api.ServerUrl;
@@ -276,8 +293,6 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
 
         Settings.CurrentSyncFolder = Folder.SelectedFolderPath ?? string.Empty;
         Settings.IsInitialized = true;
-
-        await Connection.CheckConnectionCommand.ExecuteAsync(null);
 
         if (Login.IsLoggedIn && Folder.IsFolderSelected)
         {

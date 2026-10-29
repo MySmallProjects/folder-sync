@@ -53,6 +53,7 @@ dotnet run --project src/FolderSyncEr.Server
 
 By default, the server will launch and listen on:
 - `http://localhost:5000` (or `https://localhost:5001` if HTTPS is configured)
+- **Web File Viewer**: [http://localhost:5000/](http://localhost:5000/) (built-in HTML/JS TreeView to sign in and inspect/download server files)
 - **Interactive Swagger UI**: [http://localhost:5000/swagger](http://localhost:5000/swagger)
 
 ### 3. Default Credentials (Seeded on First Startup)
@@ -64,15 +65,24 @@ When the server starts up for the first time, it automatically creates the SQLit
 | **Password** | `AdminPassword123!` | Configurable in `appsettings.json` under `Bootstrap:AdminPassword` |
 | **Role** | `Admin` | Has access to `/api/settings` and cross-user logs |
 
-### 4. Configuration (`appsettings.json`)
+### 4. Configuration (`appsettings.json`) & Token Lifetimes
 Key configuration sections in `src/FolderSyncEr.Server/appsettings.json`:
 - `ConnectionStrings:DefaultConnection`: SQLite connection string (`Data Source=foldersyncer.db`).
 - `Storage:RootPath`: Directory where file blobs are persisted (defaults to `storage/`).
 - `Storage:MaxUploadBytes`: Maximum file upload size in bytes (defaults to `4294967296` = 4 GB).
 - `Storage:VersionRetentionCount`: Number of previous file versions retained for recovery (defaults to `5`).
 - `Jwt:Secret`: Secret key used for signing JWT access tokens (must be at least 256 bits).
-- `Jwt:ExpiryMinutes`: Lifetime of access tokens (defaults to `15` minutes).
+- `Jwt:ExpiryMinutes`: Lifetime of short-lived JWT access tokens (defaults to `15` minutes).
 - `Jwt:RefreshExpiryDays`: Lifetime of rotating refresh tokens (defaults to `30` days).
+
+#### How Long Until a User Must Log In Again?
+FolderSyncEr uses a two-token authentication model with **rolling refresh token rotation**:
+1. **Access Token (`15 minutes` default)**: Sent as `Authorization: Bearer <token>` on API calls. When it expires, the user does **not** need to log in again.
+2. **Refresh Token (`30 days` default, rolling)**: Whenever the 15-minute access token expires, the client (`AuthTokenManager`) automatically exchanges the refresh token in the background (`POST /api/auth/refresh`) for a new 15-minute access token **and** a brand-new 30-day refresh token.
+3. **Effective Session Duration**: As long as the client connects to the server at least once every **30 days**, the user remains signed in indefinitely across app and machine restarts. A user only needs to sign in again if:
+   - The client has been completely offline/inactive for more than 30 days,
+   - The user explicitly clicks **Sign Out** (or the device is remotely signed out from the **Logged-In Devices** list), or
+   - The server database is reset (e.g. via `./reset-server.sh`).
 
 ---
 

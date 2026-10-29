@@ -84,9 +84,31 @@ public partial class LoginViewModel : ViewModelBase
         _api = api;
         _tokenManager = tokenManager;
         _settingsManager = settingsManager;
+
+        _tokenManager.SessionExpired += (_, _) =>
+        {
+            void HandleSessionExpired()
+            {
+                IsLoggedIn = false;
+                LoggedInUserText = string.Empty;
+                LoggedInDevices.Clear();
+                ErrorMessage = "Your session has expired or was reset on the server. Please sign in again.";
+                OnPropertyChanged(nameof(DeviceId));
+                OnPropertyChanged(nameof(CurrentDeviceDisplay));
+            }
+
+            if (Avalonia.Application.Current == null || Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
+            {
+                HandleSessionExpired();
+            }
+            else
+            {
+                Avalonia.Threading.Dispatcher.UIThread.Post(HandleSessionExpired);
+            }
+        };
     }
 
-    public async Task InitializeSessionAsync()
+    public async Task InitializeSessionAsync(bool fetchDevicesFromServer = true)
     {
         if (_settingsManager != null)
         {
@@ -100,15 +122,24 @@ public partial class LoginViewModel : ViewModelBase
         var session = await _tokenManager.GetSessionAsync();
         if (session != null && session.IsRefreshTokenValid)
         {
-            if (string.IsNullOrWhiteSpace(_api.ServerUrl) && !string.IsNullOrWhiteSpace(session.ServerUrl))
+            if (!string.IsNullOrWhiteSpace(_api.ServerUrl))
+            {
+                await _tokenManager.UpdateServerUrlAsync(_api.ServerUrl);
+            }
+            else if (!string.IsNullOrWhiteSpace(session.ServerUrl))
             {
                 _api.ServerUrl = session.ServerUrl;
             }
+
             IsLoggedIn = true;
             LoggedInUserText = $"{session.Username} ({session.Role})";
             OnPropertyChanged(nameof(DeviceId));
             OnPropertyChanged(nameof(CurrentDeviceDisplay));
-            await RefreshDevicesAsync();
+
+            if (fetchDevicesFromServer)
+            {
+                await RefreshDevicesAsync();
+            }
         }
     }
 
