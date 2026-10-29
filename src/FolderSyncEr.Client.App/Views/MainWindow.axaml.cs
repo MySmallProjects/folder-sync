@@ -22,7 +22,7 @@ public partial class MainWindow : Window
     {
         try
         {
-            if (DataContext is MainWindowViewModel vm)
+            if (DataContext is MainWindowViewModel vm && !vm.IsStartupInitialized)
             {
                 await vm.InitializeAsync();
             }

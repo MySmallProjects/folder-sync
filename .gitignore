@@ -7,6 +7,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/Dotnet.gitignore
 
+# database
+src/FolderSyncEr.Server/foldersyncer.db*
+crash.log
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/

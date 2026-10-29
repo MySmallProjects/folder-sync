@@ -1,0 +1,84 @@
+Specifications – ESP32 DEVKIT V1
+The following table shows a summary of the ESP32 DEVKIT V1 DOIT board
+features and specifications:
+Number of cores 2 (dual core)
+Wi-Fi 2.4 GHz up to 150 Mbits/s
+Bluetooth BLE (Bluetooth Low Energy) and legacy
+Bluetooth
+Architecture 32 bits
+Clock frequency Up to 240 MHz
+RAM 512 KB
+Pins 30(depending on the model)CommentHighlight
+6/137
+Peripherals
+Capacitive touch, ADC (analog to digital
+converter), DAC (digital to analog
+converter), I2C (Inter-Integrated Circuit),
+UART (universal asynchronous
+receiver/transmitter), CAN 2.0 (Controller
+Area Netwokr), SPI (Serial Peripheral
+Interface), I2S (Integrated Inter-IC
+Sound), RMII (Reduced
+Media-Independent Interface), PWM
+(pulse width modulation), and more.
+Built-in buttons RESET and BOOT buttons
+Built-in LEDs
+built-in blue LED connected to GPIO2;
+built-in red LED that shows the board is
+being powered
+USB to UART
+bridge CP2102
+
+
+
+The [](https://www.google.com/search?ibp=oshop&prds=pvt:hg,pvo:48,imageDocid:1089001993332421922,headlineOfferDocid:7550187662529123468,productDocid:7550187662529123468,rds:CSS_PC_10849444555109598714%7CPC_10849444555109598714%7CPROD_CSS_PC_10849444555109598714%7CPROD_PC_10849444555109598714&q=product&sa=X&ved=2ahUKEwimgpCfvsKXAxVwVfEDHR_8JWIQxa4PegoIAggACAAIChAE)[](https://www.google.com/search?ibp=oshop&prds=pvt:hg,pvo:48,imageDocid:1089001993332421922,headlineOfferDocid:7550187662529123468,productDocid:7550187662529123468,rds:CSS_PC_10849444555109598714%7CPC_10849444555109598714%7CPROD_CSS_PC_10849444555109598714%7CPROD_PC_10849444555109598714&q=product&sa=X&ved=2ahUKEwimgpCfvsKXAxVwVfEDHR_8JWIQxa4PegoIAggACAAIChAE)[](https://www.google.com/search?ibp=oshop&prds=pvt:hg,pvo:48,imageDocid:1089001993332421922,headlineOfferDocid:7550187662529123468,productDocid:7550187662529123468,rds:CSS_PC_10849444555109598714%7CPC_10849444555109598714%7CPROD_CSS_PC_10849444555109598714%7CPROD_PC_10849444555109598714&q=product&sa=X&ved=2ahUKEwimgpCfvsKXAxVwVfEDHR_8JWIQxa4PegoIAggACAAIChAE)[Wemos D1 ESP32](https://www.google.com/search?ibp=oshop&prds=pvt:hg,pvo:48,imageDocid:1089001993332421922,headlineOfferDocid:7550187662529123468,productDocid:7550187662529123468,rds:CSS_PC_10849444555109598714%7CPC_10849444555109598714%7CPROD_CSS_PC_10849444555109598714%7CPROD_PC_10849444555109598714&q=product&sa=X&ved=2ahUKEwimgpCfvsKXAxVwVfEDHR_8JWIQxa4PegoIAggACAAIChAF) board ==combines the Espressif ESP32 wireless module with popular D1 development footprints== (such as the compact D1 Mini or the Arduino Uno-styled D1 R32). [[1](https://www.google.com/goto?url=CAESkgEB6zswFXYq6u7ADF7PTMOXVA3rykgmvamMMaeEPSfZttkDo37L-z1Ca4gMtOdoVnEsR230oRcnXhfmBGueEzUhEkaFf2wjfbAzk2AkO0fGzGYc-Pkizc0gAO9bp9krMscjAEVZwC_Wc6Fe4TFSnwoWC1obQWep_kMW9l-y3diuO1ehP0Zes9hVOgYbn5WLisJ5xA), [2](https://www.google.com/goto?url=CAESeAHrOzAVuKaaqtokR5wE-TxcHeQeCRyitGZxKAcaQ2yP6gUBj93sbco5cXsG57mYb5Z1kyQ5MKq76CBvvxCsveznfwCWmyrDSYPThu54Bubu2CAxnwn2d7KMHuvd-Xoy8x9HN3wkz-g1vNx_n6vq2mo4olKL4lo_DA), [3](https://www.google.com/goto?url=CAESeQHrOzAVj5UIx6k3Ja77JdBpbsnu7ukNOeDgFucC_vNG1XH_NBIKfBj_GDQNJm4LV1oQ34JMli6VMyR-kZxw-t10bS-VjrpxE1h-3fl0wqIB-ztBJDxGJmvYsOU-p8cxLfeGpWfg8EyuZVl1vWoohASF9pzGcZNW60Y)]
+
+Core Specifications
+
+- **Microcontroller:** ESP32 dual-core Xtensa 32-bit LX6, running up to 240 MHz (up to 600 DMIPS) [[1](https://www.google.com/goto?url=CAESeAHrOzAVuKaaqtokR5wE-TxcHeQeCRyitGZxKAcaQ2yP6gUBj93sbco5cXsG57mYb5Z1kyQ5MKq76CBvvxCsveznfwCWmyrDSYPThu54Bubu2CAxnwn2d7KMHuvd-Xoy8x9HN3wkz-g1vNx_n6vq2mo4olKL4lo_DA)]
+- **Memory:** 4 MB SPI Flash, 520 KB SRAM, 448 KB ROM [[1](https://www.google.com/goto?url=CAESeAHrOzAVuKaaqtokR5wE-TxcHeQeCRyitGZxKAcaQ2yP6gUBj93sbco5cXsG57mYb5Z1kyQ5MKq76CBvvxCsveznfwCWmyrDSYPThu54Bubu2CAxnwn2d7KMHuvd-Xoy8x9HN3wkz-g1vNx_n6vq2mo4olKL4lo_DA)]
+- **Wireless:** Wi-Fi 802.11 b/g/n (2.4 GHz) and Bluetooth v4.2 BR/EDR & BLE [[1](https://www.google.com/goto?url=CAESeAHrOzAVuKaaqtokR5wE-TxcHeQeCRyitGZxKAcaQ2yP6gUBj93sbco5cXsG57mYb5Z1kyQ5MKq76CBvvxCsveznfwCWmyrDSYPThu54Bubu2CAxnwn2d7KMHuvd-Xoy8x9HN3wkz-g1vNx_n6vq2mo4olKL4lo_DA)]
+- **Operating Voltage:** 5V via USB/external (Logic/GPIO level is 3.3V) [[1](https://www.google.com/goto?url=CAESeAHrOzAVuKaaqtokR5wE-TxcHeQeCRyitGZxKAcaQ2yP6gUBj93sbco5cXsG57mYb5Z1kyQ5MKq76CBvvxCsveznfwCWmyrDSYPThu54Bubu2CAxnwn2d7KMHuvd-Xoy8x9HN3wkz-g1vNx_n6vq2mo4olKL4lo_DA)]
+- **USB Interface:** Typically uses CH340G, CH340C, or CH9102X serial-to-USB chips depending on the specific variant. [[1](https://www.google.com/goto?url=CAESeQHrOzAVR69LovMySE9EmzmK3Rrzp8WVJYua7Cw3jhnC_UzU2OwNyOWgykzuH_LE1zHfBm9mixB1tUnao_Km87FCOvXrl7-vWn69P4pu88Bos6_d0QoeYHpSU7MRwF9XB2cvkS9mEbJNRTftzTeKmaTMAYRP4OZX3cA), [2](https://www.google.com/goto?url=CAESYgHrOzAVireB-Zh3h7Dm7iUClnSFfJUVyshcxh9kQfferUiPpWxwZb9KStjBY98_rULut1oIGM7CApIls-I4BXvrN68YIPmx0Omt-uip-aENiaGnV6Tkf3-e9p75BWLRSuJ6), [3](https://www.google.com/goto?url=CAESeAHrOzAVuKaaqtokR5wE-TxcHeQeCRyitGZxKAcaQ2yP6gUBj93sbco5cXsG57mYb5Z1kyQ5MKq76CBvvxCsveznfwCWmyrDSYPThu54Bubu2CAxnwn2d7KMHuvd-Xoy8x9HN3wkz-g1vNx_n6vq2mo4olKL4lo_DA)]
+
+Form Factor Variants
+
+- **Wemos D1 Mini ESP32:**
+    - Compact size (~39 x 31 mm)
+    - Wider than the classic [](https://www.google.com/search?ibp=oshop&prds=pvt:hg,pvo:48,mid:576462912859653516,imageDocid:12971393187203325606,gpcid:13110087579362782336,headlineOfferDocid:8677292219131931819,catalogid:11476014998621483870,productDocid:5823838546565286665,rds:CSS_PC_13110087579362782336%7CPC_13110087579362782336%7CPROD_CSS_PC_13110087579362782336%7CPROD_PC_13110087579362782336&q=product&sa=X&ved=2ahUKEwimgpCfvsKXAxVwVfEDHR_8JWIQxa4PegoIAggACAAILxAI)[](https://www.google.com/search?ibp=oshop&prds=pvt:hg,pvo:48,mid:576462912859653516,imageDocid:12971393187203325606,gpcid:13110087579362782336,headlineOfferDocid:8677292219131931819,catalogid:11476014998621483870,productDocid:5823838546565286665,rds:CSS_PC_13110087579362782336%7CPC_13110087579362782336%7CPROD_CSS_PC_13110087579362782336%7CPROD_PC_13110087579362782336&q=product&sa=X&ved=2ahUKEwimgpCfvsKXAxVwVfEDHR_8JWIQxa4PegoIAggACAAILxAI)[](https://www.google.com/search?ibp=oshop&prds=pvt:hg,pvo:48,mid:576462912859653516,imageDocid:12971393187203325606,gpcid:13110087579362782336,headlineOfferDocid:8677292219131931819,catalogid:11476014998621483870,productDocid:5823838546565286665,rds:CSS_PC_13110087579362782336%7CPC_13110087579362782336%7CPROD_CSS_PC_13110087579362782336%7CPROD_PC_13110087579362782336&q=product&sa=X&ved=2ahUKEwimgpCfvsKXAxVwVfEDHR_8JWIQxa4PegoIAggACAAILxAI)[ESP8266 D1 Mini](https://www.google.com/search?ibp=oshop&prds=pvt:hg,pvo:48,mid:576462912859653516,imageDocid:17774304976866316357,gpcid:13110087579362782336,headlineOfferDocid:8677292219131931819,catalogid:11476014998621483870,productDocid:5823838546565286665,rds:CSS_PC_13110087579362782336%7CPC_13110087579362782336%7CPROD_CSS_PC_13110087579362782336%7CPROD_PC_13110087579362782336&q=product&sa=X&ved=2ahUKEwimgpCfvsKXAxVwVfEDHR_8JWIQxa4PegoIAggACAAILxAJ) to accommodate double-row headers for the extra ESP32 pins.
+    - Compatible with select D1 Mini stackable shields and shields from providers like [AZ-Delivery](https://www.google.com/goto?url=CAESaQHrOzAV11yhSb1eCq0n-xkFDIMMMgNVfMH08H_DOQIH6tpn5RD3e9h3moawSyVz529ZAq2sRUtCUY_a4iWGiM5pTGJ1DQDtqhZok3w1-V-K3X9ziF5wwoAqv93IeIEkmUnaxL-cN2PU2w). [[1](https://www.google.com/goto?url=CAES9QEB6zswFU5SESKeadUi3XGmiakzB3lD9sokYpfPrbBI-E730SGQxtorJweOHV7qX0eNv_pDwfFLQW26OqLu1DnNMNjIZBGApvajvtZzq_HjGZ0Hiqfs1m_0GKTSmJfKRT9LZf91i8298WlJVhRspWksosps4qQGq79flEzjTtjYEPSnCBO_6EkWPPMcyxwXHxRkmylfizn7OM1gb84HWy5JvcGeDg0SewWWuaNSvQrr8vEYbDrHhoS6ECmz4fKep_ERf_yQ1E--lIGAECDoeBK7XnMhNDiHwlWlFIrmDKXMWX0l6NZUtAh7Dx3V_KDbaP3rnDjVpA), [2](https://www.google.com/goto?url=CAESbAHrOzAVeDJ-u2gTek0g4wqO6kXi8bnyTYjT0wOuCw58_vEQCs5C9d5mheo-6WYX0AhdxbCndDAeKkx2wl8o2lA0QWo2s2BodozNsGibTgvzr-kGcDxYyyw8EJD1blEmNyRKLh_aWcUUUfzCNQ), [3](https://www.google.com/goto?url=CAESYgHrOzAVireB-Zh3h7Dm7iUClnSFfJUVyshcxh9kQfferUiPpWxwZb9KStjBY98_rULut1oIGM7CApIls-I4BXvrN68YIPmx0Omt-uip-aENiaGnV6Tkf3-e9p75BWLRSuJ6), [4](https://www.google.com/goto?url=CAESeQHrOzAVR69LovMySE9EmzmK3Rrzp8WVJYua7Cw3jhnC_UzU2OwNyOWgykzuH_LE1zHfBm9mixB1tUnao_Km87FCOvXrl7-vWn69P4pu88Bos6_d0QoeYHpSU7MRwF9XB2cvkS9mEbJNRTftzTeKmaTMAYRP4OZX3cA)]
+- **[](https://www.google.com/search?ibp=oshop&prds=pvt:hg,pvo:48,imageDocid:10658265037889142807,headlineOfferDocid:16014661331426817912,productDocid:16014661331426817912,rds:CSS_PC_10849444555109598714%7CPC_10849444555109598714%7CPROD_CSS_PC_10849444555109598714%7CPROD_PC_10849444555109598714&q=product&sa=X&ved=2ahUKEwimgpCfvsKXAxVwVfEDHR_8JWIQxa4PegoIAggACAAILxAR)[](https://www.google.com/search?ibp=oshop&prds=pvt:hg,pvo:48,imageDocid:10658265037889142807,headlineOfferDocid:16014661331426817912,productDocid:16014661331426817912,rds:CSS_PC_10849444555109598714%7CPC_10849444555109598714%7CPROD_CSS_PC_10849444555109598714%7CPROD_PC_10849444555109598714&q=product&sa=X&ved=2ahUKEwimgpCfvsKXAxVwVfEDHR_8JWIQxa4PegoIAggACAAILxAR)[](https://www.google.com/search?ibp=oshop&prds=pvt:hg,pvo:48,imageDocid:10658265037889142807,headlineOfferDocid:16014661331426817912,productDocid:16014661331426817912,rds:CSS_PC_10849444555109598714%7CPC_10849444555109598714%7CPROD_CSS_PC_10849444555109598714%7CPROD_PC_10849444555109598714&q=product&sa=X&ved=2ahUKEwimgpCfvsKXAxVwVfEDHR_8JWIQxa4PegoIAggACAAILxAR)[Wemos D1 R32](https://www.google.com/search?ibp=oshop&prds=pvt:hg,pvo:48,imageDocid:10658265037889142807,headlineOfferDocid:16014661331426817912,productDocid:16014661331426817912,rds:CSS_PC_10849444555109598714%7CPC_10849444555109598714%7CPROD_CSS_PC_10849444555109598714%7CPROD_PC_10849444555109598714&q=product&sa=X&ved=2ahUKEwimgpCfvsKXAxVwVfEDHR_8JWIQxa4PegoIAggACAAILxAS) (Arduino Uno style):**
+    - Larger board (~68 x 53 mm) matching the Arduino Uno footprint.
+    - Pinout maps closely to Arduino Uno layout for use with traditional Uno shields. [[1](https://www.google.com/goto?url=CAESeQHrOzAVj5UIx6k3Ja77JdBpbsnu7ukNOeDgFucC_vNG1XH_NBIKfBj_GDQNJm4LV1oQ34JMli6VMyR-kZxw-t10bS-VjrpxE1h-3fl0wqIB-ztBJDxGJmvYsOU-p8cxLfeGpWfg8EyuZVl1vWoohASF9pzGcZNW60Y), [2](https://www.google.com/goto?url=CAESeAHrOzAVuKaaqtokR5wE-TxcHeQeCRyitGZxKAcaQ2yP6gUBj93sbco5cXsG57mYb5Z1kyQ5MKq76CBvvxCsveznfwCWmyrDSYPThu54Bubu2CAxnwn2d7KMHuvd-Xoy8x9HN3wkz-g1vNx_n6vq2mo4olKL4lo_DA)]
+
+Software Support
+
+- **Programming Environments:** [Arduino IDE](https://www.google.com/goto?url=CAESTwHrOzAVmkGYKQdw2iMpndKexkDXLXTG3OUx41v3t0LMYI4udUfBZw6sPA7aeyJs2awnmSNWH8oXgV9vk1PCDkyxQ43uyFZylT0mrvxE4uU), [PlatformIO](https://www.google.com/goto?url=CAEShQEB6zswFTpA3TpMat43ytL-k4ql8QTEzbfyzZG5T6bwhd_Xco1pVw7yWdSh4fk4fZCI-45VBRJweKI3IpHdTIYV9nKTtv3qdjigtSSnzlqLF-wPXeFJW-gdbJr4HDJmvgFabAbTiPGi2hUwS3gJQ3_KblqWWk5gHCoGMGvYrn64M2O_fOi8), and MicroPython/ESP-IDF. [[1](https://www.google.com/goto?url=CAEShQEB6zswFTpA3TpMat43ytL-k4ql8QTEzbfyzZG5T6bwhd_Xco1pVw7yWdSh4fk4fZCI-45VBRJweKI3IpHdTIYV9nKTtv3qdjigtSSnzlqLF-wPXeFJW-gdbJr4HDJmvgFabAbTiPGi2hUwS3gJQ3_KblqWWk5gHCoGMGvYrn64M2O_fOi8), [2](https://www.google.com/goto?url=CAESkgEB6zswFXYq6u7ADF7PTMOXVA3rykgmvamMMaeEPSfZttkDo37L-z1Ca4gMtOdoVnEsR230oRcnXhfmBGueEzUhEkaFf2wjfbAzk2AkO0fGzGYc-Pkizc0gAO9bp9krMscjAEVZwC_Wc6Fe4TFSnwoWC1obQWep_kMW9l-y3diuO1ehP0Zes9hVOgYbn5WLisJ5xA)]
+- **Flashing Tool:** Command-line `esptool_py` or direct upload via USB in the Arduino IDE (selected as _ESP32 Dev Module_). [[1](https://www.google.com/goto?url=CAESYQHrOzAV8kWzgPrPVe-hdcHEzJchWpW0CF1T88uVq-WNF9SCFSVXrkhhuU8Vl9I6kEhV82iGjLif66pIbEWb3-oWcJxVrf4qX1XK7hEQcjWKTsdz9NJQgrLaj-PPTeSabWk), [2](https://www.google.com/goto?url=CAESYgHrOzAVireB-Zh3h7Dm7iUClnSFfJUVyshcxh9kQfferUiPpWxwZb9KStjBY98_rULut1oIGM7CApIls-I4BXvrN68YIPmx0Omt-uip-aENiaGnV6Tkf3-e9p75BWLRSuJ6)]
+
+Across 40 pins (2.54 mm pitch), the **WEMOS D1 MINI ESP32** exposes 32 GPIO plus `GND`, `3V3` and `5V` for power.
+
+For peripherals, I²C is mapped to `SDA` on GPIO21 and `SCL` on GPIO22, while the SPI bus (`MOSI`, `MISO`, `SCK`, `SS`) is broken out in full.
+
+On the analog side there are 7 ADC-capable pins for sensors and battery monitoring, 9 capacitive-touch inputs and 2 true DAC outputs.
+
+If you want zero surprises, `IO21`, `IO22`, `IO23`, `IO19` and 9 more are free of any such role - the safest first picks. 13 of the exposed pins carry boot-time or system duties on the ESP32 (`IO2`, `TXD`, `RXD` and 10 more).
+
+
+The **WEMOS D1 mini ESP32 pinout** exposes 26 ESP32 GPIOs on the familiar D label headers-making it shield-compatible while retaining the ESP32’s rich peripherals.
+
+**Power rails** include `5 V/VIN` (USB or external), a regulated `3V3` output, and multiple `GND` pins. Current draw is typically 80 mA active; the ESP32 chip itself can deep-sleep at ~10 µA, though the CH340 and regulator keep whole-board sleep current well above that.
+
+**Default serial** lines `U0_TX (GPIO1)` and `U0_RX (GPIO3)` connect to the CH340C for programming and logging. Need another UART? Use `U2_TX (GPIO17)` and `U2_RX (GPIO16)`.
+
+**I²C** defaults to `SDA (GPIO21)` and `SCL (GPIO22)`-changeable in software-and breaks out on the D2/D1 shield pins.
+
+**SPI**: the primary _VSPI_ bus maps to `MOSI GPIO23`, `MISO GPIO19`, `SCK GPIO18`, and `CS GPIO5`. An alternate _HSPI_ bus lives on `GPIO12-15` when a second SPI device is needed.
+
+**Analog**: Eight _ADC1_ channels on `GPIO32-GPIO39` remain usable while Wi-Fi is active. Extra _ADC2_ channels (e.g., `GPIO0, 2, 4, 12-15, 25-27`) share hardware with Wi-Fi. Dual 8-bit **DAC** outputs are on `GPIO25` and `GPIO26`.
+
+**Capacitive-touch** sensing is available on `GPIO0, 2, 4, 12-15, 27, 32, 33`, perfect for touch-buttons or gesture pads.
+
+Every GPIO can generate **PWM** up to 40 kHz for LEDs, motors, or buzzers. Watch the _boot-strap pins_-`GPIO0`, `GPIO2`, and `GPIO15`-which must be at the correct logic level (usually HIGH) at reset to boot normally.
+
+With breadboard-friendly headers, shield compatibility, and the full might of an ESP32 module, the **WEMOS D1 mini ESP32 pinout** is your compact gateway to advanced connected projects.

@@ -406,9 +406,12 @@
                                     <CheckBox Content="Close to System Tray (Keep running in background when window is closed)"
                                               IsChecked="{Binding CloseToTray, Mode=TwoWay}"/>
 
+                                    <CheckBox Content="Start Minimized to System Tray (Launch hidden in the tray on startup)"
+                                              IsChecked="{Binding StartMinimized, Mode=TwoWay}"/>
+
                                     <Grid ColumnDefinitions="Auto,*" Margin="0,6,0,0">
-                                        <TextBlock Text="Periodic Scan Interval (seconds):" Foreground="#9CA3AF" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                                        <NumericUpDown Value="{Binding SyncIntervalSeconds, Mode=TwoWay}" Minimum="10" Maximum="3600" Width="140"/>
+                                        <TextBlock Grid.Column="0" Text="Periodic Scan Interval (seconds):" Foreground="#9CA3AF" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                                        <NumericUpDown Grid.Column="1" Value="{Binding SyncIntervalSeconds, Mode=TwoWay}" Minimum="10" Maximum="3600" Width="140" HorizontalAlignment="Left"/>
                                     </Grid>
                                 </StackPanel>
                             </Border>

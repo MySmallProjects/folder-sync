@@ -30,7 +30,7 @@ public partial class LogsViewModel : ViewModelBase, IDisposable
     private string _searchQuery = string.Empty;
 
     [ObservableProperty]
-    private bool _autoRefreshEnabled = true;
+    private bool _autoRefreshEnabled = false;
 
     [ObservableProperty]
     private bool _isLoading;

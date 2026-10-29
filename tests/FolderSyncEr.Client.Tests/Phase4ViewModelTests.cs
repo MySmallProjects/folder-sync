@@ -592,7 +592,8 @@ public class Phase4ViewModelTests
                 SyncFolderPath = tempSyncFolder,
                 ConflictPolicy = "NewestWins",
                 SyncIntervalSeconds = 120,
-                CloseToTray = false
+                CloseToTray = false,
+                StartMinimized = true
             };
             await manager.SaveSettingsAsync(initialSettings);
 
@@ -605,6 +606,8 @@ public class Phase4ViewModelTests
 
             // Construct MainWindowViewModel (previously constructor triggered PersistCurrentSettingsAsync and wiped the file)
             var mainVm = new MainWindowViewModel(secretStore, api, connVm, loginVm, folderVm, manager);
+            Assert.False(mainVm.Logs.AutoRefreshEnabled);
+            Assert.False(new ClientSettings().StartMinimized);
 
             // File should remain completely unchanged after construction
             var postConstructorSettings = await manager.LoadSettingsAsync();
@@ -613,6 +616,7 @@ public class Phase4ViewModelTests
             Assert.Equal("NewestWins", postConstructorSettings.ConflictPolicy);
             Assert.Equal(120, postConstructorSettings.SyncIntervalSeconds);
             Assert.False(postConstructorSettings.CloseToTray);
+            Assert.True(postConstructorSettings.StartMinimized);
 
             // Run InitializeAsync
             await mainVm.InitializeAsync();
@@ -624,6 +628,7 @@ public class Phase4ViewModelTests
             Assert.Equal(tempSyncFolder, mainVm.Settings.CurrentSyncFolder);
             Assert.Equal(120, mainVm.Settings.SyncIntervalSeconds);
             Assert.False(mainVm.Settings.CloseToTray);
+            Assert.True(mainVm.Settings.StartMinimized);
             Assert.Equal(ConflictPolicy.NewestWins, mainVm.Settings.SelectedConflictPolicy);
 
             // Verify file was not overwritten with defaults during initialization
@@ -633,6 +638,7 @@ public class Phase4ViewModelTests
             Assert.Equal("NewestWins", postInitSettings.ConflictPolicy);
             Assert.Equal(120, postInitSettings.SyncIntervalSeconds);
             Assert.False(postInitSettings.CloseToTray);
+            Assert.True(postInitSettings.StartMinimized);
         }
         finally
         {

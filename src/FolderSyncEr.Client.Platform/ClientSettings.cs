@@ -9,6 +9,7 @@ public class ClientSettings
     public string ConflictPolicy { get; set; } = "KeepBoth";
     public int SyncIntervalSeconds { get; set; } = 60;
     public bool CloseToTray { get; set; } = true;
+    public bool StartMinimized { get; set; } = false;
     public DateTime LastUpdatedUtc { get; set; } = DateTime.UtcNow;
 }
 

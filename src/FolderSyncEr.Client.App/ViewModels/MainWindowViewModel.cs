@@ -256,8 +256,11 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         };
     }
 
+    public bool IsStartupInitialized { get; private set; }
+
     public async Task InitializeAsync()
     {
+        IsStartupInitialized = true;
         Settings.IsInitialized = false;
 
         var appSettings = await _settingsManager.LoadSettingsAsync();
@@ -265,6 +268,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         {
             Settings.SyncIntervalSeconds = appSettings.SyncIntervalSeconds;
             Settings.CloseToTray = appSettings.CloseToTray;
+            Settings.StartMinimized = appSettings.StartMinimized;
             if (Enum.TryParse<ConflictPolicy>(appSettings.ConflictPolicy, out var pol))
             {
                 Settings.SelectedConflictPolicy = pol;

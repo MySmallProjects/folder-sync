@@ -39,6 +39,9 @@ public partial class SettingsViewModel : ViewModelBase
     private bool _closeToTray = true;
 
     [ObservableProperty]
+    private bool _startMinimized;
+
+    [ObservableProperty]
     private bool _showFolderChangeConfirmation;
 
     [ObservableProperty]
@@ -147,6 +150,14 @@ public partial class SettingsViewModel : ViewModelBase
         }
     }
 
+    partial void OnStartMinimizedChanged(bool value)
+    {
+        if (IsInitialized)
+        {
+            _ = PersistCurrentSettingsAsync();
+        }
+    }
+
     [RelayCommand]
     public async Task SaveServerUrlAsync()
     {
@@ -208,6 +219,7 @@ public partial class SettingsViewModel : ViewModelBase
             settings.ConflictPolicy = SelectedConflictPolicy.ToString();
             settings.SyncIntervalSeconds = SyncIntervalSeconds;
             settings.CloseToTray = CloseToTray;
+            settings.StartMinimized = StartMinimized;
             settings.LastUpdatedUtc = DateTime.UtcNow;
             await _settingsManager.SaveSettingsAsync(settings);
         }

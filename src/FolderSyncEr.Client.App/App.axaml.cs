@@ -6,6 +6,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Platform;
 using FolderSyncEr.Client.App.ViewModels;
 using FolderSyncEr.Client.App.Views;
+using FolderSyncEr.Client.Platform;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace FolderSyncEr.Client.App;
@@ -25,13 +26,28 @@ public partial class App : Application
         {
             desktop.ShutdownMode = ShutdownMode.OnExplicitShutdown;
 
+            var settingsManager = Services.GetService<ClientSettingsManager>();
+            var initialSettings = settingsManager?.LoadSettings();
+            var startMinimized = initialSettings?.StartMinimized ?? false;
+
             var mainVm = Services.GetRequiredService<MainWindowViewModel>();
             var mainWindow = new MainWindow
             {
                 DataContext = mainVm
             };
-            desktop.MainWindow = mainWindow;
-            mainWindow.Show();
+
+            if (startMinimized)
+            {
+                // Do NOT assign desktop.MainWindow here, because Avalonia's
+                // ClassicDesktopStyleApplicationLifetime.StartCore automatically calls
+                // MainWindow?.Show() right after OnFrameworkInitializationCompleted returns.
+                _ = mainVm.InitializeAsync();
+            }
+            else
+            {
+                desktop.MainWindow = mainWindow;
+                mainWindow.Show();
+            }
 
             // Load application icons
             var defaultIcon = LoadIcon("icon.png");
@@ -51,7 +67,7 @@ public partial class App : Application
             };
 
             // Setup System Tray icon
-            SetupSystemTray(desktop, mainVm, defaultIcon, offlineIcon, syncedIcon, () => isShuttingDown = true);
+            SetupSystemTray(desktop, mainWindow, mainVm, defaultIcon, offlineIcon, syncedIcon, () => isShuttingDown = true);
 
             // Handle close behavior (close-to-tray or quit)
             mainWindow.Closing += (s, e) =>
@@ -98,6 +114,7 @@ public partial class App : Application
 
     private void SetupSystemTray(
         IClassicDesktopStyleApplicationLifetime desktop,
+        Window mainWindow,
         MainWindowViewModel mainVm,
         WindowIcon? defaultIcon,
         WindowIcon? offlineIcon,
@@ -154,10 +171,8 @@ public partial class App : Application
             var openItem = new NativeMenuItem("Open FolderSyncEr");
             openItem.Click += (_, _) =>
             {
-                if (desktop.MainWindow != null)
-                {
-                    BringWindowToForeground(desktop.MainWindow);
-                }
+                desktop.MainWindow ??= mainWindow;
+                BringWindowToForeground(mainWindow);
             };
 
             var syncNowItem = new NativeMenuItem("Sync Now");
@@ -189,10 +204,8 @@ public partial class App : Application
             trayIcon.Menu = menu;
             trayIcon.Clicked += (_, _) =>
             {
-                if (desktop.MainWindow != null)
-                {
-                    BringWindowToForeground(desktop.MainWindow);
-                }
+                desktop.MainWindow ??= mainWindow;
+                BringWindowToForeground(mainWindow);
             };
 
             var trayIcons = new TrayIcons { trayIcon };
