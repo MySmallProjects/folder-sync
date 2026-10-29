@@ -106,13 +106,16 @@ public sealed class SafeLocalStorage : ISyncStorage
             }
 
             // Atomic move/replace
-            if (File.Exists(fullDestPath))
+            var existedBefore = File.Exists(fullDestPath);
+            if (existedBefore)
             {
                 File.Move(tempFilePath, fullDestPath, overwrite: true);
+                _logger.LogInformation("Local file updated from server: '{Path}'", path);
             }
             else
             {
                 File.Move(tempFilePath, fullDestPath);
+                _logger.LogInformation("Local file created from server: '{Path}'", path);
             }
 
             // Invalidate hash cache for this path
@@ -148,16 +151,18 @@ public sealed class SafeLocalStorage : ISyncStorage
         return Task.CompletedTask;
     }
 
-    public Task CreateDirectoryAsync(string path, CancellationToken cancellationToken)
+    public async Task CreateDirectoryAsync(string path, CancellationToken cancellationToken)
     {
-        return _inner.CreateDirectoryAsync(path, cancellationToken);
+        await _inner.CreateDirectoryAsync(path, cancellationToken);
+        _logger.LogInformation("Local folder created: '{Path}'", path);
     }
 
-    public Task MoveAsync(string sourcePath, string targetPath, CancellationToken cancellationToken)
+    public async Task MoveAsync(string sourcePath, string targetPath, CancellationToken cancellationToken)
     {
         _hashCache.TryRemove(sourcePath, out _);
         _hashCache.TryRemove(targetPath, out _);
-        return _inner.MoveAsync(sourcePath, targetPath, cancellationToken);
+        await _inner.MoveAsync(sourcePath, targetPath, cancellationToken);
+        _logger.LogInformation("Local file/folder moved: '{SourcePath}' -> '{TargetPath}'", sourcePath, targetPath);
     }
 
     public async Task<string> ComputeHashAsync(string path, CancellationToken cancellationToken)

@@ -98,7 +98,9 @@ dotnet run --project src/FolderSyncEr.Client.App
 ### 2. Client Features (Phase 2 & Phase 4 Full UI)
 - **Status & Latency Checker**: Real-time roundtrip ping and server UTC time verification against `/api/status`.
 - **Configurable Server URL & Port**: Enter any custom server URL and port (e.g. `http://localhost:5001`) and click **Save URL** to persist it to secure storage (`ISecretStore`) and apply it across the app.
-- **Authentication**: JWT login with automatic token refresh on expiry, session persistence across restarts, and secure logout.
+- **Authentication & Active Devices**:
+  - JWT login with automatic token refresh on expiry, session persistence across restarts, and secure logout.
+  - Displays the current device name & ID (`Device: <Name> (<Id>)`) and lists all active logged-in devices (`GET /api/devices`), allowing users to remotely revoke/sign out any other device (`DELETE /api/devices/{id}`).
 - **OS-Native Secret Storage (`ISecretStore`)**:
   - **Windows**: Windows Credential Manager (`advapi32.dll` CredWriteW/CredReadW/CredDeleteW) with fallback to DPAPI `ProtectedData`.
   - **Linux / Ubuntu**: FreeDesktop Secret Service via `libsecret-1.so.0` (SecretValue / secret_password_store_sync).
@@ -113,20 +115,35 @@ dotnet run --project src/FolderSyncEr.Client.App
   - **Delete Forever & Empty Trash**: Per-item permanent deletion and full trash purge with inline confirmation dialogs.
 - **Activity Logs Viewer**:
   - Paged server-side audit logs fetched directly from `/api/logs`.
-  - Auto-refresh toggle (polls every 4 seconds when active).
+  - Optional auto-refresh toggle (disabled by default to avoid unnecessary background polling; polls every 4 seconds when enabled).
   - Filter by action (`Upload`, `Download`, `Conflict`, `Delete`, `Move`, `Login`, `Error`) and result (`Success`, `Failure`, `Conflict`, `Rejected`).
 - **Interactive Conflict Dialog**:
   - Modal overlay appearing when a conflict is encountered under the `Prompt` policy.
   - Side-by-side comparison cards (Size, Last Modified UTC, SHA-256 prefix, Originating Device).
   - Interactive decision actions: **Keep Local**, **Keep Server**, and **Keep Both (Rename Loser)**.
-- **Settings & Administration**:
+- **Settings, Administration & Diagnostics**:
   - **Change Synced Folder**: Path validation with an explicit warning dialog explaining how changing the sync directory affects the local sync state database.
   - **Conflict Policy Selection**: Choose between `KeepBoth` (automatic loser rename), `NewestWins` (UTC timestamp comparison), or `Prompt` (interactive modal).
   - **Sync Interval**: Configurable periodic background scan frequency (seconds).
+  - **Start Minimized to Tray**: Configurable toggle (`StartMinimized`, default `false`) to launch the app directly into the system tray without showing the main window on startup.
   - **Close-to-Tray**: Configurable toggle to minimize to notification tray on window close.
   - **Admin Folder Archive**: One-click download of the user's remote files bundled as a compressed ZIP archive (`GET /api/files/export`).
-  - **App Settings Storage Link**: Clickable file path link at the bottom of the Settings tab displaying the exact local location of `settings.json` (`~/.config/foldersyncer/settings.json` on Linux or `%LOCALAPPDATA%\FolderSyncEr\settings.json` on Windows) and opening it in the system's default text editor / viewer on click.
+  - **App Settings & Log File Links**: Clickable file path links at the bottom of the Settings tab to open `settings.json` and the current daily client log file (`Logs/app-yyyy-MM-dd.log`) in the system's default text editor / viewer.
+- **Client Daily File Logging (`ClientFileLoggerProvider`)**:
+  - **Location**: Stored inside a `Logs` subfolder of the app's configuration directory:
+    - **Linux**: `~/.config/foldersyncer/Logs/app-yyyy-MM-dd.log`
+    - **Windows**: `%LOCALAPPDATA%\FolderSyncEr\Logs\app-yyyy-MM-dd.log`
+  - **Retention**: One log file per UTC day (`app-yyyy-MM-dd.log`), automatically pruning log files older than **30 days**.
+  - **Logged Events**:
+    - Every HTTP API request (`Method` + `Url`), HTTP response status code, and network/transport error (`AuthHeaderHandler`).
+    - Server connection checks succeeding or failing (`FileSyncApiClient.CheckConnectionAsync`).
+    - File uploads to the server (start, byte size, resulting server version, or 409 conflict), remote directory creation, remote deletions, moves/renames, and trash restores (`FileSyncApiClient`).
+    - Local file and folder change-detection events (`Created`, `Changed`, `Deleted`, `Renamed`) from `FileSystemWatcher` (`SyncCoordinator`), as well as local file writes, directory creations, moves, and `.sync-trash` operations (`SafeLocalStorage`).
 - **System Tray Integration (`TrayIcon`)**:
+  - **Dynamic Tray Icon States**:
+    - **Grey folder icon** (`icon-offline.png`): Disconnected / unable to reach the server.
+    - **Blue folder icon with green tick** (`icon-synced.png`): Connected to the server and all files are in sync.
+    - **Blue folder icon** (`icon.png`): Connected and syncing or local/remote changes pending.
   - Tray menu options: **Open FolderSyncEr**, **Sync Now**, **Pause / Resume Sync**, and **Quit**.
   - **Linux Desktop Environment Caveats**:
     - Default GNOME Shell on Ubuntu does not display system tray icons out of the box unless the AppIndicator / Ayatana extension (`gnome-shell-extension-appindicator`) is enabled:
@@ -177,9 +194,9 @@ To run with detailed test log output:
 dotnet test --logger "console;verbosity=normal"
 ```
 
-### Test Suites (65 Tests Total)
-- **`FolderSyncEr.Server.IntegrationTests` (17 tests)**: Full ASP.NET Core Web API server tests against SQLite EF Core, verifying JWT auth, token rotation, streaming uploads/downloads, atomic writes, optimistic concurrency, soft delete tombstones, and admin ZIP export.
-- **`FolderSyncEr.Client.Tests` (21 tests)**: Client platform and UI viewmodel tests verifying OS secret stores (`ISecretStore`), token management with 401 automatic single-flight token refresh, `FileListViewModel` (local/remote merge & badge logic), `LogsViewModel` (filters & pagination), `ConflictPromptViewModel` (interactive resolution), `SettingsViewModel` (folder migration warning, URL persistence, `settings.json` file link, & ZIP export), `ClientSettingsManager` (atomic JSON loading & saving), `LoginViewModel` (uses settings URL on sign-in), and `ConnectionCheckViewModel` (explicit URL save & persistence).
+### Test Suites (74 Tests Total)
+- **`FolderSyncEr.Server.IntegrationTests` (19 tests)**: Full ASP.NET Core Web API server tests against SQLite EF Core, verifying JWT auth, token rotation, device management & revocation, streaming uploads/downloads, atomic writes, optimistic concurrency, soft delete tombstones, and admin ZIP export.
+- **`FolderSyncEr.Client.Tests` (28 tests)**: Client platform and UI viewmodel tests verifying OS secret stores (`ISecretStore`), daily rolling file logger (`ClientFileLoggerProvider`) with 30-day pruning, token management with 401 automatic single-flight token refresh and offline resilience, `FileListViewModel` (local/remote merge & badge logic), `LogsViewModel` (filters & pagination), `ConflictPromptViewModel` (interactive resolution), `SettingsViewModel` (folder migration warning, URL persistence, `StartMinimized`, `settings.json` & log file links, and ZIP export), `ClientSettingsManager` (atomic JSON loading & saving), `LoginViewModel` (active devices list & remote device sign-out), and `ConnectionCheckViewModel` (explicit URL save & persistence).
 - **`FolderSyncEr.Client.Sync.Tests` (27 tests)**: SharpSync integration tests verifying `RestRemoteStorage`, `SafeLocalStorage` (atomic writes + trash recovery + hash cache), `GuardedSyncDatabase` (R1 failure suppression + version tagging), `PolicyConflictResolver` (keep-both, newest-wins, prompt), and `SyncCoordinator`.
 
 ### Integration Test Credentials

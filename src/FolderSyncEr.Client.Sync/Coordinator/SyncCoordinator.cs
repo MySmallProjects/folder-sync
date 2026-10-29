@@ -55,6 +55,7 @@ public sealed class SyncCoordinator : IDisposable
     private readonly ILoggerFactory _loggerFactory;
 
     private readonly SemaphoreSlim _syncLock = new(1, 1);
+    private readonly CancellationTokenSource _disposeCts = new();
     private readonly RunFailureRegistry _failureRegistry = new();
 
     private SafeLocalStorage? _localStorage;
@@ -184,8 +185,11 @@ public sealed class SyncCoordinator : IDisposable
         if (_isDisposed)
             throw new ObjectDisposedException(nameof(SyncCoordinator));
 
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _disposeCts.Token);
+        var ct = linkedCts.Token;
+
         // Serialize execution: single-flight with pending queue (Mitigating Risk R13)
-        if (!await _syncLock.WaitAsync(0, cancellationToken))
+        if (!await _syncLock.WaitAsync(0, ct))
         {
             _logger.LogDebug("Sync already in progress; queuing follow-up sync.");
             _pendingSyncRequested = true;
@@ -201,17 +205,20 @@ public sealed class SyncCoordinator : IDisposable
             ClientSyncResult? lastResult = null;
             do
             {
+                if (_isDisposed || ct.IsCancellationRequested)
+                    break;
+
                 _pendingSyncRequested = false;
 
                 // 0. Ensure database initialized
                 if (!_dbInitialized)
                 {
-                    await _guardedDb!.InitializeAsync(cancellationToken);
+                    await _guardedDb!.InitializeAsync(ct);
                     _dbInitialized = true;
                 }
 
                 // 1. Preflight check: verify API connection and DB reachability
-                var status = await _api.CheckConnectionAsync(cancellationToken);
+                var status = await _api.CheckConnectionAsync(ct);
                 if (!status.IsConnected)
                 {
                     var msg = $"Server unreachable: {status.ErrorMessage ?? status.Status}";
@@ -223,11 +230,11 @@ public sealed class SyncCoordinator : IDisposable
                 }
 
                 // 2. Fetch fresh remote snapshot (Mitigating Risk R2)
-                var remoteFiles = await _api.ListFilesAsync(includeDeleted: false, limit: 10000, ct: cancellationToken);
+                var remoteFiles = await _api.ListFilesAsync(includeDeleted: false, limit: 10000, ct: ct);
                 _currentSnapshot!.Load(remoteFiles.Items, remoteFiles.SnapshotSeq, remoteFiles.ServerTimeUtc);
 
                 // 3. Pre-sync seeding pass (Mitigating Risk R8: both-new untracked files)
-                await ExecuteSeedingPassAsync(cancellationToken);
+                await ExecuteSeedingPassAsync(ct);
 
                 // 4. Run SharpSync engine
                 var options = new SyncOptions
@@ -250,7 +257,7 @@ public sealed class SyncCoordinator : IDisposable
                 SyncResult syncResult;
                 try
                 {
-                    syncResult = await _engine!.SynchronizeAsync(options, cancellationToken);
+                    syncResult = await _engine!.SynchronizeAsync(options, ct);
                 }
                 finally
                 {
@@ -274,9 +281,17 @@ public sealed class SyncCoordinator : IDisposable
 
                 SyncCompleted?.Invoke(this, new CoordinatorSyncCompletedEventArgs { Result = lastResult });
 
-            } while (_pendingSyncRequested && !cancellationToken.IsCancellationRequested);
+            } while (_pendingSyncRequested && !_isDisposed && !ct.IsCancellationRequested);
 
             return lastResult ?? new ClientSyncResult(true, 0, 0, 0, sw.Elapsed, null);
+        }
+        catch (OperationCanceledException) when (_isDisposed || cancellationToken.IsCancellationRequested)
+        {
+            return new ClientSyncResult(false, 0, 0, 0, sw.Elapsed, "Sync cancelled.");
+        }
+        catch (Exception) when (_isDisposed)
+        {
+            return new ClientSyncResult(false, 0, 0, 0, sw.Elapsed, "Coordinator disposed.");
         }
         catch (Exception ex)
         {
@@ -289,7 +304,18 @@ public sealed class SyncCoordinator : IDisposable
         finally
         {
             IsSynchronizing = false;
-            _syncLock.Release();
+            if (_isDisposed)
+            {
+                _guardedDb?.Dispose();
+                _engine?.Dispose();
+            }
+            try
+            {
+                _syncLock.Release();
+            }
+            catch (ObjectDisposedException)
+            {
+            }
         }
     }
 
@@ -440,6 +466,15 @@ public sealed class SyncCoordinator : IDisposable
         if (name.Contains("(conflict "))
             return;
 
+        if (e is RenamedEventArgs renamed)
+        {
+            _logger.LogInformation("Local file/folder rename detected: '{OldPath}' -> '{NewPath}'", renamed.OldName, renamed.Name);
+        }
+        else
+        {
+            _logger.LogInformation("Local file/folder {ChangeType} detected: '{Path}'", e.ChangeType, e.Name);
+        }
+
         _debounceTimer?.Dispose();
         _debounceTimer = new Timer(async _ =>
         {
@@ -492,9 +527,29 @@ public sealed class SyncCoordinator : IDisposable
         if (_isDisposed) return;
         _isDisposed = true;
 
+        try
+        {
+            _disposeCts.Cancel();
+        }
+        catch (ObjectDisposedException)
+        {
+        }
+
         StopBackgroundSync();
-        _syncLock.Dispose();
-        _guardedDb?.Dispose();
-        _engine?.Dispose();
+
+        if (_syncLock.Wait(0))
+        {
+            try
+            {
+                _guardedDb?.Dispose();
+                _engine?.Dispose();
+            }
+            finally
+            {
+                _syncLock.Release();
+                _syncLock.Dispose();
+                _disposeCts.Dispose();
+            }
+        }
     }
 }

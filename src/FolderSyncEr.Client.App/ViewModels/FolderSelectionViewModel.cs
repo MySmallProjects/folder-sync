@@ -89,8 +89,8 @@ public partial class FolderSelectionViewModel : ViewModelBase
 
     private void SetFolderPath(string path)
     {
-        SelectedFolderPath = path;
         IsFolderSelected = true;
+        SelectedFolderPath = path;
         try
         {
             var fileCount = Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories).Count();

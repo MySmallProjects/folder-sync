@@ -912,4 +912,55 @@ public class Phase4ViewModelTests
         protected override Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage request, CancellationToken cancellationToken)
             => Task.FromResult(new System.Net.Http.HttpResponseMessage(_statusCode));
     }
+
+    [Fact]
+    public void ClientFileLoggerProvider_WritesDailyLog_AndPrunesOlderThan30Days()
+    {
+        var tempConfigDir = Path.Combine(Path.GetTempPath(), $"FolderSyncEr_LogTest_{Guid.NewGuid():N}");
+        var logsDir = Path.Combine(tempConfigDir, "Logs");
+        Directory.CreateDirectory(logsDir);
+
+        try
+        {
+            var fakeNow = new DateTime(2026, 10, 29, 12, 0, 0, DateTimeKind.Utc);
+
+            // Seed an old log file from 35 days ago and a recent log file from 10 days ago
+            var oldLogPath = Path.Combine(logsDir, "app-2026-09-20.log");
+            var recentLogPath = Path.Combine(logsDir, "app-2026-10-19.log");
+            File.WriteAllText(oldLogPath, "old log");
+            File.WriteAllText(recentLogPath, "recent log");
+
+            using var provider = new ClientFileLoggerProvider(logsDir, retentionDays: 30, utcNowProvider: () => fakeNow);
+            var logger = provider.CreateLogger("FolderSyncEr.Client.Api.FileSyncApiClient");
+            Microsoft.Extensions.Logging.LoggerExtensions.LogInformation(logger, "API Request: GET http://localhost:5000/api/status");
+
+            var todayLogPath = provider.GetCurrentLogPath();
+            Assert.Equal(Path.Combine(logsDir, "app-2026-10-29.log"), todayLogPath);
+            Assert.True(File.Exists(todayLogPath));
+            var content = File.ReadAllText(todayLogPath);
+            Assert.Contains("API Request: GET http://localhost:5000/api/status", content);
+
+            // Old log (>30 days) should be pruned; recent log (10 days old) should be retained
+            Assert.False(File.Exists(oldLogPath));
+            Assert.True(File.Exists(recentLogPath));
+
+            // SettingsViewModel exposes CurrentLogFilePath matching the config directory's Logs folder
+            var settingsFile = Path.Combine(tempConfigDir, "settings.json");
+            var manager = new ClientSettingsManager(settingsFile);
+            var settingsVm = new SettingsViewModel(
+                new FakeFileSyncApi(),
+                new TestSecretStore(),
+                manager,
+                () => null,
+                _ => Task.CompletedTask,
+                _ => { });
+
+            Assert.StartsWith(logsDir, settingsVm.CurrentLogFilePath);
+            Assert.EndsWith(".log", settingsVm.CurrentLogFilePath);
+        }
+        finally
+        {
+            if (Directory.Exists(tempConfigDir)) Directory.Delete(tempConfigDir, recursive: true);
+        }
+    }
 }

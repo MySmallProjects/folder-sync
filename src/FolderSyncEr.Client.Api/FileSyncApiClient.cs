@@ -36,22 +36,34 @@ public class FileSyncApiClient : IFileSyncApi
     public async Task<ApiConnectionStatus> CheckConnectionAsync(CancellationToken ct = default)
     {
         var sw = Stopwatch.StartNew();
+        var uri = BuildUri(ApiRoutes.Status);
         try
         {
-            var uri = BuildUri(ApiRoutes.Status);
             using var response = await _httpClient.GetAsync(uri, ct);
             sw.Stop();
 
             if (!response.IsSuccessStatusCode)
             {
-                return new ApiConnectionStatus(false, "Unreachable", "Unknown", null, sw.ElapsedMilliseconds,
-                    $"Server returned HTTP {(int)response.StatusCode} {response.ReasonPhrase}");
+                var errMsg = $"Server returned HTTP {(int)response.StatusCode} {response.ReasonPhrase}";
+                _logger.LogWarning("Server connection failed ({Url}): {Error}", uri, errMsg);
+                return new ApiConnectionStatus(false, "Unreachable", "Unknown", null, sw.ElapsedMilliseconds, errMsg);
             }
 
             var status = await response.Content.ReadFromJsonAsync<StatusResponse>(cancellationToken: ct);
             if (status == null)
             {
+                _logger.LogWarning("Server connection failed ({Url}): Failed to deserialize status response.", uri);
                 return new ApiConnectionStatus(false, "InvalidResponse", "Unknown", null, sw.ElapsedMilliseconds, "Failed to deserialize status response.");
+            }
+
+            if (status.DbReachable)
+            {
+                _logger.LogInformation("Server connection connected: {Url} (Status: {Status}, Version: {Version}, Latency: {LatencyMs}ms)",
+                    uri, status.Status, status.Version, sw.ElapsedMilliseconds);
+            }
+            else
+            {
+                _logger.LogWarning("Server connection failed ({Url}): Database unreachable on server", uri);
             }
 
             return new ApiConnectionStatus(
@@ -67,6 +79,7 @@ public class FileSyncApiClient : IFileSyncApi
         catch (Exception ex)
         {
             sw.Stop();
+            _logger.LogWarning("Server connection failed ({Url}): {Error}", uri, ex.Message);
             return new ApiConnectionStatus(false, "Offline", "Unknown", null, sw.ElapsedMilliseconds, ex.Message);
         }
     }
@@ -245,27 +258,33 @@ public class FileSyncApiClient : IFileSyncApi
             request.Headers.Add(ApiHeaders.LastModifiedUtc, lastModifiedUtc.Value.ToString("o"));
         }
 
+        _logger.LogInformation("Uploading file to server: '{Path}' (URL: {Url})", path, uri);
         using var response = await _httpClient.SendAsync(request, ct);
 
         if (response.StatusCode == HttpStatusCode.Created || response.StatusCode == HttpStatusCode.OK)
         {
             var fileDto = await response.Content.ReadFromJsonAsync<FileDto>(cancellationToken: ct);
+            _logger.LogInformation("File uploaded to server: '{Path}' (v{Version}, {Size} bytes, URL: {Url})",
+                fileDto?.Path ?? path, fileDto?.Version ?? 1, fileDto?.Size ?? 0, uri);
             return new UploadResult(true, false, false, fileDto, null, null);
         }
 
         if (response.StatusCode == HttpStatusCode.Conflict)
         {
             var conflict = await response.Content.ReadFromJsonAsync<ConflictDto>(cancellationToken: ct);
+            _logger.LogWarning("File upload conflict (409) for '{Path}' (URL: {Url})", path, uri);
             return new UploadResult(false, true, false, null, conflict, "409 Conflict");
         }
 
         if (response.StatusCode == HttpStatusCode.UnprocessableEntity)
         {
             var detail = await response.Content.ReadAsStringAsync(ct);
+            _logger.LogWarning("File upload rejected (422 Hash Mismatch) for '{Path}' (URL: {Url}): {Detail}", path, uri, detail);
             return new UploadResult(false, false, true, null, null, $"422 Hash Mismatch: {detail}");
         }
 
         var err = await response.Content.ReadAsStringAsync(ct);
+        _logger.LogWarning("File upload failed (HTTP {StatusCode}) for '{Path}' (URL: {Url}): {Error}", (int)response.StatusCode, path, uri, err);
         return new UploadResult(false, false, false, null, null, $"HTTP {(int)response.StatusCode}: {err}");
     }
 
@@ -274,7 +293,9 @@ public class FileSyncApiClient : IFileSyncApi
         var uri = BuildUri(ApiRoutes.Directories);
         using var response = await _httpClient.PostAsJsonAsync(uri, new CreateDirectoryRequest(path), ct);
         response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync<FileDto>(cancellationToken: ct))!;
+        var dto = (await response.Content.ReadFromJsonAsync<FileDto>(cancellationToken: ct))!;
+        _logger.LogInformation("Folder created on server: '{Path}' (URL: {Url})", dto.Path, uri);
+        return dto;
     }
 
     public async Task<bool> DeleteFileAsync(string id, string? ifMatchSha256 = null, long? baseVersion = null, CancellationToken ct = default)
@@ -293,6 +314,10 @@ public class FileSyncApiClient : IFileSyncApi
         }
 
         using var response = await _httpClient.SendAsync(request, ct);
+        if (response.IsSuccessStatusCode)
+        {
+            _logger.LogInformation("Item deleted on server: id='{Id}' (URL: {Url})", id, uri);
+        }
         return response.IsSuccessStatusCode;
     }
 
@@ -302,7 +327,9 @@ public class FileSyncApiClient : IFileSyncApi
         var req = new MoveFileRequest(fromPath, toPath, ifMatchSha256);
         using var response = await _httpClient.PostAsJsonAsync(uri, req, ct);
         if (!response.IsSuccessStatusCode) return null;
-        return await response.Content.ReadFromJsonAsync<FileDto>(cancellationToken: ct);
+        var dto = await response.Content.ReadFromJsonAsync<FileDto>(cancellationToken: ct);
+        _logger.LogInformation("Item moved/renamed on server: '{FromPath}' -> '{ToPath}' (URL: {Url})", fromPath, toPath, uri);
+        return dto;
     }
 
     public async Task<StorageInfoDto> GetStorageInfoAsync(CancellationToken ct = default)
@@ -333,7 +360,17 @@ public class FileSyncApiClient : IFileSyncApi
     {
         var uri = BuildUri($"{ApiRoutes.Trash}/{Uri.EscapeDataString(id)}/restore");
         using var response = await _httpClient.PostAsJsonAsync(uri, new RestoreRequest(targetPath), ct);
-        return await ToTrashActionResultAsync<RestoreResponse>(response, ct);
+        var result = await ToTrashActionResultAsync<RestoreResponse>(response, ct);
+        if (result.IsSuccess && result.Value != null)
+        {
+            _logger.LogInformation("File/folder restored from trash: '{Path}' (id='{Id}', restoredCount={Count}, URL: {Url})",
+                result.Value.Path, id, result.Value.RestoredCount, uri);
+        }
+        else
+        {
+            _logger.LogWarning("Failed to restore deleted item id='{Id}' (URL: {Url}): {Error}", id, uri, result.ErrorMessage);
+        }
+        return result;
     }
 
     public async Task<TrashActionResult<PurgeResponse>> PurgeDeletedItemAsync(string id, CancellationToken ct = default)

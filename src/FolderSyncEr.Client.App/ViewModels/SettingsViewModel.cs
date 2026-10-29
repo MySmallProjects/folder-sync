@@ -60,6 +60,15 @@ public partial class SettingsViewModel : ViewModelBase
     public bool HasOpenSettingsStatus => !string.IsNullOrWhiteSpace(OpenSettingsStatus);
 
     [ObservableProperty]
+    private string _currentLogFilePath = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasOpenLogStatus))]
+    private string? _openLogStatus;
+
+    public bool HasOpenLogStatus => !string.IsNullOrWhiteSpace(OpenLogStatus);
+
+    [ObservableProperty]
     private string _appVersion = "1.0.0";
 
     [ObservableProperty]
@@ -90,6 +99,9 @@ public partial class SettingsViewModel : ViewModelBase
         CurrentSyncFolder = _getSyncFolder() ?? string.Empty;
         ServerUrl = _api.ServerUrl;
         SettingsFilePath = _settingsManager.SettingsFilePath;
+        var configDir = Path.GetDirectoryName(_settingsManager.SettingsFilePath);
+        var logsDir = !string.IsNullOrEmpty(configDir) ? Path.Combine(configDir, "Logs") : null;
+        CurrentLogFilePath = ClientFileLoggerProvider.GetCurrentLogFilePath(logsDir);
 
         var appAssembly = typeof(SettingsViewModel).Assembly;
         AppVersion = BuildInfo.GetVersionString(appAssembly);
@@ -200,6 +212,39 @@ public partial class SettingsViewModel : ViewModelBase
         else
         {
             OpenSettingsStatus = $"File path: {SettingsFilePath}";
+        }
+    }
+
+    [RelayCommand]
+    public void OpenLogFile()
+    {
+        OpenLogStatus = null;
+        var configDir = Path.GetDirectoryName(_settingsManager.SettingsFilePath);
+        var logsDir = !string.IsNullOrEmpty(configDir) ? Path.Combine(configDir, "Logs") : null;
+        CurrentLogFilePath = ClientFileLoggerProvider.GetCurrentLogFilePath(logsDir);
+
+        try
+        {
+            var dir = Path.GetDirectoryName(CurrentLogFilePath);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+            if (!File.Exists(CurrentLogFilePath))
+            {
+                File.WriteAllText(CurrentLogFilePath, string.Empty);
+            }
+        }
+        catch { }
+
+        var success = ClientSettingsManager.OpenSettingsFileInDefaultViewer(CurrentLogFilePath);
+        if (success)
+        {
+            OpenLogStatus = "Log file opened in default viewer.";
+        }
+        else
+        {
+            OpenLogStatus = $"Log file path: {CurrentLogFilePath}";
         }
     }
 

@@ -33,10 +33,13 @@ internal class Program
         {
             var services = new ServiceCollection();
 
-            // Logging
+            // Logging (Console + Rolling Daily File Logger in ~/.config/foldersyncer/Logs/app-yyyy-MM-dd.log)
+            var fileLoggerProvider = new ClientFileLoggerProvider();
+            services.AddSingleton(fileLoggerProvider);
             services.AddLogging(builder =>
             {
                 builder.AddConsole();
+                builder.AddProvider(fileLoggerProvider);
                 builder.SetMinimumLevel(LogLevel.Information);
             });
 
@@ -88,6 +91,9 @@ internal class Program
             services.AddTransient<MainWindowViewModel>();
 
             App.Services = services.BuildServiceProvider();
+
+            var startupLogger = App.Services.GetRequiredService<ILogger<Program>>();
+            startupLogger.LogInformation("FolderSyncEr Client started. Log file: {LogFilePath}", fileLoggerProvider.GetCurrentLogPath());
 
             BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
         }

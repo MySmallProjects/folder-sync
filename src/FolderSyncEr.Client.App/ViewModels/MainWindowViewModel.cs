@@ -8,6 +8,7 @@ using FolderSyncEr.Client.Api;
 using FolderSyncEr.Client.Platform;
 using FolderSyncEr.Client.Sync.Conflicts;
 using FolderSyncEr.Client.Sync.Coordinator;
+using Microsoft.Extensions.Logging;
 
 namespace FolderSyncEr.Client.App.ViewModels;
 
@@ -23,6 +24,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     private readonly ISecretStore _secretStore;
     private readonly IFileSyncApi _api;
     private readonly ClientSettingsManager _settingsManager;
+    private readonly ILoggerFactory? _loggerFactory;
+    private bool _isInitializing;
 
     public ConnectionCheckViewModel Connection { get; }
     public LoginViewModel Login { get; }
@@ -122,11 +125,13 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         ConnectionCheckViewModel connection,
         LoginViewModel login,
         FolderSelectionViewModel folder,
-        ClientSettingsManager? settingsManager = null)
+        ClientSettingsManager? settingsManager = null,
+        ILoggerFactory? loggerFactory = null)
     {
         _secretStore = secretStore ?? throw new ArgumentNullException(nameof(secretStore));
         _api = api ?? throw new ArgumentNullException(nameof(api));
         _settingsManager = settingsManager ?? new ClientSettingsManager();
+        _loggerFactory = loggerFactory;
         Connection = connection ?? throw new ArgumentNullException(nameof(connection));
         Login = login ?? throw new ArgumentNullException(nameof(login));
         Folder = folder ?? throw new ArgumentNullException(nameof(folder));
@@ -150,7 +155,6 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             async newFolder =>
             {
                 await Folder.SaveAndSetFolderPathAsync(newFolder);
-                RebuildCoordinator();
             },
             newPolicy =>
             {
@@ -184,7 +188,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         {
             OnPropertyChanged(nameof(IsReadyForSync));
             OnPropertyChanged(nameof(CurrentTrayIconState));
-            if (e.PropertyName == nameof(Connection.IsConnected) && Connection.IsConnected && Coordinator == null)
+            if (!_isInitializing && e.PropertyName == nameof(Connection.IsConnected) && Connection.IsConnected && Coordinator == null)
             {
                 RebuildCoordinator();
             }
@@ -222,13 +226,16 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             {
                 if (Login.IsLoggedIn)
                 {
-                    if (!Connection.IsConnected)
+                    if (!_isInitializing)
                     {
-                        _ = Connection.CheckConnectionCommand.ExecuteAsync(null);
-                    }
-                    if (Folder.IsFolderSelected)
-                    {
-                        RebuildCoordinator();
+                        if (!Connection.IsConnected)
+                        {
+                            _ = Connection.CheckConnectionCommand.ExecuteAsync(null);
+                        }
+                        if (Folder.IsFolderSelected)
+                        {
+                            RebuildCoordinator();
+                        }
                     }
                 }
                 else
@@ -243,16 +250,19 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         };
         Folder.PropertyChanged += (_, e) =>
         {
-            if (e.PropertyName == nameof(Folder.SelectedFolderPath) && Settings != null)
+            if (e.PropertyName == nameof(Folder.SelectedFolderPath))
             {
-                Settings.CurrentSyncFolder = Folder.SelectedFolderPath ?? string.Empty;
+                if (Settings != null)
+                {
+                    Settings.CurrentSyncFolder = Folder.SelectedFolderPath ?? string.Empty;
+                }
+                if (!_isInitializing && Folder.IsFolderSelected && Login.IsLoggedIn)
+                {
+                    RebuildCoordinator();
+                }
             }
             OnPropertyChanged(nameof(IsReadyForSync));
             OnPropertyChanged(nameof(CurrentTrayIconState));
-            if (Folder.IsFolderSelected && Login.IsLoggedIn)
-            {
-                RebuildCoordinator();
-            }
         };
     }
 
@@ -261,42 +271,50 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     public async Task InitializeAsync()
     {
         IsStartupInitialized = true;
+        _isInitializing = true;
         Settings.IsInitialized = false;
 
-        var appSettings = await _settingsManager.LoadSettingsAsync();
-        if (appSettings != null)
+        try
         {
-            Settings.SyncIntervalSeconds = appSettings.SyncIntervalSeconds;
-            Settings.CloseToTray = appSettings.CloseToTray;
-            Settings.StartMinimized = appSettings.StartMinimized;
-            if (Enum.TryParse<ConflictPolicy>(appSettings.ConflictPolicy, out var pol))
+            var appSettings = await _settingsManager.LoadSettingsAsync();
+            if (appSettings != null)
             {
-                Settings.SelectedConflictPolicy = pol;
+                Settings.SyncIntervalSeconds = appSettings.SyncIntervalSeconds;
+                Settings.CloseToTray = appSettings.CloseToTray;
+                Settings.StartMinimized = appSettings.StartMinimized;
+                if (Enum.TryParse<ConflictPolicy>(appSettings.ConflictPolicy, out var pol))
+                {
+                    Settings.SelectedConflictPolicy = pol;
+                }
+                if (!string.IsNullOrWhiteSpace(appSettings.ServerUrl))
+                {
+                    _api.ServerUrl = appSettings.ServerUrl;
+                    Connection.ServerUrl = appSettings.ServerUrl;
+                    Settings.ServerUrl = appSettings.ServerUrl;
+                }
             }
-            if (!string.IsNullOrWhiteSpace(appSettings.ServerUrl))
+
+            await Connection.InitializeAsync();
+            await Connection.CheckConnectionCommand.ExecuteAsync(null);
+            await Login.InitializeSessionAsync(fetchDevicesFromServer: Connection.IsConnected);
+            if (!string.IsNullOrWhiteSpace(_api.ServerUrl))
             {
-                _api.ServerUrl = appSettings.ServerUrl;
-                Connection.ServerUrl = appSettings.ServerUrl;
-                Settings.ServerUrl = appSettings.ServerUrl;
+                Connection.ServerUrl = _api.ServerUrl;
+                Settings.ServerUrl = _api.ServerUrl;
             }
-        }
+            await Folder.InitializeFolderAsync();
+            if (string.IsNullOrWhiteSpace(Folder.SelectedFolderPath) && !string.IsNullOrWhiteSpace(appSettings?.SyncFolderPath))
+            {
+                await Folder.SaveAndSetFolderPathAsync(appSettings.SyncFolderPath);
+            }
 
-        await Connection.InitializeAsync();
-        await Connection.CheckConnectionCommand.ExecuteAsync(null);
-        await Login.InitializeSessionAsync(fetchDevicesFromServer: Connection.IsConnected);
-        if (!string.IsNullOrWhiteSpace(_api.ServerUrl))
-        {
-            Connection.ServerUrl = _api.ServerUrl;
-            Settings.ServerUrl = _api.ServerUrl;
+            Settings.CurrentSyncFolder = Folder.SelectedFolderPath ?? string.Empty;
+            Settings.IsInitialized = true;
         }
-        await Folder.InitializeFolderAsync();
-        if (string.IsNullOrWhiteSpace(Folder.SelectedFolderPath) && !string.IsNullOrWhiteSpace(appSettings?.SyncFolderPath))
+        finally
         {
-            await Folder.SaveAndSetFolderPathAsync(appSettings.SyncFolderPath);
+            _isInitializing = false;
         }
-
-        Settings.CurrentSyncFolder = Folder.SelectedFolderPath ?? string.Empty;
-        Settings.IsInitialized = true;
 
         if (Login.IsLoggedIn && Folder.IsFolderSelected)
         {
@@ -325,7 +343,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                 localFolderPath: Folder.SelectedFolderPath,
                 deviceId: deviceId,
                 policy: Settings.SelectedConflictPolicy,
-                promptHandler: ConflictPrompt);
+                promptHandler: ConflictPrompt,
+                loggerFactory: _loggerFactory);
 
             Coordinator.ProgressChanged += (s, e) =>
             {

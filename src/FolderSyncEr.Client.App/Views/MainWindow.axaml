@@ -431,10 +431,10 @@
                                 </StackPanel>
                             </Border>
 
-                            <!-- App Configuration File Link Card -->
+                            <!-- App Configuration & Log Files Card -->
                             <Border Background="#1F2937" CornerRadius="10" Padding="20" BorderBrush="#374151" BorderThickness="1">
                                 <StackPanel Spacing="10">
-                                    <TextBlock Text="App Configuration File" FontSize="16" FontWeight="SemiBold" Foreground="#F3F4F6"/>
+                                    <TextBlock Text="App Configuration &amp; Log Files" FontSize="16" FontWeight="SemiBold" Foreground="#F3F4F6"/>
                                     <TextBlock Text="All client application preferences and settings are stored locally in:"
                                                FontSize="12" Foreground="#9CA3AF"/>
 
@@ -460,6 +460,32 @@
                                                Foreground="#10B981"
                                                FontSize="11"
                                                IsVisible="{Binding HasOpenSettingsStatus}"/>
+
+                                    <TextBlock Text="Today's application log file (retained for 30 days):"
+                                               FontSize="12" Foreground="#9CA3AF" Margin="0,6,0,0"/>
+
+                                    <!-- Clickable Link to Current Daily Log File -->
+                                    <Button Command="{Binding OpenLogFileCommand}"
+                                            Background="Transparent"
+                                            BorderThickness="0"
+                                            Padding="0"
+                                            Cursor="Hand"
+                                            HorizontalAlignment="Left">
+                                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                            <TextBlock Text="📋" FontSize="14" VerticalAlignment="Center"/>
+                                            <TextBlock Text="{Binding CurrentLogFilePath}"
+                                                       FontSize="12"
+                                                       FontWeight="Medium"
+                                                       Foreground="#60A5FA"
+                                                       TextDecorations="Underline"
+                                                       VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Button>
+
+                                    <TextBlock Text="{Binding OpenLogStatus}"
+                                               Foreground="#10B981"
+                                               FontSize="11"
+                                               IsVisible="{Binding HasOpenLogStatus}"/>
                                 </StackPanel>
                             </Border>
 
