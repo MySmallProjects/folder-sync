@@ -142,6 +142,7 @@ dotnet run --project src/FolderSyncEr.Client.App
 - **Settings, Administration & Diagnostics**:
   - **Change Synced Folder**: Path validation with an explicit warning dialog explaining how changing the sync directory affects the local sync state database.
   - **Conflict Policy Selection**: Choose between `KeepBoth` (automatic loser rename), `NewestWins` (UTC timestamp comparison), or `Prompt` (interactive modal).
+  - **Allow Untrusted / Self-Signed SSL Certificates**: Configurable toggle in **Settings -> Server Connection URL** (`AllowUntrustedCertificates`, default `false`). Allows connecting to internal HTTPS servers (e.g. `https://foldersync.house.lan/` or self-signed homelab certificates) without triggering `The SSL connection could not be established`.
   - **Sync Interval**: Configurable periodic background scan frequency (seconds).
   - **Start Minimized to Tray**: Configurable toggle (`StartMinimized`, default `false`) to launch the app directly into the system tray without showing the main window on startup.
   - **Close-to-Tray**: Configurable toggle to minimize to notification tray on window close.

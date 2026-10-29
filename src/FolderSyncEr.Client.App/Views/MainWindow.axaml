@@ -374,6 +374,9 @@
                                                 Command="{Binding SaveServerUrlCommand}"
                                                 Background="#059669" Foreground="White" FontWeight="SemiBold" Padding="14,7"/>
                                     </Grid>
+                                    <CheckBox Content="Allow untrusted/self-signed SSL/TLS certificates (e.g. for internal https:// LAN servers)"
+                                              IsChecked="{Binding AllowUntrustedCertificates, Mode=TwoWay}"
+                                              Margin="0,4,0,0"/>
                                     <TextBlock Text="{Binding ServerUrlStatusMessage}" Foreground="#10B981" FontSize="12"
                                                IsVisible="{Binding HasServerUrlStatusMessage}"/>
                                 </StackPanel>

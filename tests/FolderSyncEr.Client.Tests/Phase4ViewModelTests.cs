@@ -965,6 +965,47 @@ public class Phase4ViewModelTests
     }
 
     [Fact]
+    public async Task SettingsViewModel_AllowUntrustedCertificates_PersistsToSettingsJson()
+    {
+        var tempSettingsFile = Path.Combine(Path.GetTempPath(), $"FolderSyncEr_UntrustedCertSettings_{Guid.NewGuid():N}.json");
+        try
+        {
+            var manager = new ClientSettingsManager(tempSettingsFile);
+            var api = new FakeFileSyncApi();
+            var secretStore = new TestSecretStore();
+            var settingsVm = new SettingsViewModel(
+                api,
+                secretStore,
+                manager,
+                () => null,
+                _ => Task.CompletedTask,
+                _ => { });
+
+            settingsVm.IsInitialized = true;
+            Assert.False(settingsVm.AllowUntrustedCertificates);
+
+            // Toggle checkbox to allow untrusted certificates
+            settingsVm.AllowUntrustedCertificates = true;
+            // Let debounce/persistence task run
+            await settingsVm.PersistCurrentSettingsAsync();
+
+            var saved = await manager.LoadSettingsAsync();
+            Assert.True(saved.AllowUntrustedCertificates);
+
+            // Toggle off
+            settingsVm.AllowUntrustedCertificates = false;
+            await settingsVm.PersistCurrentSettingsAsync();
+
+            var savedOff = await manager.LoadSettingsAsync();
+            Assert.False(savedOff.AllowUntrustedCertificates);
+        }
+        finally
+        {
+            if (File.Exists(tempSettingsFile)) File.Delete(tempSettingsFile);
+        }
+    }
+
+    [Fact]
     public async Task MainWindowViewModel_Logout_ClearsFileList_DeletedFiles_AndLogs()
     {
         var api = new FakeFileSyncApi();

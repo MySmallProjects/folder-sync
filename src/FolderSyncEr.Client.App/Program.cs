@@ -56,6 +56,34 @@ internal class Program
             services.AddTransient<AuthHeaderHandler>();
 
             services.AddHttpClient("FileSyncApi")
+                .ConfigurePrimaryHttpMessageHandler(sp =>
+                {
+                    var settingsManager = sp.GetService<ClientSettingsManager>();
+                    var handler = new System.Net.Http.SocketsHttpHandler();
+                    handler.SslOptions.RemoteCertificateValidationCallback = (sender, cert, chain, sslErrors) =>
+                    {
+                        if (sslErrors == System.Net.Security.SslPolicyErrors.None)
+                        {
+                            return true;
+                        }
+
+                        if (settingsManager != null)
+                        {
+                            try
+                            {
+                                var settings = settingsManager.LoadSettings();
+                                if (settings.AllowUntrustedCertificates)
+                                {
+                                    return true;
+                                }
+                            }
+                            catch { }
+                        }
+
+                        return false;
+                    };
+                    return handler;
+                })
                 .AddHttpMessageHandler<AuthHeaderHandler>();
 
             services.AddSingleton<IFileSyncApi>(sp =>

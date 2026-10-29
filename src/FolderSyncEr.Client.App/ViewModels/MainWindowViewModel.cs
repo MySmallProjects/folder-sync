@@ -285,6 +285,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                 Settings.SyncIntervalSeconds = appSettings.SyncIntervalSeconds;
                 Settings.CloseToTray = appSettings.CloseToTray;
                 Settings.StartMinimized = appSettings.StartMinimized;
+                Settings.AllowUntrustedCertificates = appSettings.AllowUntrustedCertificates;
                 if (Enum.TryParse<ConflictPolicy>(appSettings.ConflictPolicy, out var pol))
                 {
                     Settings.SelectedConflictPolicy = pol;

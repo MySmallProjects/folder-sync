@@ -5,6 +5,7 @@ namespace FolderSyncEr.Client.Platform;
 public class ClientSettings
 {
     public string ServerUrl { get; set; } = "http://localhost:5000";
+    public bool AllowUntrustedCertificates { get; set; } = false;
     public string? SyncFolderPath { get; set; }
     public string ConflictPolicy { get; set; } = "KeepBoth";
     public int SyncIntervalSeconds { get; set; } = 60;

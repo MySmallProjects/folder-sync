@@ -30,6 +30,9 @@ public partial class SettingsViewModel : ViewModelBase
     private string _serverUrl = string.Empty;
 
     [ObservableProperty]
+    private bool _allowUntrustedCertificates;
+
+    [ObservableProperty]
     private ConflictPolicy _selectedConflictPolicy = ConflictPolicy.KeepBoth;
 
     [ObservableProperty]
@@ -140,6 +143,14 @@ public partial class SettingsViewModel : ViewModelBase
     {
         _setConflictPolicy(value);
         StatusMessage = $"Conflict policy changed to: {value}";
+        if (IsInitialized)
+        {
+            _ = PersistCurrentSettingsAsync();
+        }
+    }
+
+    partial void OnAllowUntrustedCertificatesChanged(bool value)
+    {
         if (IsInitialized)
         {
             _ = PersistCurrentSettingsAsync();
@@ -257,6 +268,7 @@ public partial class SettingsViewModel : ViewModelBase
             {
                 settings.ServerUrl = ServerUrl;
             }
+            settings.AllowUntrustedCertificates = AllowUntrustedCertificates;
             if (!string.IsNullOrWhiteSpace(CurrentSyncFolder))
             {
                 settings.SyncFolderPath = CurrentSyncFolder;
