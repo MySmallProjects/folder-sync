@@ -38,6 +38,8 @@ public static class ApiRoutes
     public const string Devices = "api/devices";
     public const string DeviceById = "api/devices/{id}";
 
+    public const string Users = "api/users";
+
     public const string Settings = "api/settings";
 }
 

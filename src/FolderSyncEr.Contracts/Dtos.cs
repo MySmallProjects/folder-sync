@@ -36,6 +36,31 @@ public record UserDto(
     DateTime? LastLoginUtc
 );
 
+public record AdminUserDto(
+    int Id,
+    string Username,
+    string Role,
+    DateTime CreatedUtc,
+    DateTime? LastLoginUtc,
+    bool IsDisabled,
+    bool IsDeleted,
+    DateTime? DeletedUtc
+);
+
+public record CreateUserRequest(
+    string Username,
+    string Password
+);
+
+public record UpdateUserStatusRequest(
+    bool? IsDisabled,
+    bool? IsDeleted
+);
+
+public record ChangeUserPasswordRequest(
+    string NewPassword
+);
+
 public record DeviceDto(
     string Id,
     int UserId,

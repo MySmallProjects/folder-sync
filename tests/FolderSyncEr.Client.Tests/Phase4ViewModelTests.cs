@@ -963,4 +963,66 @@ public class Phase4ViewModelTests
             if (Directory.Exists(tempConfigDir)) Directory.Delete(tempConfigDir, recursive: true);
         }
     }
+
+    [Fact]
+    public async Task MainWindowViewModel_Logout_ClearsFileList_DeletedFiles_AndLogs()
+    {
+        var api = new FakeFileSyncApi();
+        api.MockFiles.Add(new FileDto(
+            Id: "f1",
+            Path: "doc.txt",
+            IsDirectory: false,
+            Size: 100,
+            Sha256: "abc12345",
+            Version: 1,
+            LastModifiedUtc: DateTime.UtcNow,
+            UploadedAtUtc: DateTime.UtcNow,
+            UploadedByDeviceId: "dev1",
+            IsDeleted: false,
+            ChangeSeq: 1));
+        api.MockDeletedItems.Add(new DeletedItemDto(
+            Id: "d1",
+            Path: "old.txt",
+            IsDirectory: false,
+            Size: 50,
+            Version: 2,
+            LastModifiedUtc: DateTime.UtcNow.AddDays(-1),
+            DeletedAtUtc: DateTime.UtcNow,
+            ContainedItemCount: 0,
+            ContainedSize: 0));
+        api.MockLogs.Add(new ActivityLogDto(
+            Id: 1,
+            TimestampUtc: DateTime.UtcNow,
+            UserId: 1,
+            DeviceId: "dev1",
+            Action: "Upload",
+            Path: "doc.txt",
+            Result: "Success",
+            Message: "Uploaded",
+            CorrelationId: "c1"));
+
+        var store = new TestSecretStore();
+        var tokenMgr = new AuthTokenManager(store, Microsoft.Extensions.Logging.Abstractions.NullLogger<AuthTokenManager>.Instance);
+        var connVm = new ConnectionCheckViewModel(api, store);
+        var loginVm = new LoginViewModel(api, tokenMgr);
+        var folderVm = new FolderSelectionViewModel(store);
+
+        using var mainVm = new MainWindowViewModel(store, api, connVm, loginVm, folderVm);
+
+        loginVm.IsLoggedIn = true;
+        mainVm.FileList.Files.Add(new FileItemViewModel { Path = "doc.txt", FileName = "doc.txt", Status = "In sync" });
+        await mainVm.DeletedFiles.RefreshAsync();
+        await mainVm.Logs.RefreshAsync();
+
+        Assert.NotEmpty(mainVm.FileList.Files);
+        Assert.NotEmpty(mainVm.DeletedFiles.Items);
+        Assert.NotEmpty(mainVm.Logs.Logs);
+
+        await loginVm.LogoutCommand.ExecuteAsync(null);
+
+        Assert.False(loginVm.IsLoggedIn);
+        Assert.Empty(mainVm.FileList.Files);
+        Assert.Empty(mainVm.DeletedFiles.Items);
+        Assert.Empty(mainVm.Logs.Logs);
+    }
 }

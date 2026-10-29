@@ -235,17 +235,20 @@ All endpoints require a Bearer token (`Authorization: Bearer <token>`) except `/
 | `GET` | `/api/logs` | Query paged server activity logs (scoped to user, filterable by action/result/date) | Log viewer |
 | `POST` | `/api/logs/client` | Report client-side sync events and errors to the server log | Diagnostics |
 | `GET/PUT`| `/api/settings` | Admin-only API key/value settings | Settings management |
+| `GET/POST`| `/api/users` | Admin-only user list and new regular user creation | Web User Admin |
+| `PATCH` | `/api/users/{id}/status` | Admin-only enable, disable, or mark/restore deleted user | Web User Admin |
+| `PUT` | `/api/users/{id}/password` | Admin-only change a regular user's password | Web User Admin |
 | `GET/DELETE`| `/api/devices`, `/api/devices/{id}` | List or revoke user devices | Device management |
 
 ---
 
 ## Server Data & Blob Storage Design
 
-1. **Blob Layout**: File contents are stored on disk indexed by GUID to prevent path traversal and cross-platform filename conflicts:
+1. **Per-User Blob Layout**: File contents are stored under each user's username folder, indexed by GUID to prevent path traversal and cross-platform filename conflicts:
    ```
-   <StorageRoot>/<userId>/<fileId[0..2]>/<fileId>/<version>.blob
+   <StorageRoot>/<username>/<fileId[0..2]>/<fileId>/<version>.blob
    ```
-2. **Atomic Writes**: Incoming uploads are streamed directly to temporary files (`<StorageRoot>/<userId>/.tmp/<guid>.tmp`) while computing SHA-256 incrementally. Once verified, the file is atomically moved (`File.Move`) to its final blob destination.
+2. **Atomic Writes**: Incoming uploads are streamed directly to temporary files (`<StorageRoot>/<username>/.tmp/<guid>.tmp`) while computing SHA-256 incrementally. Once verified, the file is atomically moved (`File.Move`) to its final blob destination.
 3. **Monotonic Change Sequence**: Changes increment a per-user sequence number (`ChangeSeq`), allowing clients to poll updates reliably without clock-skew issues.
 4. **Optimistic Concurrency**:
    - `If-Match: "<baseSha256>"`: Verifies the client's base hash before updating. If changed on the server, responds with `409 Conflict` containing both `client` and `server` version metadata.

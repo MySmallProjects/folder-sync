@@ -57,6 +57,14 @@ public partial class FileListViewModel : ViewModelBase
     partial void OnSearchQueryChanged(string value) => ApplyFilter();
     partial void OnSelectedStatusFilterChanged(string value) => ApplyFilter();
 
+    public void Clear()
+    {
+        _allFiles.Clear();
+        Files = new ObservableCollection<FileItemViewModel>();
+        AreAllFilesInSync = false;
+        SummaryText = "0 files";
+    }
+
     [RelayCommand]
     public async Task RefreshAsync()
     {

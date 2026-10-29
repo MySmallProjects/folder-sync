@@ -19,14 +19,16 @@ public static class AuthEndpoints
             CancellationToken ct) =>
         {
             var ip = httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown";
-            var result = await authService.LoginAsync(request, ip, ct);
-            if (result == null)
+            var authResult = await authService.AuthenticateAsync(request, ip, ct);
+            if (!authResult.Success || authResult.Response == null)
             {
+                var detail = authResult.ErrorMessage ?? "Invalid username or password.";
                 await logService.LogAsync(null, request.DeviceId, "Login", null, "Failed",
-                    $"Invalid login attempt for username '{request.Username}'", httpContext.TraceIdentifier, ct);
-                return Results.Problem("Invalid username or password.", statusCode: StatusCodes.Status401Unauthorized);
+                    $"Login failed for username '{request.Username}': {detail}", httpContext.TraceIdentifier, ct);
+                return Results.Problem(detail, statusCode: StatusCodes.Status401Unauthorized);
             }
 
+            var result = authResult.Response;
             await logService.LogAsync(result.User.Id, request.DeviceId, "Login", null, "Success",
                 $"Logged in on device '{request.DeviceName}'", httpContext.TraceIdentifier, ct);
 

@@ -243,6 +243,9 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                     Coordinator?.Dispose();
                     Coordinator = null;
                     IsSynchronizing = false;
+                    FileList.Clear();
+                    DeletedFiles.Clear();
+                    Logs.ClearDisplay();
                     SyncStatusSummary = "Sign in to sync.";
                     SelectedTabIndex = AccountTabIndex;
                 }
@@ -369,6 +372,9 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             {
                 void HandleSyncCompleted()
                 {
+                    if (!Login.IsLoggedIn)
+                        return;
+
                     IsSynchronizing = false;
                     LastSyncText = DateTime.UtcNow.ToString("HH:mm:ss 'UTC'");
                     if (e.Result.Success)
@@ -456,7 +462,10 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         finally
         {
             IsSynchronizing = false;
-            await FileList.RefreshCommand.ExecuteAsync(null);
+            if (Login.IsLoggedIn)
+            {
+                await FileList.RefreshCommand.ExecuteAsync(null);
+            }
         }
     }
 

@@ -186,6 +186,114 @@ public class ClientApiIntegrationTests : IClassFixture<ClientTestServerFixture>,
         Assert.Null(session);
     }
 
+    [Fact]
+    public async Task MultiUserAdmin_StorageByUsername_RoleLockdown_AndLoginStatusErrors()
+    {
+        // 1. Login as Admin
+        var adminLogin = await _api.LoginAsync("clienttestadmin", "AdminPass123!", "Admin-Console");
+        Assert.Equal("Admin", adminLogin.User.Role);
+
+        using var adminHttp = _fixture.CreateClient();
+        adminHttp.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", adminLogin.AccessToken);
+
+        // 2. Create two regular users (alice & bob) via POST /api/users
+        var createAliceResp = await System.Net.Http.Json.HttpClientJsonExtensions.PostAsJsonAsync(
+            adminHttp, "/api/users", new FolderSyncEr.Contracts.CreateUserRequest("alice", "AlicePass123!"));
+        Assert.Equal(System.Net.HttpStatusCode.Created, createAliceResp.StatusCode);
+        var aliceDto = await System.Net.Http.Json.HttpContentJsonExtensions.ReadFromJsonAsync<FolderSyncEr.Contracts.AdminUserDto>(createAliceResp.Content);
+        Assert.NotNull(aliceDto);
+        Assert.Equal("alice", aliceDto.Username);
+        Assert.Equal("User", aliceDto.Role);
+
+        var createBobResp = await System.Net.Http.Json.HttpClientJsonExtensions.PostAsJsonAsync(
+            adminHttp, "/api/users", new FolderSyncEr.Contracts.CreateUserRequest("bob", "BobPass123!"));
+        Assert.Equal(System.Net.HttpStatusCode.Created, createBobResp.StatusCode);
+        var bobDto = await System.Net.Http.Json.HttpContentJsonExtensions.ReadFromJsonAsync<FolderSyncEr.Contracts.AdminUserDto>(createBobResp.Content);
+        Assert.NotNull(bobDto);
+
+        // 3. Login as alice and upload a file; verify storage is under storage/alice/ and /api/users is 403 Forbidden
+        await _api.LoginAsync("alice", "AlicePass123!", "Shared-PC");
+        var aliceToken = (await _tokenManager.GetSessionAsync())!.AccessToken;
+
+        using var aliceHttp = _fixture.CreateClient();
+        aliceHttp.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", aliceToken);
+        var forbiddenUsersResp = await aliceHttp.GetAsync("/api/users");
+        Assert.Equal(System.Net.HttpStatusCode.Forbidden, forbiddenUsersResp.StatusCode);
+
+        using (var ms = new MemoryStream("Alice private file"u8.ToArray()))
+        {
+            var res = await _api.UploadFileStreamAsync("hello.txt", ms, ifNoneMatch: "*");
+            Assert.True(res.IsSuccess);
+        }
+        Assert.True(Directory.Exists(Path.Combine(_fixture.StoragePath, "alice")));
+
+        // 4. Login as bob on the same device and upload same relative path; verify storage is under storage/bob/
+        await _api.LoginAsync("bob", "BobPass123!", "Shared-PC");
+        using (var ms = new MemoryStream("Bob private file"u8.ToArray()))
+        {
+            var res = await _api.UploadFileStreamAsync("hello.txt", ms, ifNoneMatch: "*");
+            Assert.True(res.IsSuccess);
+        }
+        Assert.True(Directory.Exists(Path.Combine(_fixture.StoragePath, "bob")));
+
+        var bobFiles = await _api.ListFilesAsync();
+        Assert.Single(bobFiles.Items);
+        Assert.Equal("Bob private file".Length, bobFiles.Items[0].Size);
+
+        // 5. Admin disables alice -> LoginViewModel reports that alice is disabled
+        var disableResp = await adminHttp.PatchAsync(
+            $"/api/users/{aliceDto.Id}/status",
+            System.Net.Http.Json.JsonContent.Create(new FolderSyncEr.Contracts.UpdateUserStatusRequest(IsDisabled: true, IsDeleted: null)));
+        Assert.Equal(System.Net.HttpStatusCode.OK, disableResp.StatusCode);
+
+        // Active JWT token for disabled user is immediately rejected
+        var rejectedFilesResp = await aliceHttp.GetAsync("/api/files");
+        Assert.Equal(System.Net.HttpStatusCode.Unauthorized, rejectedFilesResp.StatusCode);
+
+        var loginVm = new FolderSyncEr.Client.App.ViewModels.LoginViewModel(_api, _tokenManager);
+        loginVm.Username = "alice";
+        loginVm.Password = "AlicePass123!";
+        await loginVm.LoginCommand.ExecuteAsync(null);
+        Assert.False(loginVm.IsLoggedIn);
+        Assert.Contains("User account 'alice' is disabled.", loginVm.ErrorMessage);
+
+        // 6. Non-existent user -> LoginViewModel reports that user does not exist
+        loginVm.Username = "nonexistent_user";
+        loginVm.Password = "anypass";
+        await loginVm.LoginCommand.ExecuteAsync(null);
+        Assert.False(loginVm.IsLoggedIn);
+        Assert.Contains("User 'nonexistent_user' does not exist.", loginVm.ErrorMessage);
+
+        // 7. Admin marks alice as deleted -> LoginViewModel reports deleted/does not exist
+        var deleteResp = await adminHttp.PatchAsync(
+            $"/api/users/{aliceDto.Id}/status",
+            System.Net.Http.Json.JsonContent.Create(new FolderSyncEr.Contracts.UpdateUserStatusRequest(IsDisabled: false, IsDeleted: true)));
+        Assert.Equal(System.Net.HttpStatusCode.OK, deleteResp.StatusCode);
+
+        loginVm.Username = "alice";
+        loginVm.Password = "AlicePass123!";
+        await loginVm.LoginCommand.ExecuteAsync(null);
+        Assert.False(loginVm.IsLoggedIn);
+        Assert.Contains("does not exist", loginVm.ErrorMessage);
+
+        // 8. Admin restores alice and changes her password -> alice can sign in with new password
+        var restoreResp = await adminHttp.PatchAsync(
+            $"/api/users/{aliceDto.Id}/status",
+            System.Net.Http.Json.JsonContent.Create(new FolderSyncEr.Contracts.UpdateUserStatusRequest(IsDisabled: false, IsDeleted: false)));
+        Assert.Equal(System.Net.HttpStatusCode.OK, restoreResp.StatusCode);
+
+        var pwResp = await System.Net.Http.Json.HttpClientJsonExtensions.PutAsJsonAsync(
+            adminHttp, $"/api/users/{aliceDto.Id}/password", new FolderSyncEr.Contracts.ChangeUserPasswordRequest("NewAlicePass999!"));
+        Assert.Equal(System.Net.HttpStatusCode.OK, pwResp.StatusCode);
+
+        loginVm.Username = "alice";
+        loginVm.Password = "NewAlicePass999!";
+        await loginVm.LoginCommand.ExecuteAsync(null);
+        Assert.True(loginVm.IsLoggedIn);
+    }
+
     public void Dispose()
     {
         if (File.Exists(_tempSecretFile))

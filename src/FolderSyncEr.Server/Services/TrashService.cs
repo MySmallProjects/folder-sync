@@ -193,6 +193,11 @@ public class TrashService : ITrashService
 
         await using var tx = await _db.Database.BeginTransactionAsync(cancellationToken);
 
+        var username = await _db.Users.AsNoTracking()
+            .Where(u => u.Id == userId)
+            .Select(u => u.Username)
+            .FirstOrDefaultAsync(cancellationToken) ?? userId.ToString();
+
         // Parents first, then shallow-to-deep, so clients receive folders before their contents
         foreach (var ancestor in ancestorsToRevive.OrderBy(a => a.PathKey.Length))
         {
@@ -216,7 +221,7 @@ public class TrashService : ITrashService
 
                 var copiedBlob = latest == null
                     ? null
-                    : await _blobStorage.CopyBlobAsync(userId, record.Id, newVersion, latest.BlobRelativePath, cancellationToken);
+                    : await _blobStorage.CopyBlobAsync(username, record.Id, newVersion, latest.BlobRelativePath, cancellationToken);
 
                 if (latest == null || copiedBlob == null)
                 {
@@ -332,6 +337,11 @@ public class TrashService : ITrashService
         await _db.SaveChangesAsync(cancellationToken);
         await tx.CommitAsync(cancellationToken);
 
+        var username = await _db.Users.AsNoTracking()
+            .Where(u => u.Id == userId)
+            .Select(u => u.Username)
+            .FirstOrDefaultAsync(cancellationToken) ?? userId.ToString();
+
         // Remove blobs only after the DB commit so a failed commit never loses content
         foreach (var version in versions)
         {
@@ -339,18 +349,19 @@ public class TrashService : ITrashService
         }
         foreach (var item in items.Where(i => !i.IsDirectory))
         {
-            TryDeleteEmptyBlobDirectory(userId, item.Id);
+            TryDeleteEmptyBlobDirectory(username, item.Id);
         }
 
         return new PurgeResponse(items.Count, freedBytes);
     }
 
-    private void TryDeleteEmptyBlobDirectory(int userId, string fileId)
+    private void TryDeleteEmptyBlobDirectory(string username, string fileId)
     {
         try
         {
+            var userFolder = _blobStorage.GetUserFolderName(username);
             var prefix = fileId.Length >= 2 ? fileId[..2] : "00";
-            var dir = Path.Combine(_blobStorage.GetStorageRoot(), userId.ToString(), prefix, fileId);
+            var dir = Path.Combine(_blobStorage.GetStorageRoot(), userFolder, prefix, fileId);
             if (Directory.Exists(dir) && !Directory.EnumerateFileSystemEntries(dir).Any())
             {
                 Directory.Delete(dir);

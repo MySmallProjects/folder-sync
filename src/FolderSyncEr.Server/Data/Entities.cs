@@ -25,12 +25,15 @@ public class User
     public DateTime? LastLoginUtc { get; set; }
 
     public bool IsDisabled { get; set; }
+
+    public bool IsDeleted { get; set; }
+
+    public DateTime? DeletedUtc { get; set; }
 }
 
 [Table("Devices")]
 public class Device
 {
-    [Key]
     [MaxLength(64)]
     public string Id { get; set; } = string.Empty;
 

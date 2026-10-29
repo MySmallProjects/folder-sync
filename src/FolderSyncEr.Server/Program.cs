@@ -66,6 +66,28 @@ builder.Services.AddAuthentication(options =>
         ValidateLifetime = true,
         ClockSkew = TimeSpan.FromSeconds(30)
     };
+
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = async context =>
+        {
+            var userIdStr = context.Principal?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                ?? context.Principal?.FindFirst("sub")?.Value;
+            if (!int.TryParse(userIdStr, out var userId))
+            {
+                context.Fail("Invalid user identifier claim.");
+                return;
+            }
+
+            var db = context.HttpContext.RequestServices.GetRequiredService<ServerDbContext>();
+            var activeUser = await db.Users.AsNoTracking()
+                .AnyAsync(u => u.Id == userId && !u.IsDisabled && !u.IsDeleted, context.HttpContext.RequestAborted);
+            if (!activeUser)
+            {
+                context.Fail("User account is disabled or deleted.");
+            }
+        }
+    };
 });
 
 builder.Services.AddAuthorization(options =>
@@ -167,6 +189,7 @@ app.MapTrashEndpoints();
 app.MapLogEndpoints();
 app.MapSettingEndpoints();
 app.MapDeviceEndpoints();
+app.MapUserEndpoints();
 
 // Initialize Database & Seed Defaults
 using (var scope = app.Services.CreateScope())

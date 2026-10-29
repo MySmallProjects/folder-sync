@@ -28,6 +28,7 @@ public class ServerDbContext : DbContext
 
         modelBuilder.Entity<Device>(entity =>
         {
+            entity.HasKey(d => new { d.UserId, d.Id });
             entity.HasIndex(d => new { d.UserId, d.Id });
         });
 

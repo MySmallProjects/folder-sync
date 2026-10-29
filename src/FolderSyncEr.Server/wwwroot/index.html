@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FolderSyncEr — Server File Viewer</title>
+    <title>FolderSyncEr — Server File Viewer &amp; Admin</title>
     <style>
         :root {
             --bg-main: #0f172a;
@@ -43,6 +43,8 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
         }
 
         .brand {
@@ -55,6 +57,36 @@
             font-size: 18px;
             font-weight: 700;
             letter-spacing: -0.01em;
+        }
+
+        .nav-tabs {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            margin-left: 12px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid transparent;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .tab-btn.active {
+            background-color: rgba(59, 130, 246, 0.18);
+            color: #60a5fa;
+            border-color: rgba(59, 130, 246, 0.4);
         }
 
         .badge {
@@ -76,6 +108,18 @@
             background: rgba(239, 68, 68, 0.15);
             color: #f87171;
             border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .badge.warning {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.35);
+        }
+
+        .badge.admin-role {
+            background: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+            border: 1px solid rgba(59, 130, 246, 0.35);
         }
 
         .header-right {
@@ -105,6 +149,11 @@
             background-color: var(--accent-hover);
         }
 
+        .btn.sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
         .btn.secondary {
             background-color: #334155;
             color: var(--text-primary);
@@ -112,6 +161,26 @@
 
         .btn.secondary:hover {
             background-color: #475569;
+        }
+
+        .btn.warning {
+            background-color: rgba(245, 158, 11, 0.2);
+            color: #fcd34d;
+            border: 1px solid rgba(245, 158, 11, 0.35);
+        }
+
+        .btn.warning:hover {
+            background-color: rgba(245, 158, 11, 0.35);
+        }
+
+        .btn.success {
+            background-color: rgba(34, 197, 94, 0.2);
+            color: #86efac;
+            border: 1px solid rgba(34, 197, 94, 0.35);
+        }
+
+        .btn.success:hover {
+            background-color: rgba(34, 197, 94, 0.35);
         }
 
         .btn.danger {
@@ -195,6 +264,17 @@
             display: none;
         }
 
+        .success-box {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.35);
+            color: #86efac;
+            padding: 10px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
         /* Browser View */
         #browser-view {
             flex: 1;
@@ -263,7 +343,7 @@
             }
         }
 
-        .tree-panel, .details-panel {
+        .tree-panel, .details-panel, .admin-panel {
             background-color: var(--bg-panel);
             border: 1px solid var(--border);
             border-radius: 8px;
@@ -414,6 +494,104 @@
             overflow: auto;
             white-space: pre-wrap;
         }
+
+        /* User Admin Section */
+        #admin-view {
+            flex: 1;
+            display: none;
+            flex-direction: column;
+            padding: 16px 24px;
+            gap: 16px;
+            max-width: 1280px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .admin-create-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+            padding: 16px;
+        }
+
+        .admin-create-form .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 220px;
+            flex: 1;
+        }
+
+        .admin-create-form label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-secondary);
+        }
+
+        .admin-create-form input {
+            padding: 8px 12px;
+            background-color: var(--bg-main);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 13.5px;
+        }
+
+        .admin-table-wrap {
+            overflow-x: auto;
+        }
+
+        table.admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+        }
+
+        table.admin-table th,
+        table.admin-table td {
+            padding: 11px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        table.admin-table th {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: var(--text-muted);
+            background-color: rgba(15, 23, 42, 0.45);
+        }
+
+        table.admin-table tr:hover td {
+            background-color: rgba(51, 65, 85, 0.35);
+        }
+
+        .user-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .inline-pw-box {
+            display: inline-flex;
+            gap: 6px;
+            align-items: center;
+            margin-top: 6px;
+        }
+
+        .inline-pw-box input {
+            padding: 5px 9px;
+            background-color: var(--bg-main);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            color: var(--text-primary);
+            font-size: 12.5px;
+            width: 170px;
+        }
     </style>
 </head>
 <body>
@@ -422,6 +600,11 @@
             <span style="font-size: 22px;">📁</span>
             <h1>FolderSyncEr Server Viewer</h1>
             <span id="server-status-badge" class="badge">Checking API...</span>
+
+            <nav id="nav-tabs" class="nav-tabs">
+                <button id="tab-files-btn" class="tab-btn active" type="button">📁 Server Files</button>
+                <button id="tab-admin-btn" class="tab-btn" type="button" style="display: none;">👥 User Admin</button>
+            </nav>
         </div>
         <div class="header-right">
             <span id="user-info" style="display: none;"></span>
@@ -492,7 +675,59 @@
         </div>
     </section>
 
+    <!-- Admin-Only User Administration Section -->
+    <section id="admin-view">
+        <div id="admin-error-box" class="error-box"></div>
+        <div id="admin-success-box" class="success-box"></div>
+
+        <!-- Create New User Panel -->
+        <div class="admin-panel">
+            <div class="panel-header">
+                <span>Create New Regular User</span>
+            </div>
+            <form id="create-user-form" class="admin-create-form">
+                <div class="form-field">
+                    <label for="new-username">Username</label>
+                    <input type="text" id="new-username" placeholder="e.g. alice" required autocomplete="off">
+                </div>
+                <div class="form-field">
+                    <label for="new-user-password">Initial Password</label>
+                    <input type="password" id="new-user-password" placeholder="At least 4 characters" required autocomplete="new-password">
+                </div>
+                <button type="submit" id="create-user-btn" class="btn">+ Create User</button>
+            </form>
+        </div>
+
+        <!-- Users List Panel -->
+        <div class="admin-panel">
+            <div class="panel-header">
+                <span>User Accounts (<span id="users-count-label">0</span>)</span>
+                <button id="refresh-users-btn" class="btn sm secondary" type="button">↻ Refresh Users</button>
+            </div>
+            <div class="admin-table-wrap">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Storage Folder</th>
+                            <th>Created (UTC)</th>
+                            <th>Last Login (UTC)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <tr>
+                            <td colspan="8" class="empty-state">Loading users...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
     <script src="/app.js"></script>
 </body>
 </html>
-

@@ -1,5 +1,5 @@
 // ============================================================================
-// FolderSyncEr Server Web File Viewer (Pure API Client)
+// FolderSyncEr Server Web File Viewer & User Admin (Pure API Client)
 // ============================================================================
 
 const STORAGE_KEY_SESSION = 'foldersyncer_web_session';
@@ -11,15 +11,21 @@ const DEVICE_ID = 'web-viewer-' + (localStorage.getItem('foldersyncer_web_device
 
 let session = null;
 let allFiles = [];
+let allUsers = [];
 let selectedNodePath = null;
+let activePasswordEditUserId = null;
 const collapsedPaths = new Set();
 
 // DOM Elements
 const statusBadge = document.getElementById('server-status-badge');
+const navTabs = document.getElementById('nav-tabs');
+const tabFilesBtn = document.getElementById('tab-files-btn');
+const tabAdminBtn = document.getElementById('tab-admin-btn');
 const userInfoEl = document.getElementById('user-info');
 const logoutBtn = document.getElementById('logout-btn');
 const loginView = document.getElementById('login-view');
 const browserView = document.getElementById('browser-view');
+const adminView = document.getElementById('admin-view');
 const loginForm = document.getElementById('login-form');
 const loginError = document.getElementById('login-error');
 const loginSubmitBtn = document.getElementById('login-submit-btn');
@@ -34,6 +40,17 @@ const expandAllBtn = document.getElementById('expand-all-btn');
 const collapseAllBtn = document.getElementById('collapse-all-btn');
 const refreshBtn = document.getElementById('refresh-btn');
 
+// Admin DOM Elements
+const adminErrorBox = document.getElementById('admin-error-box');
+const adminSuccessBox = document.getElementById('admin-success-box');
+const createUserForm = document.getElementById('create-user-form');
+const newUsernameInput = document.getElementById('new-username');
+const newUserPasswordInput = document.getElementById('new-user-password');
+const createUserBtn = document.getElementById('create-user-btn');
+const refreshUsersBtn = document.getElementById('refresh-users-btn');
+const usersCountLabel = document.getElementById('users-count-label');
+const usersTableBody = document.getElementById('users-table-body');
+
 // ----------------------------------------------------------------------------
 // Initialization
 // ----------------------------------------------------------------------------
@@ -42,7 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadSavedSession();
 
     if (session && session.accessToken) {
-        showBrowserView();
+        showAuthenticatedUI();
         await fetchFiles();
     } else {
         showLoginView();
@@ -85,6 +102,10 @@ function saveSession(newSession) {
     }
 }
 
+function isAdminSession() {
+    return Boolean(session && session.user && String(session.user.role).toLowerCase() === 'admin');
+}
+
 async function apiFetch(url, options = {}) {
     const headers = new Headers(options.headers || {});
     if (session && session.accessToken) {
@@ -101,7 +122,7 @@ async function apiFetch(url, options = {}) {
             response = await fetch(url, { ...options, headers });
         } else {
             saveSession(null);
-            showLoginView('Session expired. Please sign in again.');
+            showLoginView('Session expired or account was disabled/revoked. Please sign in again.');
             throw new Error('Unauthorized');
         }
     }
@@ -128,8 +149,19 @@ async function tryRefreshToken() {
     }
 }
 
+async function extractErrorMessage(res, fallback) {
+    try {
+        const data = await res.json();
+        if (data && data.detail) return data.detail;
+        if (data && data.title) return data.title;
+    } catch {
+        // Ignore JSON parse error
+    }
+    return fallback;
+}
+
 // ----------------------------------------------------------------------------
-// Authentication Handlers
+// Authentication & Navigation Handlers
 // ----------------------------------------------------------------------------
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -153,17 +185,13 @@ loginForm.addEventListener('submit', async (e) => {
         });
 
         if (!res.ok) {
-            let msg = `Login failed (HTTP ${res.status})`;
-            try {
-                const problem = await res.json();
-                if (problem && problem.detail) msg = problem.detail;
-            } catch { /* ignore */ }
+            const msg = await extractErrorMessage(res, `Login failed (HTTP ${res.status})`);
             throw new Error(msg);
         }
 
         const data = await res.json();
         saveSession(data);
-        showBrowserView();
+        showAuthenticatedUI();
         await fetchFiles();
     } catch (err) {
         loginError.textContent = err.message || 'Could not sign in.';
@@ -184,14 +212,28 @@ logoutBtn.addEventListener('click', async () => {
     } finally {
         saveSession(null);
         allFiles = [];
+        allUsers = [];
         selectedNodePath = null;
+        activePasswordEditUserId = null;
         showLoginView();
     }
+});
+
+tabFilesBtn.addEventListener('click', () => {
+    switchTab('files');
+});
+
+tabAdminBtn.addEventListener('click', () => {
+    if (!isAdminSession()) return;
+    switchTab('admin');
 });
 
 function showLoginView(errorMessage) {
     loginView.style.display = 'flex';
     browserView.style.display = 'none';
+    adminView.style.display = 'none';
+    navTabs.style.display = 'none';
+    tabAdminBtn.style.display = 'none';
     userInfoEl.style.display = 'none';
     logoutBtn.style.display = 'none';
     if (errorMessage) {
@@ -202,15 +244,273 @@ function showLoginView(errorMessage) {
     }
 }
 
-function showBrowserView() {
+function showAuthenticatedUI() {
     loginView.style.display = 'none';
-    browserView.style.display = 'flex';
+    navTabs.style.display = 'inline-flex';
+    tabAdminBtn.style.display = isAdminSession() ? 'inline-flex' : 'none';
+
     if (session && session.user) {
         userInfoEl.textContent = `👤 ${session.user.username} (${session.user.role})`;
         userInfoEl.style.display = 'inline';
     }
     logoutBtn.style.display = 'inline-flex';
+    switchTab('files');
 }
+
+function switchTab(tab) {
+    hideAdminBanner();
+    if (tab === 'admin' && isAdminSession()) {
+        tabFilesBtn.classList.remove('active');
+        tabAdminBtn.classList.add('active');
+        browserView.style.display = 'none';
+        adminView.style.display = 'flex';
+        fetchUsers();
+    } else {
+        tabAdminBtn.classList.remove('active');
+        tabFilesBtn.classList.add('active');
+        adminView.style.display = 'none';
+        browserView.style.display = 'flex';
+    }
+}
+
+// ----------------------------------------------------------------------------
+// User Administration (Admin Only)
+// ----------------------------------------------------------------------------
+function showAdminError(msg) {
+    adminSuccessBox.style.display = 'none';
+    adminErrorBox.textContent = msg;
+    adminErrorBox.style.display = 'block';
+}
+
+function showAdminSuccess(msg) {
+    adminErrorBox.style.display = 'none';
+    adminSuccessBox.textContent = msg;
+    adminSuccessBox.style.display = 'block';
+}
+
+function hideAdminBanner() {
+    adminErrorBox.style.display = 'none';
+    adminSuccessBox.style.display = 'none';
+}
+
+async function fetchUsers() {
+    if (!isAdminSession()) return;
+    usersTableBody.innerHTML = '<tr><td colspan="8" class="empty-state">Loading users...</td></tr>';
+
+    try {
+        const res = await apiFetch('/api/users');
+        if (!res.ok) {
+            const msg = await extractErrorMessage(res, `Failed to load users (HTTP ${res.status})`);
+            throw new Error(msg);
+        }
+
+        allUsers = await res.json();
+        usersCountLabel.textContent = String(allUsers.length);
+        renderUsersTable();
+    } catch (err) {
+        if (err.message !== 'Unauthorized') {
+            usersTableBody.innerHTML = `<tr><td colspan="8" class="empty-state" style="color:#f87171;">${escapeHtml(err.message)}</td></tr>`;
+        }
+    }
+}
+
+function renderUsersTable() {
+    if (!allUsers || allUsers.length === 0) {
+        usersTableBody.innerHTML = '<tr><td colspan="8" class="empty-state">No users found.</td></tr>';
+        return;
+    }
+
+    usersTableBody.innerHTML = '';
+
+    for (const u of allUsers) {
+        const tr = document.createElement('tr');
+        const isAdmin = String(u.role).toLowerCase() === 'admin';
+
+        let statusBadgeHtml = '<span class="badge online">Active</span>';
+        if (u.isDeleted) {
+            statusBadgeHtml = '<span class="badge offline">Deleted</span>';
+        } else if (u.isDisabled) {
+            statusBadgeHtml = '<span class="badge warning">Disabled</span>';
+        }
+
+        const roleBadgeHtml = isAdmin
+            ? '<span class="badge admin-role">Admin</span>'
+            : '<span class="badge">User</span>';
+
+        const nameStyle = u.isDeleted ? 'text-decoration: line-through; color: var(--text-muted);' : 'font-weight: 600;';
+
+        tr.innerHTML = `
+            <td>#${u.id}</td>
+            <td><span style="${nameStyle}">${escapeHtml(u.username)}</span></td>
+            <td>${roleBadgeHtml}</td>
+            <td>${statusBadgeHtml}</td>
+            <td><code>storage/${escapeHtml(u.username)}/</code></td>
+            <td>${formatUtc(u.createdUtc)}</td>
+            <td>${formatUtc(u.lastLoginUtc)}</td>
+            <td id="user-actions-cell-${u.id}"></td>
+        `;
+
+        usersTableBody.appendChild(tr);
+
+        const actionsCell = tr.querySelector(`#user-actions-cell-${u.id}`);
+        if (isAdmin) {
+            actionsCell.innerHTML = '<span style="color: var(--text-muted); font-size: 12px;">Primary Admin (Protected)</span>';
+        } else {
+            const actionsWrap = document.createElement('div');
+            actionsWrap.className = 'user-actions';
+
+            // Enable / Disable button
+            const toggleDisableBtn = document.createElement('button');
+            toggleDisableBtn.type = 'button';
+            toggleDisableBtn.className = u.isDisabled ? 'btn sm success' : 'btn sm warning';
+            toggleDisableBtn.textContent = u.isDisabled ? 'Enable' : 'Disable';
+            toggleDisableBtn.addEventListener('click', () => updateUserStatus(u.id, u.username, { isDisabled: !u.isDisabled }));
+            actionsWrap.appendChild(toggleDisableBtn);
+
+            // Mark Deleted / Restore button
+            const toggleDeleteBtn = document.createElement('button');
+            toggleDeleteBtn.type = 'button';
+            toggleDeleteBtn.className = u.isDeleted ? 'btn sm secondary' : 'btn sm danger';
+            toggleDeleteBtn.textContent = u.isDeleted ? 'Restore User' : 'Mark Deleted';
+            toggleDeleteBtn.addEventListener('click', () => updateUserStatus(u.id, u.username, {
+                isDeleted: !u.isDeleted,
+                ...(u.isDeleted ? { isDisabled: false } : {})
+            }));
+            actionsWrap.appendChild(toggleDeleteBtn);
+
+            // Change Password button
+            const pwBtn = document.createElement('button');
+            pwBtn.type = 'button';
+            pwBtn.className = 'btn sm secondary';
+            pwBtn.textContent = '🔑 Change Password';
+            pwBtn.addEventListener('click', () => {
+                activePasswordEditUserId = (activePasswordEditUserId === u.id) ? null : u.id;
+                renderUsersTable();
+            });
+            actionsWrap.appendChild(pwBtn);
+
+            actionsCell.appendChild(actionsWrap);
+
+            // Inline password change row if active
+            if (activePasswordEditUserId === u.id) {
+                const pwBox = document.createElement('div');
+                pwBox.className = 'inline-pw-box';
+                pwBox.innerHTML = `
+                    <input type="password" id="inline-pw-input-${u.id}" placeholder="New password (min 4 chars)" autocomplete="new-password">
+                    <button type="button" id="inline-pw-save-${u.id}" class="btn sm">Save</button>
+                    <button type="button" id="inline-pw-cancel-${u.id}" class="btn sm secondary">Cancel</button>
+                `;
+                actionsCell.appendChild(pwBox);
+
+                const inputEl = pwBox.querySelector(`#inline-pw-input-${u.id}`);
+                const saveEl = pwBox.querySelector(`#inline-pw-save-${u.id}`);
+                const cancelEl = pwBox.querySelector(`#inline-pw-cancel-${u.id}`);
+
+                saveEl.addEventListener('click', () => changeUserPassword(u.id, u.username, inputEl.value));
+                cancelEl.addEventListener('click', () => {
+                    activePasswordEditUserId = null;
+                    renderUsersTable();
+                });
+                setTimeout(() => inputEl.focus(), 0);
+            }
+        }
+    }
+}
+
+createUserForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!isAdminSession()) return;
+
+    hideAdminBanner();
+    const username = newUsernameInput.value.trim();
+    const password = newUserPasswordInput.value;
+
+    if (!username || !password) {
+        showAdminError('Both username and initial password are required.');
+        return;
+    }
+
+    createUserBtn.disabled = true;
+    try {
+        const res = await apiFetch('/api/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        if (!res.ok) {
+            const msg = await extractErrorMessage(res, `Could not create user (HTTP ${res.status})`);
+            throw new Error(msg);
+        }
+
+        const created = await res.json();
+        newUsernameInput.value = '';
+        newUserPasswordInput.value = '';
+        showAdminSuccess(`Created user '${created.username}' (#${created.id}). Their files will be stored under storage/${created.username}/`);
+        await fetchUsers();
+    } catch (err) {
+        showAdminError(err.message || 'Failed to create user.');
+    } finally {
+        createUserBtn.disabled = false;
+    }
+});
+
+async function updateUserStatus(userId, username, payload) {
+    hideAdminBanner();
+    try {
+        const res = await apiFetch(`/api/users/${userId}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+            const msg = await extractErrorMessage(res, `Failed to update user status (HTTP ${res.status})`);
+            throw new Error(msg);
+        }
+
+        const updated = await res.json();
+        const stateDesc = updated.isDeleted
+            ? 'marked as deleted'
+            : (updated.isDisabled ? 'disabled' : 'enabled');
+        showAdminSuccess(`User '${username}' is now ${stateDesc}.`);
+        await fetchUsers();
+    } catch (err) {
+        showAdminError(err.message || 'Failed to update user status.');
+    }
+}
+
+async function changeUserPassword(userId, username, newPassword) {
+    hideAdminBanner();
+    if (!newPassword || newPassword.length < 4) {
+        showAdminError('New password must be at least 4 characters long.');
+        return;
+    }
+
+    try {
+        const res = await apiFetch(`/api/users/${userId}/password`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ newPassword })
+        });
+
+        if (!res.ok) {
+            const msg = await extractErrorMessage(res, `Failed to change password (HTTP ${res.status})`);
+            throw new Error(msg);
+        }
+
+        activePasswordEditUserId = null;
+        showAdminSuccess(`Password updated for user '${username}' (active device sessions were signed out).`);
+        renderUsersTable();
+    } catch (err) {
+        showAdminError(err.message || 'Failed to change password.');
+    }
+}
+
+refreshUsersBtn.addEventListener('click', () => {
+    hideAdminBanner();
+    fetchUsers();
+});
 
 // ----------------------------------------------------------------------------
 // Fetching Files & Building the Tree Structure
@@ -630,4 +930,3 @@ function escapeHtml(str) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;');
 }
-

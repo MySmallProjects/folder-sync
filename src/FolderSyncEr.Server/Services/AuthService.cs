@@ -31,24 +31,42 @@ public class AuthService : IAuthService
 
     public async Task<User?> GetUserByIdAsync(int userId, CancellationToken cancellationToken)
     {
-        return await _db.Users.FirstOrDefaultAsync(u => u.Id == userId && !u.IsDisabled, cancellationToken);
+        return await _db.Users.FirstOrDefaultAsync(u => u.Id == userId && !u.IsDisabled && !u.IsDeleted, cancellationToken);
     }
 
     public async Task<LoginResponse?> LoginAsync(LoginRequest request, string ipAddress, CancellationToken cancellationToken)
     {
+        var result = await AuthenticateAsync(request, ipAddress, cancellationToken);
+        return result.Response;
+    }
+
+    public async Task<AuthLoginResult> AuthenticateAsync(LoginRequest request, string ipAddress, CancellationToken cancellationToken)
+    {
         var username = request.Username.Trim();
         var user = await _db.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower(), cancellationToken);
-        if (user == null || user.IsDisabled)
+        if (user == null)
         {
-            _logger.LogWarning("Login failed for username '{Username}' from IP {IP}: user not found or disabled", username, ipAddress);
-            return null;
+            _logger.LogWarning("Login failed for username '{Username}' from IP {IP}: user does not exist", username, ipAddress);
+            return new AuthLoginResult(false, null, LoginFailureReason.UserNotFound, $"User '{username}' does not exist.");
+        }
+
+        if (user.IsDeleted)
+        {
+            _logger.LogWarning("Login failed for username '{Username}' from IP {IP}: user is marked as deleted", username, ipAddress);
+            return new AuthLoginResult(false, null, LoginFailureReason.UserDeleted, $"User '{username}' does not exist (account was deleted).");
+        }
+
+        if (user.IsDisabled)
+        {
+            _logger.LogWarning("Login failed for username '{Username}' from IP {IP}: user is disabled", username, ipAddress);
+            return new AuthLoginResult(false, null, LoginFailureReason.UserDisabled, $"User account '{username}' is disabled.");
         }
 
         var verificationResult = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
         if (verificationResult == PasswordVerificationResult.Failed)
         {
             _logger.LogWarning("Login failed for username '{Username}' from IP {IP}: invalid password", username, ipAddress);
-            return null;
+            return new AuthLoginResult(false, null, LoginFailureReason.InvalidPassword, "Invalid username or password.");
         }
 
         user.LastLoginUtc = DateTime.UtcNow;
@@ -97,13 +115,14 @@ public class AuthService : IAuthService
 
         _logger.LogInformation("User '{Username}' logged in successfully on device '{DeviceId}'", user.Username, deviceId);
 
-        return new LoginResponse(
+        var response = new LoginResponse(
             accessToken,
             accessExpires,
             rawRefreshToken,
             refreshExpires,
             new UserDto(user.Id, user.Username, user.Role, user.CreatedUtc, user.LastLoginUtc)
         );
+        return new AuthLoginResult(true, response, LoginFailureReason.None, null);
     }
 
     public async Task<LoginResponse?> RefreshAsync(RefreshRequest request, string ipAddress, CancellationToken cancellationToken)
@@ -143,7 +162,7 @@ public class AuthService : IAuthService
             return null;
         }
 
-        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == storedToken.UserId && !u.IsDisabled, cancellationToken);
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == storedToken.UserId && !u.IsDisabled && !u.IsDeleted, cancellationToken);
         if (user == null)
         {
             return null;
@@ -230,6 +249,154 @@ public class AuthService : IAuthService
         await CreateUserAsync(username, password, "Admin", cancellationToken);
         _logger.LogInformation("Seeded initial administrator account '{Username}'", username);
         return true;
+    }
+
+    public async Task<IReadOnlyList<AdminUserDto>> ListUsersAsync(CancellationToken cancellationToken)
+    {
+        var users = await _db.Users
+            .AsNoTracking()
+            .OrderByDescending(u => u.Role == "Admin")
+            .ThenBy(u => u.Id)
+            .Select(u => new AdminUserDto(
+                u.Id,
+                u.Username,
+                u.Role,
+                u.CreatedUtc,
+                u.LastLoginUtc,
+                u.IsDisabled,
+                u.IsDeleted,
+                u.DeletedUtc))
+            .ToListAsync(cancellationToken);
+
+        return users;
+    }
+
+    public async Task<(AdminUserDto? User, string? Error)> CreateRegularUserAsync(string username, string password, CancellationToken cancellationToken)
+    {
+        var trimmed = (username ?? string.Empty).Trim();
+        if (string.IsNullOrWhiteSpace(trimmed))
+        {
+            return (null, "Username is required.");
+        }
+
+        if (trimmed.Length > 100)
+        {
+            return (null, "Username must be 100 characters or fewer.");
+        }
+
+        if (!trimmed.All(ch => char.IsLetterOrDigit(ch) || ch is '_' or '-' or '.'))
+        {
+            return (null, "Username may only contain letters, digits, '.', '_', or '-'.");
+        }
+
+        if (string.IsNullOrWhiteSpace(password) || password.Length < 4)
+        {
+            return (null, "Password must be at least 4 characters long.");
+        }
+
+        var exists = await _db.Users.AnyAsync(u => u.Username.ToLower() == trimmed.ToLower(), cancellationToken);
+        if (exists)
+        {
+            return (null, $"A user with username '{trimmed}' already exists.");
+        }
+
+        var user = await CreateUserAsync(trimmed, password, "User", cancellationToken);
+        _logger.LogInformation("Admin created regular user '{Username}' (Id={UserId})", user.Username, user.Id);
+
+        return (new AdminUserDto(
+            user.Id,
+            user.Username,
+            user.Role,
+            user.CreatedUtc,
+            user.LastLoginUtc,
+            user.IsDisabled,
+            user.IsDeleted,
+            user.DeletedUtc), null);
+    }
+
+    public async Task<(AdminUserDto? User, string? Error, bool NotFound)> UpdateUserStatusAsync(int userId, bool? isDisabled, bool? isDeleted, CancellationToken cancellationToken)
+    {
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+        if (user == null)
+        {
+            return (null, "User not found.", true);
+        }
+
+        if (string.Equals(user.Role, "Admin", StringComparison.OrdinalIgnoreCase))
+        {
+            return (null, "The administrator account cannot be disabled or deleted.", false);
+        }
+
+        if (isDisabled.HasValue)
+        {
+            user.IsDisabled = isDisabled.Value;
+        }
+
+        if (isDeleted.HasValue)
+        {
+            user.IsDeleted = isDeleted.Value;
+            user.DeletedUtc = isDeleted.Value ? DateTime.UtcNow : null;
+        }
+
+        if (user.IsDisabled || user.IsDeleted)
+        {
+            await RevokeAllUserSessionsInternalAsync(user.Id, cancellationToken);
+        }
+
+        await _db.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("Admin updated status for user '{Username}' (Id={UserId}): IsDisabled={IsDisabled}, IsDeleted={IsDeleted}",
+            user.Username, user.Id, user.IsDisabled, user.IsDeleted);
+
+        return (new AdminUserDto(
+            user.Id,
+            user.Username,
+            user.Role,
+            user.CreatedUtc,
+            user.LastLoginUtc,
+            user.IsDisabled,
+            user.IsDeleted,
+            user.DeletedUtc), null, false);
+    }
+
+    public async Task<(bool Success, string? Error, bool NotFound)> ChangeUserPasswordAsync(int userId, string newPassword, CancellationToken cancellationToken)
+    {
+        var user = await _db.Users.FirstOrDefaultAsync(u => u.Id == userId, cancellationToken);
+        if (user == null)
+        {
+            return (false, "User not found.", true);
+        }
+
+        if (string.Equals(user.Role, "Admin", StringComparison.OrdinalIgnoreCase))
+        {
+            return (false, "Only regular user passwords can be changed from User Admin.", false);
+        }
+
+        if (string.IsNullOrWhiteSpace(newPassword) || newPassword.Length < 4)
+        {
+            return (false, "New password must be at least 4 characters long.", false);
+        }
+
+        user.PasswordHash = _passwordHasher.HashPassword(user, newPassword);
+        await RevokeAllUserSessionsInternalAsync(user.Id, cancellationToken);
+        await _db.SaveChangesAsync(cancellationToken);
+
+        _logger.LogInformation("Admin changed password for user '{Username}' (Id={UserId}) and revoked active sessions", user.Username, user.Id);
+        return (true, null, false);
+    }
+
+    private async Task RevokeAllUserSessionsInternalAsync(int userId, CancellationToken cancellationToken)
+    {
+        var devices = await _db.Devices.Where(d => d.UserId == userId && !d.IsRevoked).ToListAsync(cancellationToken);
+        foreach (var d in devices)
+        {
+            d.IsRevoked = true;
+        }
+
+        var tokens = await _db.RefreshTokens.Where(r => r.UserId == userId && r.RevokedUtc == null).ToListAsync(cancellationToken);
+        foreach (var t in tokens)
+        {
+            t.RevokedUtc = DateTime.UtcNow;
+        }
     }
 
     private (string Token, DateTime ExpiresUtc) GenerateJwtToken(User user, string deviceId)

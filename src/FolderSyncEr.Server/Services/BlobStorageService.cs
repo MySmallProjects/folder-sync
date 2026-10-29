@@ -20,9 +20,39 @@ public class BlobStorageService : IBlobStorageService
 
     public string GetStorageRoot() => _storageRoot;
 
-    public async Task<TempUploadResult> SaveStreamToTempAsync(int userId, Stream inputStream, long maxSizeBytes, CancellationToken cancellationToken)
+    public string GetUserFolderName(string username)
     {
-        var userTmpDir = Path.Combine(_storageRoot, userId.ToString(), ".tmp");
+        if (string.IsNullOrWhiteSpace(username))
+        {
+            return "unknown";
+        }
+
+        var invalid = Path.GetInvalidFileNameChars();
+        var sanitized = new string(username.Trim().Select(ch =>
+            invalid.Contains(ch) || ch == '/' || ch == '\\' || ch == ':' ? '_' : ch).ToArray());
+
+        if (string.IsNullOrWhiteSpace(sanitized) || sanitized is "." or "..")
+        {
+            return "user";
+        }
+
+        return sanitized;
+    }
+
+    public string GetBlobRelativePath(string username, string fileId, long version)
+    {
+        var userFolder = GetUserFolderName(username);
+        var prefix = fileId.Length >= 2 ? fileId[..2] : "00";
+        return Path.Combine(userFolder, prefix, fileId, $"{version}.blob");
+    }
+
+    public Task<TempUploadResult> SaveStreamToTempAsync(int userId, Stream inputStream, long maxSizeBytes, CancellationToken cancellationToken)
+        => SaveStreamToTempAsync(userId.ToString(), inputStream, maxSizeBytes, cancellationToken);
+
+    public async Task<TempUploadResult> SaveStreamToTempAsync(string username, Stream inputStream, long maxSizeBytes, CancellationToken cancellationToken)
+    {
+        var userFolder = GetUserFolderName(username);
+        var userTmpDir = Path.Combine(_storageRoot, userFolder, ".tmp");
         Directory.CreateDirectory(userTmpDir);
 
         var tempFilePath = Path.Combine(userTmpDir, $"{Guid.NewGuid():N}.tmp");
@@ -65,9 +95,13 @@ public class BlobStorageService : IBlobStorageService
     }
 
     public Task<string> CommitBlobAsync(int userId, string fileId, long version, string tempFilePath, CancellationToken cancellationToken)
+        => CommitBlobAsync(userId.ToString(), fileId, version, tempFilePath, cancellationToken);
+
+    public Task<string> CommitBlobAsync(string username, string fileId, long version, string tempFilePath, CancellationToken cancellationToken)
     {
+        var userFolder = GetUserFolderName(username);
         var prefix = fileId.Length >= 2 ? fileId[..2] : "00";
-        var relativeDir = Path.Combine(userId.ToString(), prefix, fileId);
+        var relativeDir = Path.Combine(userFolder, prefix, fileId);
         var targetDir = Path.Combine(_storageRoot, relativeDir);
         Directory.CreateDirectory(targetDir);
 
@@ -80,7 +114,10 @@ public class BlobStorageService : IBlobStorageService
         return Task.FromResult(relativeBlobPath);
     }
 
-    public async Task<string?> CopyBlobAsync(int userId, string fileId, long version, string sourceBlobRelativePath, CancellationToken cancellationToken)
+    public Task<string?> CopyBlobAsync(int userId, string fileId, long version, string sourceBlobRelativePath, CancellationToken cancellationToken)
+        => CopyBlobAsync(userId.ToString(), fileId, version, sourceBlobRelativePath, cancellationToken);
+
+    public async Task<string?> CopyBlobAsync(string username, string fileId, long version, string sourceBlobRelativePath, CancellationToken cancellationToken)
     {
         var sourceFullPath = Path.Combine(_storageRoot, sourceBlobRelativePath);
         if (!File.Exists(sourceFullPath))
@@ -88,8 +125,9 @@ public class BlobStorageService : IBlobStorageService
             return null;
         }
 
+        var userFolder = GetUserFolderName(username);
         var prefix = fileId.Length >= 2 ? fileId[..2] : "00";
-        var relativeDir = Path.Combine(userId.ToString(), prefix, fileId);
+        var relativeDir = Path.Combine(userFolder, prefix, fileId);
         Directory.CreateDirectory(Path.Combine(_storageRoot, relativeDir));
 
         var relativeBlobPath = Path.Combine(relativeDir, $"{version}.blob");

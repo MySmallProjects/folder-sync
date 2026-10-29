@@ -114,11 +114,16 @@ public class FileService : IFileService
         var pathKey = PathRules.ToLookupKey(normalizedPath);
         var maxUploadBytes = _config.GetValue<long>("Storage:MaxUploadBytes", 4L * 1024 * 1024 * 1024);
 
+        var username = await _db.Users.AsNoTracking()
+            .Where(u => u.Id == command.UserId)
+            .Select(u => u.Username)
+            .FirstOrDefaultAsync(cancellationToken) ?? command.UserId.ToString();
+
         // Stream into temporary file and compute SHA-256
         TempUploadResult tempResult;
         try
         {
-            tempResult = await _blobStorage.SaveStreamToTempAsync(command.UserId, command.InputStream, maxUploadBytes, cancellationToken);
+            tempResult = await _blobStorage.SaveStreamToTempAsync(username, command.InputStream, maxUploadBytes, cancellationToken);
         }
         catch (InvalidOperationException ex)
         {
@@ -183,7 +188,7 @@ public class FileService : IFileService
 
         // Move temp file to final storage destination
         var relativeBlobPath = await _blobStorage.CommitBlobAsync(
-            command.UserId,
+            username,
             fileId,
             newVersion,
             tempResult.TempFilePath,

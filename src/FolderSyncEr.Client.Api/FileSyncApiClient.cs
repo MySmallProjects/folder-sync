@@ -33,6 +33,39 @@ public class FileSyncApiClient : IFileSyncApi
         return new Uri($"{ServerUrl}/{relativePath.TrimStart('/')}");
     }
 
+    private static string? TryExtractProblemDetail(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return null;
+        }
+
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            if (doc.RootElement.ValueKind == JsonValueKind.Object)
+            {
+                if (doc.RootElement.TryGetProperty("detail", out var detailProp) &&
+                    detailProp.ValueKind == JsonValueKind.String)
+                {
+                    return detailProp.GetString();
+                }
+
+                if (doc.RootElement.TryGetProperty("title", out var titleProp) &&
+                    titleProp.ValueKind == JsonValueKind.String)
+                {
+                    return titleProp.GetString();
+                }
+            }
+        }
+        catch
+        {
+            // Ignore malformed JSON
+        }
+
+        return null;
+    }
+
     public async Task<ApiConnectionStatus> CheckConnectionAsync(CancellationToken ct = default)
     {
         var sw = Stopwatch.StartNew();
@@ -93,8 +126,12 @@ public class FileSyncApiClient : IFileSyncApi
         using var response = await _httpClient.PostAsJsonAsync(uri, request, ct);
         if (!response.IsSuccessStatusCode)
         {
-            var error = await response.Content.ReadAsStringAsync(ct);
-            throw new HttpRequestException($"Login failed (HTTP {response.StatusCode}): {error}", null, response.StatusCode);
+            var rawBody = await response.Content.ReadAsStringAsync(ct);
+            var detail = TryExtractProblemDetail(rawBody);
+            var message = !string.IsNullOrWhiteSpace(detail)
+                ? $"Login failed: {detail}"
+                : $"Login failed (HTTP {response.StatusCode}): {rawBody}";
+            throw new HttpRequestException(message, null, response.StatusCode);
         }
 
         var login = await response.Content.ReadFromJsonAsync<LoginResponse>(cancellationToken: ct)

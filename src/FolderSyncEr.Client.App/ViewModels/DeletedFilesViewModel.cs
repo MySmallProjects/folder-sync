@@ -78,6 +78,18 @@ public partial class DeletedFilesViewModel : ViewModelBase
         OnPropertyChanged(nameof(StatusBrush));
     }
 
+    public void Clear()
+    {
+        _allItems.Clear();
+        Items = new ObservableCollection<DeletedItemViewModel>();
+        SummaryText = "No deleted items";
+        StatusMessage = string.Empty;
+        IsConfirmVisible = false;
+        _pendingConfirmAction = null;
+        OnPropertyChanged(nameof(HasItems));
+        OnPropertyChanged(nameof(IsEmpty));
+    }
+
     [RelayCommand]
     public async Task RefreshAsync()
     {

@@ -94,6 +94,7 @@ public static class FileEndpoints
         group.MapGet("files/{id}/content", async (
             ClaimsPrincipal user,
             IFileService fileService,
+            ServerDbContext db,
             IBlobStorageService blobStorage,
             ILogService logService,
             [FromRoute] string id,
@@ -107,10 +108,21 @@ public static class FileEndpoints
                 return Results.NotFound();
             }
 
-            var prefix = file.Id.Length >= 2 ? file.Id[..2] : "00";
-            var relativeBlobPath = Path.Combine(userId.ToString(), prefix, file.Id, $"{file.Version}.blob");
+            var versionRecord = await db.FileVersions.AsNoTracking()
+                .Where(v => v.FileId == file.Id && v.Version == file.Version)
+                .FirstOrDefaultAsync(ct);
+
+            var username = GetUsername(user) ?? userId.ToString();
+            var relativeBlobPath = versionRecord?.BlobRelativePath
+                ?? blobStorage.GetBlobRelativePath(username, file.Id, file.Version);
 
             var stream = blobStorage.OpenRead(relativeBlobPath);
+            if (stream == null)
+            {
+                // Fallback to legacy userId-based path if needed
+                var legacyPrefix = file.Id.Length >= 2 ? file.Id[..2] : "00";
+                stream = blobStorage.OpenRead(Path.Combine(userId.ToString(), legacyPrefix, file.Id, $"{file.Version}.blob"));
+            }
             if (stream == null)
             {
                 return Results.NotFound();
@@ -367,6 +379,11 @@ public static class FileEndpoints
             CancellationToken ct) =>
         {
             var userId = GetUserId(user);
+            var username = GetUsername(user) ?? await db.Users.AsNoTracking()
+                .Where(u => u.Id == userId)
+                .Select(u => u.Username)
+                .FirstOrDefaultAsync(ct) ?? userId.ToString();
+
             var files = await db.Files.AsNoTracking()
                 .Where(f => f.UserId == userId && !f.IsDeleted && !f.IsDirectory)
                 .ToListAsync(ct);
@@ -381,8 +398,7 @@ public static class FileEndpoints
                     using var entryStream = entry.Open();
                     try
                     {
-                        var prefix = file.Id.Length >= 2 ? file.Id[..2] : "00";
-                        var relativeBlobPath = Path.Combine(userId.ToString(), prefix, file.Id, $"{file.Version}.blob");
+                        var relativeBlobPath = blobStorage.GetBlobRelativePath(username, file.Id, file.Version);
                         using var blobStream = blobStorage.OpenRead(relativeBlobPath);
                         if (blobStream != null)
                         {
@@ -419,6 +435,11 @@ public static class FileEndpoints
     {
         var idStr = user.FindFirstValue(ClaimTypes.NameIdentifier) ?? user.FindFirstValue("sub");
         return int.Parse(idStr!);
+    }
+
+    private static string? GetUsername(ClaimsPrincipal user)
+    {
+        return user.FindFirstValue(ClaimTypes.Name) ?? user.FindFirstValue("unique_name");
     }
 
     private static string? GetDeviceId(ClaimsPrincipal user)
