@@ -9,6 +9,7 @@
 
 # database
 src/FolderSyncEr.Server/foldersyncer.db*
+src/FolderSyncEr.Server/storage/*
 crash.log
 
 # Build results
