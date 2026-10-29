@@ -134,6 +134,99 @@ public class SyncCoordinatorTests : IDisposable
         Assert.False(File.Exists(localFile), "Server-deleted file should be removed from the local sync folder");
     }
 
+    [Fact]
+    public async Task RunSyncAsync_RemoteFolderRename_DoesNotRecreateOldFolder()
+    {
+        _fakeApi.IsServerConnected = true;
+
+        var oldDir = Path.Combine(_testDir, "FolderA");
+        Directory.CreateDirectory(oldDir);
+        var oldFile = Path.Combine(oldDir, "note.txt");
+        await File.WriteAllTextAsync(oldFile, "Initial content");
+
+        // 1. Initial sync uploads FolderA and FolderA/note.txt
+        var r1 = await _coordinator.RunSyncAsync();
+        Assert.True(r1.Success, r1.ErrorMessage);
+
+        // 2. Simulate website renaming FolderA -> FolderB on the server
+        for (int i = 0; i < _fakeApi.ServerFiles.Count; i++)
+        {
+            var f = _fakeApi.ServerFiles[i];
+            if (f.Path.Equals("FolderA", StringComparison.OrdinalIgnoreCase))
+            {
+                _fakeApi.ServerFiles[i] = f with { Path = "FolderB", Version = f.Version + 1, ChangeSeq = f.ChangeSeq + 1 };
+            }
+            else if (f.Path.StartsWith("FolderA/", StringComparison.OrdinalIgnoreCase))
+            {
+                _fakeApi.ServerFiles[i] = f with
+                {
+                    Path = "FolderB/" + f.Path.Substring("FolderA/".Length),
+                    Version = f.Version + 1,
+                    ChangeSeq = f.ChangeSeq + 1
+                };
+            }
+        }
+
+        // 3. First sync after website rename
+        var r2 = await _coordinator.RunSyncAsync();
+        Assert.True(r2.Success, r2.ErrorMessage);
+
+        // 4. Second sync after website rename
+        var r3 = await _coordinator.RunSyncAsync();
+        Assert.True(r3.Success, r3.ErrorMessage);
+
+        var newDir = Path.Combine(_testDir, "FolderB");
+        var newFile = Path.Combine(newDir, "note.txt");
+        Assert.True(Directory.Exists(newDir), "FolderB should exist locally");
+        Assert.True(File.Exists(newFile), "FolderB/note.txt should exist locally");
+        Assert.False(Directory.Exists(oldDir), "FolderA should NOT exist locally after rename");
+        Assert.DoesNotContain(_fakeApi.ServerFiles, f => !f.IsDeleted && f.Path.StartsWith("FolderA", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public async Task RunSyncAsync_RemoteImplicitFolderRename_DoesNotRecreateOldFolder()
+    {
+        _fakeApi.IsServerConnected = true;
+
+        // Simulate a folder uploaded straight from the website (no explicit directory FileDto for "ImplicitFolder", only "ImplicitFolder/doc.txt")
+        _fakeApi.ServerFiles.Add(new FileDto(
+            Id: "file-1",
+            Path: "ImplicitFolder/doc.txt",
+            IsDirectory: false,
+            Size: "Initial content".Length,
+            Sha256: Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes("Initial content"))).ToLowerInvariant(),
+            Version: 1,
+            LastModifiedUtc: DateTime.UtcNow,
+            UploadedAtUtc: DateTime.UtcNow,
+            UploadedByDeviceId: "web",
+            IsDeleted: false,
+            ChangeSeq: 1
+        ));
+
+        // 1. Initial sync downloads ImplicitFolder/doc.txt locally
+        var r1 = await _coordinator.RunSyncAsync();
+        Assert.True(r1.Success, r1.ErrorMessage);
+        Assert.True(Directory.Exists(Path.Combine(_testDir, "ImplicitFolder")));
+        Assert.True(File.Exists(Path.Combine(_testDir, "ImplicitFolder", "doc.txt")));
+
+        // 2. Website renames ImplicitFolder -> RenamedFolder (FileService materializes RenamedFolder dir and updates child path)
+        _fakeApi.ServerFiles[0] = _fakeApi.ServerFiles[0] with { Path = "RenamedFolder/doc.txt", Version = 2, ChangeSeq = 2 };
+        _fakeApi.ServerFiles.Add(new FileDto("dir-2", "RenamedFolder", true, 0, null, 1, DateTime.UtcNow, DateTime.UtcNow, "web", false, 3));
+
+        // 3. First sync after website rename
+        var r2 = await _coordinator.RunSyncAsync();
+        Assert.True(r2.Success, r2.ErrorMessage);
+
+        // 4. Second sync after website rename
+        var r3 = await _coordinator.RunSyncAsync();
+        Assert.True(r3.Success, r3.ErrorMessage);
+
+        Assert.True(Directory.Exists(Path.Combine(_testDir, "RenamedFolder")), "RenamedFolder should exist locally");
+        Assert.True(File.Exists(Path.Combine(_testDir, "RenamedFolder", "doc.txt")), "RenamedFolder/doc.txt should exist locally");
+        Assert.False(Directory.Exists(Path.Combine(_testDir, "ImplicitFolder")), "ImplicitFolder should NOT exist locally after rename");
+        Assert.DoesNotContain(_fakeApi.ServerFiles, f => !f.IsDeleted && f.Path.StartsWith("ImplicitFolder", StringComparison.OrdinalIgnoreCase));
+    }
+
     public void Dispose()
     {
         _coordinator.Dispose();
@@ -203,8 +296,15 @@ public class SyncCoordinatorTests : IDisposable
             return Task.FromResult(new UploadResult(true, false, false, dto, null, null));
         }
 
-        public Task<FileDto> CreateDirectoryAsync(string path, CancellationToken ct = default) =>
-            Task.FromResult(new FileDto("dir-id", path, true, 0, null, 1, DateTime.UtcNow, DateTime.UtcNow, "dev", false, 1));
+        public Task<FileDto> CreateDirectoryAsync(string path, CancellationToken ct = default)
+        {
+            var existing = ServerFiles.FirstOrDefault(f => f.Path.Equals(path, StringComparison.OrdinalIgnoreCase));
+            var version = (existing?.Version ?? 0) + 1;
+            var dto = new FileDto(existing?.Id ?? Guid.NewGuid().ToString("N"), path, true, 0, null, version, DateTime.UtcNow, DateTime.UtcNow, "dev", false, version);
+            if (existing != null) ServerFiles.Remove(existing);
+            ServerFiles.Add(dto);
+            return Task.FromResult(dto);
+        }
 
         public Task<bool> DeleteFileAsync(string id, string? ifMatchSha256 = null, long? baseVersion = null, CancellationToken ct = default)
         {

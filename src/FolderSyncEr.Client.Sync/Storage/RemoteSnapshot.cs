@@ -57,7 +57,33 @@ public sealed class RemoteSnapshot
 
     public void Remove(string path)
     {
-        _items.TryRemove(NormalizePath(path), out _);
+        var norm = NormalizePath(path);
+        _items.TryRemove(norm, out _);
+
+        var prefix = norm + "/";
+        foreach (var key in _items.Keys.Where(k => k.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)).ToList())
+        {
+            _items.TryRemove(key, out _);
+        }
+    }
+
+    public void Move(string sourcePath, string targetPath, FileDto updatedRoot)
+    {
+        var normSource = NormalizePath(sourcePath);
+        var normTarget = NormalizePath(targetPath);
+
+        _items.TryRemove(normSource, out _);
+        _items[normTarget] = updatedRoot;
+
+        var prefix = normSource + "/";
+        var descendants = _items.Where(kvp => kvp.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)).ToList();
+        foreach (var (oldKey, dto) in descendants)
+        {
+            _items.TryRemove(oldKey, out _);
+            var suffix = oldKey.Substring(normSource.Length);
+            var newPath = normTarget + suffix;
+            _items[newPath] = dto with { Path = newPath, Version = dto.Version + 1 };
+        }
     }
 
     public bool TryGetFileDto(string path, out FileDto? dto)
@@ -155,7 +181,7 @@ public sealed class RemoteSnapshot
             Size = dto.Size,
             LastModified = dto.LastModifiedUtc,
             Hash = HashConverter.HexToBase64(dto.Sha256) ?? string.Empty,
-            ETag = dto.Version.ToString(),
+            ETag = null, // Do not populate SyncItem.ETag; SharpSync prefers ETag over ComputeHashAsync for RemoteHash/LocalHash when present
             CloudFileId = dto.Id
         };
     }

@@ -364,20 +364,41 @@ public class FileService : IFileService
             return new DeleteFileResult(false, false, true, "File version mismatch", conflictDto);
         }
 
+        var now = DateTime.UtcNow;
         file.IsDeleted = true;
-        file.DeletedAtUtc = DateTime.UtcNow;
+        file.DeletedAtUtc = now;
         file.Version++;
         file.ChangeSeq = await IncrementUserCounterAsync(userId, cancellationToken);
 
+        var deletedChildrenCount = 0;
+        if (file.IsDirectory)
+        {
+            var prefix = file.PathKey + "/";
+            var descendants = await _db.Files
+                .Where(f => f.UserId == userId && !f.IsDeleted && f.PathKey.StartsWith(prefix))
+                .ToListAsync(cancellationToken);
+
+            foreach (var child in descendants)
+            {
+                child.IsDeleted = true;
+                child.DeletedAtUtc = now;
+                child.Version++;
+                child.ChangeSeq = await IncrementUserCounterAsync(userId, cancellationToken);
+                deletedChildrenCount++;
+            }
+        }
+
         _db.ActivityLogs.Add(new ActivityLog
         {
-            TimestampUtc = DateTime.UtcNow,
+            TimestampUtc = now,
             UserId = userId,
             DeviceId = deviceId,
             Action = "Delete",
             Path = file.Path,
             Result = "Success",
-            Message = $"Tombstoned v{file.Version}"
+            Message = deletedChildrenCount > 0
+                ? $"Tombstoned folder v{file.Version} and {deletedChildrenCount} child item(s)"
+                : $"Tombstoned v{file.Version}"
         });
 
         await _db.SaveChangesAsync(cancellationToken);
@@ -394,28 +415,95 @@ public class FileService : IFileService
 
         var fromKey = PathRules.ToLookupKey(normalizedFrom);
         var toKey = PathRules.ToLookupKey(normalizedTo);
+        if (fromKey == toKey)
+        {
+            return null;
+        }
 
         var file = await _db.Files.FirstOrDefaultAsync(f => f.UserId == userId && f.PathKey == fromKey && !f.IsDeleted, cancellationToken);
-        if (file == null)
+        var prefix = fromKey + "/";
+        var descendants = await _db.Files
+            .Where(f => f.UserId == userId && !f.IsDeleted && f.PathKey.StartsWith(prefix))
+            .ToListAsync(cancellationToken);
+
+        if (file == null && descendants.Count == 0)
         {
             return null;
         }
 
-        if (!string.IsNullOrWhiteSpace(ifMatchSha256) && file.Sha256 != ifMatchSha256.Trim().ToLowerInvariant().Trim('"'))
+        if (file != null && !string.IsNullOrWhiteSpace(ifMatchSha256) && file.Sha256 != ifMatchSha256.Trim().ToLowerInvariant().Trim('"'))
         {
             return null;
         }
 
-        var destination = await _db.Files.FirstOrDefaultAsync(f => f.UserId == userId && f.PathKey == toKey && !f.IsDeleted, cancellationToken);
-        if (destination != null)
+        // Compute all target keys and verify no active record occupies any of them
+        var targetKeys = new List<string> { toKey };
+        var descendantPlan = new List<(FileRecord Record, string NewPath, string NewKey)>();
+        foreach (var desc in descendants)
+        {
+            var suffix = desc.Path.Length > normalizedFrom.Length ? desc.Path[normalizedFrom.Length..] : string.Empty;
+            var newDescPath = normalizedTo + suffix;
+            var newDescKey = PathRules.ToLookupKey(newDescPath);
+            descendantPlan.Add((desc, newDescPath, newDescKey));
+            targetKeys.Add(newDescKey);
+        }
+
+        var movingIds = new HashSet<string>(descendants.Select(d => d.Id));
+        if (file != null) movingIds.Add(file.Id);
+
+        var conflictingActive = await _db.Files.AsNoTracking()
+            .AnyAsync(f => f.UserId == userId && !f.IsDeleted && targetKeys.Contains(f.PathKey) && !movingIds.Contains(f.Id), cancellationToken);
+        if (conflictingActive)
         {
             return null; // Target already exists
         }
 
-        file.Path = normalizedTo;
-        file.PathKey = toKey;
-        file.Version++;
-        file.ChangeSeq = await IncrementUserCounterAsync(userId, cancellationToken);
+        // Remove any soft-deleted tombstones sitting at the target paths so the (UserId, PathKey) unique index is satisfied
+        var conflictingTombstones = await _db.Files
+            .Where(f => f.UserId == userId && f.IsDeleted && targetKeys.Contains(f.PathKey) && !movingIds.Contains(f.Id))
+            .ToListAsync(cancellationToken);
+        if (conflictingTombstones.Count > 0)
+        {
+            _db.Files.RemoveRange(conflictingTombstones);
+            await _db.SaveChangesAsync(cancellationToken);
+        }
+
+        if (file == null)
+        {
+            // Implicit directory being renamed: materialize directory record at normalizedTo
+            file = new FileRecord
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                UserId = userId,
+                Path = normalizedTo,
+                PathKey = toKey,
+                IsDirectory = true,
+                Size = 0,
+                Sha256 = null,
+                Version = 1,
+                LastModifiedUtc = DateTime.UtcNow,
+                UploadedAtUtc = DateTime.UtcNow,
+                UploadedByDeviceId = deviceId,
+                IsDeleted = false,
+                ChangeSeq = await IncrementUserCounterAsync(userId, cancellationToken)
+            };
+            _db.Files.Add(file);
+        }
+        else
+        {
+            file.Path = normalizedTo;
+            file.PathKey = toKey;
+            file.Version++;
+            file.ChangeSeq = await IncrementUserCounterAsync(userId, cancellationToken);
+        }
+
+        foreach (var (desc, newDescPath, newDescKey) in descendantPlan)
+        {
+            desc.Path = newDescPath;
+            desc.PathKey = newDescKey;
+            desc.Version++;
+            desc.ChangeSeq = await IncrementUserCounterAsync(userId, cancellationToken);
+        }
 
         _db.ActivityLogs.Add(new ActivityLog
         {
@@ -425,7 +513,9 @@ public class FileService : IFileService
             Action = "Move",
             Path = $"{normalizedFrom} -> {normalizedTo}",
             Result = "Success",
-            Message = $"Moved to {normalizedTo}"
+            Message = descendantPlan.Count > 0
+                ? $"Moved folder to {normalizedTo} ({descendantPlan.Count} child item(s))"
+                : $"Moved to {normalizedTo}"
         });
 
         await _db.SaveChangesAsync(cancellationToken);

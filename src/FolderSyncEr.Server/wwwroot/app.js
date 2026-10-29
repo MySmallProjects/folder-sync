@@ -13,6 +13,7 @@ let session = null;
 let allFiles = [];
 let allUsers = [];
 let selectedNodePath = null;
+let selectedNodeIsDir = false;
 let activePasswordEditUserId = null;
 const collapsedPaths = new Set();
 
@@ -30,6 +31,8 @@ const loginForm = document.getElementById('login-form');
 const loginError = document.getElementById('login-error');
 const loginSubmitBtn = document.getElementById('login-submit-btn');
 
+const browserErrorBox = document.getElementById('browser-error-box');
+const browserSuccessBox = document.getElementById('browser-success-box');
 const searchInput = document.getElementById('search-input');
 const includeDeletedCheckbox = document.getElementById('include-deleted-checkbox');
 const statsSummary = document.getElementById('stats-summary');
@@ -39,6 +42,20 @@ const detailsBody = document.getElementById('details-body');
 const expandAllBtn = document.getElementById('expand-all-btn');
 const collapseAllBtn = document.getElementById('collapse-all-btn');
 const refreshBtn = document.getElementById('refresh-btn');
+
+// Upload & New Folder Drawers
+const toggleUploadDrawerBtn = document.getElementById('toggle-upload-drawer-btn');
+const toggleMkdirDrawerBtn = document.getElementById('toggle-mkdir-drawer-btn');
+const uploadDrawer = document.getElementById('upload-drawer');
+const uploadTargetFolderInput = document.getElementById('upload-target-folder');
+const uploadFileInput = document.getElementById('upload-file-input');
+const uploadSubmitBtn = document.getElementById('upload-submit-btn');
+const uploadCancelBtn = document.getElementById('upload-cancel-btn');
+
+const mkdirDrawer = document.getElementById('mkdir-drawer');
+const mkdirPathInput = document.getElementById('mkdir-path-input');
+const mkdirSubmitBtn = document.getElementById('mkdir-submit-btn');
+const mkdirCancelBtn = document.getElementById('mkdir-cancel-btn');
 
 // Admin DOM Elements
 const adminErrorBox = document.getElementById('admin-error-box');
@@ -160,6 +177,23 @@ async function extractErrorMessage(res, fallback) {
     return fallback;
 }
 
+function showBrowserError(msg) {
+    browserSuccessBox.style.display = 'none';
+    browserErrorBox.textContent = msg;
+    browserErrorBox.style.display = 'block';
+}
+
+function showBrowserSuccess(msg) {
+    browserErrorBox.style.display = 'none';
+    browserSuccessBox.textContent = msg;
+    browserSuccessBox.style.display = 'block';
+}
+
+function hideBrowserBanner() {
+    browserErrorBox.style.display = 'none';
+    browserSuccessBox.style.display = 'none';
+}
+
 // ----------------------------------------------------------------------------
 // Authentication & Navigation Handlers
 // ----------------------------------------------------------------------------
@@ -214,6 +248,7 @@ logoutBtn.addEventListener('click', async () => {
         allFiles = [];
         allUsers = [];
         selectedNodePath = null;
+        selectedNodeIsDir = false;
         activePasswordEditUserId = null;
         showLoginView();
     }
@@ -259,6 +294,7 @@ function showAuthenticatedUI() {
 
 function switchTab(tab) {
     hideAdminBanner();
+    hideBrowserBanner();
     if (tab === 'admin' && isAdminSession()) {
         tabFilesBtn.classList.remove('active');
         tabAdminBtn.classList.add('active');
@@ -272,6 +308,141 @@ function switchTab(tab) {
         browserView.style.display = 'flex';
     }
 }
+
+// ----------------------------------------------------------------------------
+// File Upload & New Folder Drawers
+// ----------------------------------------------------------------------------
+function getDefaultTargetFolder() {
+    if (!selectedNodePath) return '';
+    if (selectedNodeIsDir) return selectedNodePath;
+    const lastSlash = selectedNodePath.lastIndexOf('/');
+    return lastSlash >= 0 ? selectedNodePath.substring(0, lastSlash) : '';
+}
+
+toggleUploadDrawerBtn.addEventListener('click', () => {
+    mkdirDrawer.style.display = 'none';
+    if (uploadDrawer.style.display === 'flex') {
+        uploadDrawer.style.display = 'none';
+    } else {
+        uploadTargetFolderInput.value = getDefaultTargetFolder();
+        uploadDrawer.style.display = 'flex';
+    }
+});
+
+uploadCancelBtn.addEventListener('click', () => {
+    uploadDrawer.style.display = 'none';
+    uploadFileInput.value = '';
+});
+
+toggleMkdirDrawerBtn.addEventListener('click', () => {
+    uploadDrawer.style.display = 'none';
+    if (mkdirDrawer.style.display === 'flex') {
+        mkdirDrawer.style.display = 'none';
+    } else {
+        const base = getDefaultTargetFolder();
+        mkdirPathInput.value = base ? `${base}/` : '';
+        mkdirDrawer.style.display = 'flex';
+        setTimeout(() => mkdirPathInput.focus(), 0);
+    }
+});
+
+mkdirCancelBtn.addEventListener('click', () => {
+    mkdirDrawer.style.display = 'none';
+    mkdirPathInput.value = '';
+});
+
+uploadDrawer.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideBrowserBanner();
+
+    const files = uploadFileInput.files;
+    if (!files || files.length === 0) {
+        showBrowserError('Please select at least one file to upload.');
+        return;
+    }
+
+    const folderPrefix = uploadTargetFolderInput.value.trim().replace(/^\/+|\/+$/g, '');
+    uploadSubmitBtn.disabled = true;
+    uploadSubmitBtn.textContent = 'Uploading...';
+
+    let uploadedCount = 0;
+    let lastUploadedPath = null;
+
+    try {
+        for (const file of files) {
+            const relPath = folderPrefix ? `${folderPrefix}/${file.name}` : file.name;
+            const mtimeIso = file.lastModified ? new Date(file.lastModified).toISOString() : new Date().toISOString();
+
+            const res = await apiFetch(`/api/files?path=${encodeURIComponent(relPath)}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/octet-stream',
+                    'X-Last-Modified-Utc': mtimeIso
+                },
+                body: file
+            });
+
+            if (!res.ok) {
+                const msg = await extractErrorMessage(res, `Failed to upload '${relPath}' (HTTP ${res.status})`);
+                throw new Error(msg);
+            }
+
+            uploadedCount++;
+            lastUploadedPath = relPath;
+        }
+
+        uploadFileInput.value = '';
+        uploadDrawer.style.display = 'none';
+        if (lastUploadedPath) {
+            selectedNodePath = lastUploadedPath;
+            selectedNodeIsDir = false;
+        }
+        showBrowserSuccess(`Uploaded ${uploadedCount} file(s) successfully.`);
+        await fetchFiles();
+    } catch (err) {
+        showBrowserError(err.message || 'File upload failed.');
+    } finally {
+        uploadSubmitBtn.disabled = false;
+        uploadSubmitBtn.textContent = 'Upload Now';
+    }
+});
+
+mkdirDrawer.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideBrowserBanner();
+
+    const path = mkdirPathInput.value.trim().replace(/^\/+|\/+$/g, '');
+    if (!path) {
+        showBrowserError('Please enter a valid folder path.');
+        return;
+    }
+
+    mkdirSubmitBtn.disabled = true;
+    try {
+        const res = await apiFetch('/api/directories', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ path })
+        });
+
+        if (!res.ok) {
+            const msg = await extractErrorMessage(res, `Failed to create folder (HTTP ${res.status})`);
+            throw new Error(msg);
+        }
+
+        const dirDto = await res.json();
+        mkdirPathInput.value = '';
+        mkdirDrawer.style.display = 'none';
+        selectedNodePath = dirDto.path;
+        selectedNodeIsDir = true;
+        showBrowserSuccess(`Created folder '${dirDto.path}'.`);
+        await fetchFiles();
+    } catch (err) {
+        showBrowserError(err.message || 'Could not create folder.');
+    } finally {
+        mkdirSubmitBtn.disabled = false;
+    }
+});
 
 // ----------------------------------------------------------------------------
 // User Administration (Admin Only)
@@ -359,7 +530,6 @@ function renderUsersTable() {
             const actionsWrap = document.createElement('div');
             actionsWrap.className = 'user-actions';
 
-            // Enable / Disable button
             const toggleDisableBtn = document.createElement('button');
             toggleDisableBtn.type = 'button';
             toggleDisableBtn.className = u.isDisabled ? 'btn sm success' : 'btn sm warning';
@@ -367,7 +537,6 @@ function renderUsersTable() {
             toggleDisableBtn.addEventListener('click', () => updateUserStatus(u.id, u.username, { isDisabled: !u.isDisabled }));
             actionsWrap.appendChild(toggleDisableBtn);
 
-            // Mark Deleted / Restore button
             const toggleDeleteBtn = document.createElement('button');
             toggleDeleteBtn.type = 'button';
             toggleDeleteBtn.className = u.isDeleted ? 'btn sm secondary' : 'btn sm danger';
@@ -378,7 +547,6 @@ function renderUsersTable() {
             }));
             actionsWrap.appendChild(toggleDeleteBtn);
 
-            // Change Password button
             const pwBtn = document.createElement('button');
             pwBtn.type = 'button';
             pwBtn.className = 'btn sm secondary';
@@ -391,7 +559,6 @@ function renderUsersTable() {
 
             actionsCell.appendChild(actionsWrap);
 
-            // Inline password change row if active
             if (activePasswordEditUserId === u.id) {
                 const pwBox = document.createElement('div');
                 pwBox.className = 'inline-pw-box';
@@ -600,7 +767,6 @@ function buildTree(files, filterQuery) {
         }
     }
 
-    // Compute recursive folder counts and sizes
     function computeAggregates(node) {
         if (!node.isDirectory) {
             const sz = node.fileDto ? (node.fileDto.size || 0) : 0;
@@ -625,6 +791,17 @@ function buildTree(files, filterQuery) {
     return root;
 }
 
+function findNodeByPath(root, targetPath) {
+    if (!targetPath) return null;
+    const parts = targetPath.split('/').filter(Boolean);
+    let current = root;
+    for (const part of parts) {
+        if (!current.children.has(part)) return null;
+        current = current.children.get(part);
+    }
+    return current;
+}
+
 function renderTree() {
     const filterQuery = searchInput.value;
     const root = buildTree(allFiles, filterQuery);
@@ -635,7 +812,8 @@ function renderTree() {
     statsSummary.textContent = `${fileItems.length} files, ${dirItems.length} folders (${formatBytes(totalBytes)})`;
 
     if (root.children.size === 0) {
-        treeContainer.innerHTML = '<div class="empty-state">No files found on the server.</div>';
+        treeContainer.innerHTML = '<div class="empty-state">No files found on the server. Use "⬆ Upload File(s)" or "📁+ New Folder" above.</div>';
+        detailsBody.innerHTML = '<div class="empty-state">Select a file or folder in the tree to inspect, rename, download, or delete it.</div>';
         return;
     }
 
@@ -648,6 +826,17 @@ function renderTree() {
 
     treeContainer.innerHTML = '';
     treeContainer.appendChild(fragment);
+
+    if (selectedNodePath) {
+        const selectedNode = findNodeByPath(root, selectedNodePath);
+        if (selectedNode) {
+            renderDetails(selectedNode);
+        } else {
+            selectedNodePath = null;
+            selectedNodeIsDir = false;
+            detailsBody.innerHTML = '<div class="empty-state">Select a file or folder in the tree to inspect, rename, download, or delete it.</div>';
+        }
+    }
 }
 
 function sortNodes(nodes) {
@@ -731,6 +920,7 @@ function createNodeDom(node, depth) {
     row.addEventListener('click', (e) => {
         e.stopPropagation();
         selectedNodePath = node.path;
+        selectedNodeIsDir = Boolean(node.isDirectory);
 
         if (node.isDirectory && node.children.size > 0) {
             if (collapsedPaths.has(node.path)) {
@@ -741,14 +931,13 @@ function createNodeDom(node, depth) {
         }
 
         renderTree();
-        renderDetails(node);
     });
 
     return wrapper;
 }
 
 // ----------------------------------------------------------------------------
-// Item Metadata & File Download / Preview via API
+// Item Metadata & Actions (Download, Preview, Rename, Delete, Restore)
 // ----------------------------------------------------------------------------
 function renderDetails(node) {
     const dto = node.fileDto;
@@ -764,6 +953,27 @@ function renderDetails(node) {
             <span class="detail-value">${typeLabel}${node.isDeleted ? ' (Soft-Deleted / Trash)' : ''}</span>
         </div>
     `;
+
+    // Action buttons for active or soft-deleted items
+    if (!node.isDeleted) {
+        html += `
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px;">
+                ${(!node.isDirectory && dto) ? '<button id="download-file-btn" class="btn sm" type="button">⬇ Download</button>' : ''}
+                ${(!node.isDirectory && dto && isPreviewableText(node.name, dto.size)) ? '<button id="preview-file-btn" class="btn sm secondary" type="button">👁 Preview Text</button>' : ''}
+                ${node.isDirectory ? '<button id="upload-into-folder-btn" class="btn sm success" type="button">⬆ Upload Here</button>' : ''}
+                <button id="rename-item-btn" class="btn sm secondary" type="button">✏️ Rename / Move</button>
+                <button id="delete-item-btn" class="btn sm danger" type="button">🗑️ Delete</button>
+            </div>
+            <div id="inline-action-container"></div>
+            <div id="preview-container"></div>
+        `;
+    } else if (dto && dto.isDeleted) {
+        html += `
+            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 2px;">
+                <button id="restore-item-btn" class="btn sm success" type="button">♻️ Restore from Trash</button>
+            </div>
+        `;
+    }
 
     if (node.isDirectory) {
         html += `
@@ -781,7 +991,7 @@ function renderDetails(node) {
                 <span class="detail-value">${escapeHtml(dto.id)}</span>
             </div>
             <div class="detail-item">
-                <span class="detail-label">Version & Sequence</span>
+                <span class="detail-label">Version &amp; Sequence</span>
                 <span class="detail-value">v${dto.version} (ChangeSeq #${dto.changeSeq})</span>
             </div>
             <div class="detail-item">
@@ -805,16 +1015,6 @@ function renderDetails(node) {
                 <span class="detail-value">${escapeHtml(dto.uploadedByDeviceId || '—')}</span>
             </div>
         `;
-
-        if (!node.isDirectory && !dto.isDeleted) {
-            html += `
-                <div style="display: flex; gap: 8px; margin-top: 6px;">
-                    <button id="download-file-btn" class="btn">⬇ Download File</button>
-                    ${isPreviewableText(node.name, dto.size) ? '<button id="preview-file-btn" class="btn secondary">👁 Preview Text</button>' : ''}
-                </div>
-                <div id="preview-container"></div>
-            `;
-        }
     }
 
     detailsBody.innerHTML = html;
@@ -827,6 +1027,193 @@ function renderDetails(node) {
     const previewBtn = document.getElementById('preview-file-btn');
     if (previewBtn && dto) {
         previewBtn.addEventListener('click', () => previewTextFile(dto));
+    }
+
+    const uploadHereBtn = document.getElementById('upload-into-folder-btn');
+    if (uploadHereBtn) {
+        uploadHereBtn.addEventListener('click', () => {
+            mkdirDrawer.style.display = 'none';
+            uploadTargetFolderInput.value = node.path;
+            uploadDrawer.style.display = 'flex';
+            uploadFileInput.focus();
+        });
+    }
+
+    const renameBtn = document.getElementById('rename-item-btn');
+    if (renameBtn) {
+        renameBtn.addEventListener('click', () => showInlineRenameBox(node));
+    }
+
+    const deleteBtn = document.getElementById('delete-item-btn');
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', () => showInlineDeleteConfirm(node));
+    }
+
+    const restoreBtn = document.getElementById('restore-item-btn');
+    if (restoreBtn && dto) {
+        restoreBtn.addEventListener('click', () => restoreItemFromTrash(dto));
+    }
+}
+
+function showInlineRenameBox(node) {
+    const container = document.getElementById('inline-action-container');
+    if (!container) return;
+
+    container.innerHTML = `
+        <div class="detail-box">
+            <span class="detail-label">Rename / Move ${node.isDirectory ? 'Folder' : 'File'}</span>
+            <input type="text" id="rename-path-input" value="${escapeHtml(node.path)}">
+            <div style="display: flex; gap: 8px;">
+                <button type="button" id="confirm-rename-btn" class="btn sm">Save</button>
+                <button type="button" id="cancel-rename-btn" class="btn sm secondary">Cancel</button>
+            </div>
+        </div>
+    `;
+
+    const inputEl = document.getElementById('rename-path-input');
+    const saveBtn = document.getElementById('confirm-rename-btn');
+    const cancelBtn = document.getElementById('cancel-rename-btn');
+
+    saveBtn.addEventListener('click', () => renameNode(node, inputEl.value));
+    cancelBtn.addEventListener('click', () => { container.innerHTML = ''; });
+    inputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            renameNode(node, inputEl.value);
+        } else if (e.key === 'Escape') {
+            container.innerHTML = '';
+        }
+    });
+    setTimeout(() => {
+        inputEl.focus();
+        inputEl.select();
+    }, 0);
+}
+
+async function renameNode(node, rawTargetPath) {
+    hideBrowserBanner();
+    const toPath = (rawTargetPath || '').trim().replace(/^\/+|\/+$/g, '');
+    if (!toPath) {
+        showBrowserError('Target path cannot be empty.');
+        return;
+    }
+    if (toPath === node.path) {
+        const container = document.getElementById('inline-action-container');
+        if (container) container.innerHTML = '';
+        return;
+    }
+
+    try {
+        const res = await apiFetch('/api/files/move', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                fromPath: node.path,
+                toPath: toPath,
+                ifMatchSha256: null
+            })
+        });
+
+        if (!res.ok) {
+            const msg = await extractErrorMessage(res, `Rename failed (HTTP ${res.status})`);
+            throw new Error(msg);
+        }
+
+        selectedNodePath = toPath;
+        showBrowserSuccess(`Renamed '${node.path}' to '${toPath}'.`);
+        await fetchFiles();
+    } catch (err) {
+        showBrowserError(err.message || 'Could not rename item.');
+    }
+}
+
+function showInlineDeleteConfirm(node) {
+    const container = document.getElementById('inline-action-container');
+    if (!container) return;
+
+    const desc = node.isDirectory
+        ? `Delete folder '${node.path}' and all ${node.fileCount} file(s) inside it?`
+        : `Delete file '${node.path}'?`;
+
+    container.innerHTML = `
+        <div class="detail-box" style="border-color: rgba(239, 68, 68, 0.5);">
+            <span style="font-size: 13px; color: #fca5a5;">${escapeHtml(desc)}</span>
+            <span style="font-size: 12px; color: var(--text-secondary);">The item will be soft-deleted (moved to Trash).</span>
+            <div style="display: flex; gap: 8px;">
+                <button type="button" id="confirm-delete-btn" class="btn sm danger">Confirm Delete</button>
+                <button type="button" id="cancel-delete-btn" class="btn sm secondary">Cancel</button>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('confirm-delete-btn').addEventListener('click', () => deleteNode(node));
+    document.getElementById('cancel-delete-btn').addEventListener('click', () => { container.innerHTML = ''; });
+}
+
+async function deleteNode(node) {
+    hideBrowserBanner();
+    try {
+        let targetId = node.fileDto ? node.fileDto.id : null;
+
+        // If this is an implicit folder in the tree without a directory record yet, materialize it first
+        if (!targetId && node.isDirectory) {
+            const mkdirRes = await apiFetch('/api/directories', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path: node.path })
+            });
+            if (!mkdirRes.ok) {
+                const msg = await extractErrorMessage(mkdirRes, `Could not prepare folder deletion (HTTP ${mkdirRes.status})`);
+                throw new Error(msg);
+            }
+            const dirDto = await mkdirRes.json();
+            targetId = dirDto.id;
+        }
+
+        if (!targetId) {
+            throw new Error('Item ID not found.');
+        }
+
+        const res = await apiFetch(`/api/files/${encodeURIComponent(targetId)}`, {
+            method: 'DELETE'
+        });
+
+        if (!res.ok) {
+            const msg = await extractErrorMessage(res, `Delete failed (HTTP ${res.status})`);
+            throw new Error(msg);
+        }
+
+        const deletedPath = node.path;
+        if (!includeDeletedCheckbox.checked) {
+            selectedNodePath = null;
+            selectedNodeIsDir = false;
+        }
+        showBrowserSuccess(`Deleted '${deletedPath}' (moved to Trash).`);
+        await fetchFiles();
+    } catch (err) {
+        showBrowserError(err.message || 'Could not delete item.');
+    }
+}
+
+async function restoreItemFromTrash(dto) {
+    hideBrowserBanner();
+    try {
+        const res = await apiFetch(`/api/trash/${encodeURIComponent(dto.id)}/restore`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ targetPath: null })
+        });
+
+        if (!res.ok) {
+            const msg = await extractErrorMessage(res, `Restore failed (HTTP ${res.status})`);
+            throw new Error(msg);
+        }
+
+        const data = await res.json();
+        showBrowserSuccess(`Restored '${data.path}' (${data.restoredCount} item(s)).`);
+        await fetchFiles();
+    } catch (err) {
+        showBrowserError(err.message || 'Could not restore item.');
     }
 }
 
@@ -844,7 +1231,7 @@ async function downloadFile(dto) {
         a.remove();
         URL.revokeObjectURL(url);
     } catch (err) {
-        alert(`Error downloading file: ${err.message}`);
+        showBrowserError(`Error downloading file: ${err.message}`);
     }
 }
 
@@ -870,7 +1257,10 @@ async function previewTextFile(dto) {
 // ----------------------------------------------------------------------------
 searchInput.addEventListener('input', () => renderTree());
 includeDeletedCheckbox.addEventListener('change', () => fetchFiles());
-refreshBtn.addEventListener('click', () => fetchFiles());
+refreshBtn.addEventListener('click', () => {
+    hideBrowserBanner();
+    fetchFiles();
+});
 
 expandAllBtn.addEventListener('click', () => {
     collapsedPaths.clear();

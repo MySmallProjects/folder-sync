@@ -278,8 +278,7 @@ public sealed class RestRemoteStorage : ISyncStorage
             var updated = await _api.MoveFileAsync(sourcePath, targetPath, ifMatchSha256: dto?.Sha256, ct: cancellationToken);
             if (updated != null)
             {
-                _snapshot.Remove(sourcePath);
-                _snapshot.AddOrUpdate(updated);
+                _snapshot.Move(sourcePath, targetPath, updated);
             }
         }
         catch (Exception ex)

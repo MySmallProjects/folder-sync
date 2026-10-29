@@ -2,6 +2,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -240,11 +241,94 @@ public sealed class SafeLocalStorage : ISyncStorage
         {
             File.Move(sourceFullPath, targetPath, overwrite: true);
             _logger.LogInformation("Moved local file to trash: '{Path}' -> '{TrashPath}'", relativePath, targetPath);
+
+            // Clean up any ancestor directories inside the sync root that became empty
+            // (e.g., when an implicit remote directory's last file was moved/deleted on the server).
+            PruneEmptyParentDirectories(Path.GetDirectoryName(sourceFullPath));
         }
         else if (Directory.Exists(sourceFullPath))
         {
-            Directory.Move(sourceFullPath, targetPath);
+            if (Directory.Exists(targetPath))
+            {
+                // Target directory in trash was already created when moving child files in this sync run.
+                // Merge any remaining contents into the trash directory and remove the source directory.
+                MergeDirectoryIntoTrash(sourceFullPath, targetPath);
+                Directory.Delete(sourceFullPath, recursive: true);
+            }
+            else
+            {
+                Directory.Move(sourceFullPath, targetPath);
+            }
             _logger.LogInformation("Moved local directory to trash: '{Path}' -> '{TrashPath}'", relativePath, targetPath);
+            PruneEmptyParentDirectories(Path.GetDirectoryName(sourceFullPath));
+        }
+    }
+
+    private void PruneEmptyParentDirectories(string? directoryPath)
+    {
+        var rootNormalized = Path.TrimEndingDirectorySeparator(_rootPath);
+        var current = directoryPath;
+
+        while (!string.IsNullOrEmpty(current))
+        {
+            var currentNormalized = Path.TrimEndingDirectorySeparator(Path.GetFullPath(current));
+            if (string.Equals(currentNormalized, rootNormalized, StringComparison.OrdinalIgnoreCase) ||
+                !currentNormalized.StartsWith(rootNormalized + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+            {
+                break;
+            }
+
+            if (!Directory.Exists(currentNormalized))
+            {
+                current = Path.GetDirectoryName(currentNormalized);
+                continue;
+            }
+
+            if (Directory.EnumerateFileSystemEntries(currentNormalized).Any())
+            {
+                break;
+            }
+
+            try
+            {
+                Directory.Delete(currentNormalized, recursive: false);
+                var rel = Path.GetRelativePath(_rootPath, currentNormalized).Replace('\\', '/');
+                _logger.LogInformation("Removed empty local directory after child removal: '{Path}'", rel);
+            }
+            catch
+            {
+                break;
+            }
+
+            current = Path.GetDirectoryName(currentNormalized);
+        }
+    }
+
+    private static void MergeDirectoryIntoTrash(string sourceDir, string targetDir)
+    {
+        if (!Directory.Exists(targetDir))
+        {
+            Directory.CreateDirectory(targetDir);
+        }
+
+        foreach (var file in Directory.GetFiles(sourceDir))
+        {
+            var destFile = Path.Combine(targetDir, Path.GetFileName(file));
+            File.Move(file, destFile, overwrite: true);
+        }
+
+        foreach (var subDir in Directory.GetDirectories(sourceDir))
+        {
+            var destSubDir = Path.Combine(targetDir, Path.GetFileName(subDir));
+            if (Directory.Exists(destSubDir))
+            {
+                MergeDirectoryIntoTrash(subDir, destSubDir);
+                Directory.Delete(subDir, recursive: true);
+            }
+            else
+            {
+                Directory.Move(subDir, destSubDir);
+            }
         }
     }
 }

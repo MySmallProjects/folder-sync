@@ -292,6 +292,30 @@ public class ClientApiIntegrationTests : IClassFixture<ClientTestServerFixture>,
         loginVm.Password = "NewAlicePass999!";
         await loginVm.LoginCommand.ExecuteAsync(null);
         Assert.True(loginVm.IsLoggedIn);
+
+        // 9. Folder rename & folder delete (used by website file tree actions)
+        var folderDto = await _api.CreateDirectoryAsync("projects/2026");
+        using (var ms = new MemoryStream("Spec document"u8.ToArray()))
+        {
+            var up = await _api.UploadFileStreamAsync("projects/2026/spec.txt", ms, ifNoneMatch: "*");
+            Assert.True(up.IsSuccess);
+        }
+
+        // Rename folder 'projects/2026' -> 'projects/archive'
+        var movedFolder = await _api.MoveFileAsync("projects/2026", "projects/archive");
+        Assert.NotNull(movedFolder);
+        Assert.Equal("projects/archive", movedFolder.Path);
+
+        var movedChild = await _api.GetFileMetaByPathAsync("projects/archive/spec.txt");
+        Assert.NotNull(movedChild);
+        Assert.False(movedChild.IsDeleted);
+
+        // Delete folder 'projects/archive' -> soft-deletes both the folder and 'projects/archive/spec.txt'
+        var deletedOk = await _api.DeleteFileAsync(movedFolder.Id);
+        Assert.True(deletedOk);
+
+        var activeAfterDelete = await _api.ListFilesAsync(includeDeleted: false);
+        Assert.DoesNotContain(activeAfterDelete.Items, f => f.Path.StartsWith("projects/archive", StringComparison.OrdinalIgnoreCase));
     }
 
     public void Dispose()
