@@ -39,6 +39,12 @@ public partial class SettingsViewModel : ViewModelBase
     private int _syncIntervalSeconds = 60;
 
     [ObservableProperty]
+    private int _updateCooldownSeconds = 30;
+
+    [ObservableProperty]
+    private int _maxWaitSeconds = 300;
+
+    [ObservableProperty]
     private bool _closeToTray = true;
 
     [ObservableProperty]
@@ -165,6 +171,22 @@ public partial class SettingsViewModel : ViewModelBase
         }
     }
 
+    partial void OnUpdateCooldownSecondsChanged(int value)
+    {
+        if (IsInitialized)
+        {
+            _ = PersistCurrentSettingsAsync();
+        }
+    }
+
+    partial void OnMaxWaitSecondsChanged(int value)
+    {
+        if (IsInitialized)
+        {
+            _ = PersistCurrentSettingsAsync();
+        }
+    }
+
     partial void OnCloseToTrayChanged(bool value)
     {
         if (IsInitialized)
@@ -275,6 +297,8 @@ public partial class SettingsViewModel : ViewModelBase
             }
             settings.ConflictPolicy = SelectedConflictPolicy.ToString();
             settings.SyncIntervalSeconds = SyncIntervalSeconds;
+            settings.UpdateCooldownSeconds = UpdateCooldownSeconds;
+            settings.MaxWaitSeconds = MaxWaitSeconds;
             settings.CloseToTray = CloseToTray;
             settings.StartMinimized = StartMinimized;
             settings.LastUpdatedUtc = DateTime.UtcNow;

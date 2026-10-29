@@ -184,6 +184,51 @@ public class SyncCoordinatorTests : IDisposable
     }
 
     [Fact]
+    public async Task BackgroundSync_CooldownAndMaxWait_TriggersAfterQuietPeriod()
+    {
+        _fakeApi.IsServerConnected = true;
+
+        var localFile = Path.Combine(_testDir, "cooldown_test.txt");
+        await File.WriteAllTextAsync(localFile, "Initial content");
+
+        var syncTcs = new TaskCompletionSource<bool>();
+        int syncCount = 0;
+        _coordinator.SyncCompleted += (s, e) =>
+        {
+            syncCount++;
+            syncTcs.TrySetResult(true);
+        };
+
+        // Start background sync with a 150ms cooldown and 500ms max wait for test speed
+        _coordinator.StartBackgroundSync(
+            periodicInterval: TimeSpan.FromMinutes(10),
+            cooldown: TimeSpan.FromMilliseconds(150),
+            maxWait: TimeSpan.FromMilliseconds(500));
+
+        // Rapidly write to the file 3 times within 60ms intervals (resetting cooldown each time)
+        await File.WriteAllTextAsync(localFile, "Write 1");
+        _coordinator.TriggerFileSystemChange("cooldown_test.txt", WatcherChangeTypes.Changed);
+        await Task.Delay(60);
+        Assert.Equal(0, syncCount); // Should NOT have synced yet (cooldown resetting)
+
+        await File.WriteAllTextAsync(localFile, "Write 2");
+        _coordinator.TriggerFileSystemChange("cooldown_test.txt", WatcherChangeTypes.Changed);
+        await Task.Delay(60);
+        Assert.Equal(0, syncCount); // Still waiting for quiet period
+
+        await File.WriteAllTextAsync(localFile, "Write 3");
+        _coordinator.TriggerFileSystemChange("cooldown_test.txt", WatcherChangeTypes.Changed);
+
+        // Wait up to 1500ms for quiet period to elapse and sync to complete
+        var completed = await Task.WhenAny(syncTcs.Task, Task.Delay(1500)) == syncTcs.Task;
+
+        Assert.True(completed, "Sync should have triggered once quiet cooldown elapsed");
+        Assert.True(syncCount >= 1);
+        var serverFile = _fakeApi.ServerFiles.FirstOrDefault(f => f.Path == "cooldown_test.txt");
+        Assert.NotNull(serverFile);
+    }
+
+    [Fact]
     public async Task RunSyncAsync_RemoteImplicitFolderRename_DoesNotRecreateOldFolder()
     {
         _fakeApi.IsServerConnected = true;

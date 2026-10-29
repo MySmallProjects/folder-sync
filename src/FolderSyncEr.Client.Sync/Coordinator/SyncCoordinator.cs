@@ -65,9 +65,13 @@ public sealed class SyncCoordinator : IDisposable
     private SyncEngine? _engine;
     private RemoteSnapshot? _currentSnapshot;
 
+    private readonly object _debounceLock = new();
     private FileSystemWatcher? _watcher;
     private Timer? _debounceTimer;
     private Timer? _periodicTimer;
+    private DateTime? _firstChangeTimeUtc;
+    private TimeSpan _cooldownDuration = TimeSpan.FromSeconds(30);
+    private TimeSpan _maxWaitDuration = TimeSpan.FromSeconds(300);
     private bool _pendingSyncRequested;
     private bool _dbInitialized;
     private bool _isDisposed;
@@ -77,6 +81,18 @@ public sealed class SyncCoordinator : IDisposable
     public bool IsPaused { get; private set; }
     public DateTime? LastSyncTimeUtc { get; private set; }
     public string? LastError { get; private set; }
+
+    public TimeSpan CooldownDuration
+    {
+        get => _cooldownDuration;
+        set => _cooldownDuration = value > TimeSpan.Zero ? value : TimeSpan.FromSeconds(1);
+    }
+
+    public TimeSpan MaxWaitDuration
+    {
+        get => _maxWaitDuration;
+        set => _maxWaitDuration = value >= _cooldownDuration ? value : _cooldownDuration;
+    }
 
     public ConflictPolicy Policy
     {
@@ -387,9 +403,12 @@ public sealed class SyncCoordinator : IDisposable
         }
     }
 
-    public void StartBackgroundSync(TimeSpan? periodicInterval = null)
+    public void StartBackgroundSync(TimeSpan? periodicInterval = null, TimeSpan? cooldown = null, TimeSpan? maxWait = null)
     {
         if (_watcher != null) return;
+
+        if (cooldown.HasValue) CooldownDuration = cooldown.Value;
+        if (maxWait.HasValue) MaxWaitDuration = maxWait.Value;
 
         // 1. FileSystemWatcher with debouncing
         _watcher = new FileSystemWatcher(_localFolderPath)
@@ -427,7 +446,8 @@ public sealed class SyncCoordinator : IDisposable
             }
         }, null, interval, interval);
 
-        _logger.LogInformation("Background sync started for '{Folder}'", _localFolderPath);
+        _logger.LogInformation("Background sync started for '{Folder}' (Periodic: {PeriodicSec}s, Cooldown: {CooldownSec}s, MaxWait: {MaxWaitSec}s)",
+            _localFolderPath, interval.TotalSeconds, CooldownDuration.TotalSeconds, MaxWaitDuration.TotalSeconds);
     }
 
     public void StopBackgroundSync()
@@ -441,11 +461,17 @@ public sealed class SyncCoordinator : IDisposable
 
         _debounceTimer?.Dispose();
         _debounceTimer = null;
+        _firstChangeTimeUtc = null;
 
         _periodicTimer?.Dispose();
         _periodicTimer = null;
 
         _logger.LogInformation("Background sync stopped.");
+    }
+
+    public void TriggerFileSystemChange(string path, WatcherChangeTypes changeType)
+    {
+        OnFileSystemEvent(this, new FileSystemEventArgs(changeType, _localFolderPath, path));
     }
 
     private void OnFileSystemEvent(object sender, FileSystemEventArgs e)
@@ -475,31 +501,56 @@ public sealed class SyncCoordinator : IDisposable
             _logger.LogInformation("Local file/folder {ChangeType} detected: '{Path}'", e.ChangeType, e.Name);
         }
 
-        _debounceTimer?.Dispose();
-        _debounceTimer = new Timer(async _ =>
+        lock (_debounceLock)
         {
-            if (_isDisposed) return;
-            try
+            var now = DateTime.UtcNow;
+            _firstChangeTimeUtc ??= now;
+
+            // Compute delay until trigger: whichever is shorter between remaining cooldown and remaining max wait
+            var elapsedSinceFirst = now - _firstChangeTimeUtc.Value;
+            var remainingMaxWait = MaxWaitDuration - elapsedSinceFirst;
+            if (remainingMaxWait < TimeSpan.Zero) remainingMaxWait = TimeSpan.Zero;
+
+            var delay = remainingMaxWait < CooldownDuration ? remainingMaxWait : CooldownDuration;
+            var delayMs = (int)Math.Max(50, delay.TotalMilliseconds);
+
+            if (_debounceTimer == null)
             {
-                if (!IsPaused && !IsSynchronizing)
+                _debounceTimer = new Timer(async _ =>
                 {
-                    _logger.LogInformation("Debounced local change detected ({ChangeType}: '{Path}'); starting sync.", e.ChangeType, e.Name);
-                    await RunSyncAsync();
-                }
-                else
-                {
-                    _pendingSyncRequested = true;
-                }
+                    if (_isDisposed) return;
+                    try
+                    {
+                        lock (_debounceLock)
+                        {
+                            _firstChangeTimeUtc = null;
+                        }
+
+                        if (!IsPaused && !IsSynchronizing)
+                        {
+                            _logger.LogInformation("Cooldown elapsed for local changes; starting sync.");
+                            await RunSyncAsync();
+                        }
+                        else
+                        {
+                            _pendingSyncRequested = true;
+                        }
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // Coordinator disposed while debounce callback was in flight
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error in file watcher cooldown sync.");
+                    }
+                }, null, delayMs, Timeout.Infinite);
             }
-            catch (ObjectDisposedException)
+            else
             {
-                // Coordinator disposed while debounce callback was in flight
+                _debounceTimer.Change(delayMs, Timeout.Infinite);
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error in file watcher debounce sync.");
-            }
-        }, null, 1200, Timeout.Infinite);
+        }
     }
 
     public async Task PauseAsync()

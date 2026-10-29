@@ -217,6 +217,14 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                     Connection.ServerUrl = Settings.ServerUrl;
                 }
             }
+            if (e.PropertyName == nameof(Settings.UpdateCooldownSeconds) && Coordinator != null)
+            {
+                Coordinator.CooldownDuration = TimeSpan.FromSeconds(Settings.UpdateCooldownSeconds);
+            }
+            if (e.PropertyName == nameof(Settings.MaxWaitSeconds) && Coordinator != null)
+            {
+                Coordinator.MaxWaitDuration = TimeSpan.FromSeconds(Settings.MaxWaitSeconds);
+            }
         };
         Login.PropertyChanged += (_, e) =>
         {
@@ -283,6 +291,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             if (appSettings != null)
             {
                 Settings.SyncIntervalSeconds = appSettings.SyncIntervalSeconds;
+                Settings.UpdateCooldownSeconds = appSettings.UpdateCooldownSeconds;
+                Settings.MaxWaitSeconds = appSettings.MaxWaitSeconds;
                 Settings.CloseToTray = appSettings.CloseToTray;
                 Settings.StartMinimized = appSettings.StartMinimized;
                 Settings.AllowUntrustedCertificates = appSettings.AllowUntrustedCertificates;
@@ -415,7 +425,10 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                 }
             };
 
-            Coordinator.StartBackgroundSync(TimeSpan.FromSeconds(Settings.SyncIntervalSeconds));
+            Coordinator.StartBackgroundSync(
+                periodicInterval: TimeSpan.FromSeconds(Settings.SyncIntervalSeconds),
+                cooldown: TimeSpan.FromSeconds(Settings.UpdateCooldownSeconds),
+                maxWait: TimeSpan.FromSeconds(Settings.MaxWaitSeconds));
             SyncStatusSummary = "Background sync active.";
             _ = Coordinator.RunSyncAsync();
         }

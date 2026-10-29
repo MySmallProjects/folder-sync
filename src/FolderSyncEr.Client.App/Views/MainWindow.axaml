@@ -416,6 +416,24 @@
                                         <TextBlock Grid.Column="0" Text="Periodic Scan Interval (seconds):" Foreground="#9CA3AF" VerticalAlignment="Center" Margin="0,0,12,0"/>
                                         <NumericUpDown Grid.Column="1" Value="{Binding SyncIntervalSeconds, Mode=TwoWay}" Minimum="10" Maximum="3600" Width="140" HorizontalAlignment="Left"/>
                                     </Grid>
+
+                                    <Grid ColumnDefinitions="Auto,*" Margin="0,4,0,0">
+                                        <StackPanel Grid.Column="0" Margin="0,0,12,0" VerticalAlignment="Center">
+                                            <TextBlock Text="Update Cooldown (seconds):" Foreground="#9CA3AF"
+                                                       ToolTip.Tip="Quiet period before syncing changes. Resets on each new file write to bundle rapid edits together and prevent server version churn."/>
+                                        </StackPanel>
+                                        <NumericUpDown Grid.Column="1" Value="{Binding UpdateCooldownSeconds, Mode=TwoWay}" Minimum="1" Maximum="300" Width="140" HorizontalAlignment="Left"
+                                                       ToolTip.Tip="Quiet period before syncing changes. Resets on each new file write to bundle rapid edits together and prevent server version churn."/>
+                                    </Grid>
+
+                                    <Grid ColumnDefinitions="Auto,*" Margin="0,4,0,0">
+                                        <StackPanel Grid.Column="0" Margin="0,0,12,0" VerticalAlignment="Center">
+                                            <TextBlock Text="Max Wait (seconds):" Foreground="#9CA3AF"
+                                                       ToolTip.Tip="Ceiling timeout for continuous writes. If an application never stops writing, sync triggers anyway after this duration (default 300s / 5 minutes)."/>
+                                        </StackPanel>
+                                        <NumericUpDown Grid.Column="1" Value="{Binding MaxWaitSeconds, Mode=TwoWay}" Minimum="10" Maximum="3600" Width="140" HorizontalAlignment="Left"
+                                                       ToolTip.Tip="Ceiling timeout for continuous writes. If an application never stops writing, sync triggers anyway after this duration (default 300s / 5 minutes)."/>
+                                    </Grid>
                                 </StackPanel>
                             </Border>
 
