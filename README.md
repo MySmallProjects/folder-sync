@@ -314,7 +314,31 @@ When a local application (e.g. text editor, office suite, or torrent client) ope
 
 ---
 
-### 2. Packaging & Deployment for Ubuntu / Linux (`linux-x64`)
+### 2. Automated Binary Release Packaging (GitHub Releases)
+
+To generate clean binary release archives for both Linux and Windows in a single step, run the release script from the repository root:
+
+```bash
+./create-release.sh
+```
+
+This compiles self-contained, single-file executables for all platforms and produces exactly 5 files in the `Releases/` directory:
+
+| Filename | Description | Format |
+|---|---|---|
+| `FolderSyncEr-Client-linux-<version>.tar.gz` | Linux Desktop Client with launcher, icon, and installer | `.tar.gz` (preserves executable bits) |
+| `FolderSyncEr-Server-linux-<version>.tar.gz` | Linux Web API Server with systemd unit and web file viewer | `.tar.gz` |
+| `FolderSyncEr-Client-windows-<version>.zip` | Windows Desktop Client portable single-file executable | `.zip` |
+| `FolderSyncEr-Server-windows-<version>.zip` | Windows Web API Server portable single-file executable | `.zip` |
+| `RELEASE_NOTES.txt` | Dynamically generated release notes with version numbers and install steps | Text |
+
+All intermediate build files and temporary staging directories are automatically cleaned up upon completion. The contents of `Releases/` can be directly attached to a GitHub release or committed to Git.
+
+The release notes instructions are populated from the template in `packaging/templates/release-notes-template.txt`.
+
+---
+
+### 3. Packaging & Deployment for Ubuntu / Linux (`linux-x64`)
 
 #### System Requirements
 - Ubuntu 20.04 LTS, 22.04 LTS, or 24.04 LTS (x86_64).

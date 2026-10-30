@@ -1,0 +1,71 @@
+================================================================================
+FolderSyncEr - Binary Release Notes & Quick Install Guide
+================================================================================
+
+Release Date:    {{RELEASE_DATE}}
+Desktop Client:  v{{CLIENT_VERSION}}
+Web API Server:  v{{SERVER_VERSION}}
+
+--------------------------------------------------------------------------------
+Included Packages:
+--------------------------------------------------------------------------------
+- FolderSyncEr-Client-linux-{{CLIENT_VERSION}}.tar.gz   : Linux Desktop Client
+- FolderSyncEr-Server-linux-{{SERVER_VERSION}}.tar.gz   : Linux Web API Server
+- FolderSyncEr-Client-windows-{{CLIENT_VERSION}}.zip    : Windows Desktop Client (Portable)
+- FolderSyncEr-Server-windows-{{SERVER_VERSION}}.zip    : Windows Web API Server (Portable)
+- RELEASE_NOTES.txt                                      : This release & installation guide
+
+--------------------------------------------------------------------------------
+1. Linux Desktop Client Installation (Ubuntu / Debian / Linux x64)
+--------------------------------------------------------------------------------
+Prerequisites:
+  sudo apt update && sudo apt install -y libsecret-1-0 libx11-6 libfontconfig1
+
+Installation:
+  1. Extract the tarball:
+       mkdir -p foldersyncer-client && tar -xzf FolderSyncEr-Client-linux-{{CLIENT_VERSION}}.tar.gz -C foldersyncer-client
+       cd foldersyncer-client
+  2. Run the installer:
+       ./install.sh             # Installs to ~/.local/bin and creates desktop shortcut
+       # Or run: sudo ./install.sh for system-wide install (/usr/local/bin)
+  3. Launch FolderSyncEr from your desktop applications menu or run:
+       foldersyncer-client
+
+--------------------------------------------------------------------------------
+2. Linux Web API Server Installation (Ubuntu / Debian / Linux x64)
+--------------------------------------------------------------------------------
+Running Standalone:
+  1. Extract the tarball:
+       mkdir -p foldersyncer-server && tar -xzf FolderSyncEr-Server-linux-{{SERVER_VERSION}}.tar.gz -C foldersyncer-server
+       cd foldersyncer-server
+  2. Start the server:
+       ./foldersyncer-server --urls "http://0.0.0.0:5000"
+  3. Open the web interface in your browser:
+       http://localhost:5000/
+       Default Admin: admin / AdminPassword123!
+
+Running as a Systemd Service:
+  sudo useradd -r -s /bin/false foldersyncer || true
+  sudo mkdir -p /opt/foldersyncer-server
+  sudo cp -r * /opt/foldersyncer-server/
+  sudo chown -R foldersyncer:foldersyncer /opt/foldersyncer-server
+  sudo cp foldersyncer-server.service /etc/systemd/system/
+  sudo systemctl daemon-reload
+  sudo systemctl enable --now foldersyncer-server
+
+--------------------------------------------------------------------------------
+3. Windows Desktop Client (Portable win-x64)
+--------------------------------------------------------------------------------
+  1. Extract FolderSyncEr-Client-windows-{{CLIENT_VERSION}}.zip to any folder.
+  2. Double-click "FolderSyncEr.Client.exe" to launch.
+  3. Enter your server URL (e.g. http://localhost:5000) and sign in.
+  4. The application supports minimizing to the system tray and launching at startup.
+
+--------------------------------------------------------------------------------
+4. Windows Web API Server (Portable win-x64)
+--------------------------------------------------------------------------------
+  1. Extract FolderSyncEr-Server-windows-{{SERVER_VERSION}}.zip to any folder.
+  2. Double-click "FolderSyncEr.Server.exe" or run from PowerShell:
+       .\FolderSyncEr.Server.exe --urls "http://0.0.0.0:5000"
+  3. Open http://localhost:5000/ to access the Web File Viewer and Swagger API docs.
+================================================================================

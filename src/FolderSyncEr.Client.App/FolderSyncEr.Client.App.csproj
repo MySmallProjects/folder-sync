@@ -13,6 +13,7 @@
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
     <VersionMajor>1</VersionMajor>
     <VersionMinor>1</VersionMinor>
+    <RuntimeIdentifiers>linux-x64;win-x64</RuntimeIdentifiers>
     <BuildVersionFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\build.client.version'))</BuildVersionFile>
   </PropertyGroup>
 
@@ -25,7 +26,8 @@
     <PropertyGroup>
       <_RawBuildNumber>@(_CurrentBuildLines)</_RawBuildNumber>
       <_RawBuildNumber Condition="'$(_RawBuildNumber)' == ''">0</_RawBuildNumber>
-      <BuildNumber>$([MSBuild]::Add($(_RawBuildNumber), 1))</BuildNumber>
+      <BuildNumber Condition="'$(SkipAutoIncrementVersion)' == 'true'">$(_RawBuildNumber)</BuildNumber>
+      <BuildNumber Condition="'$(SkipAutoIncrementVersion)' != 'true'">$([MSBuild]::Add($(_RawBuildNumber), 1))</BuildNumber>
       <Version>$(VersionMajor).$(VersionMinor).$(BuildNumber)</Version>
       <AssemblyVersion>$(VersionMajor).$(VersionMinor).$(BuildNumber).0</AssemblyVersion>
       <FileVersion>$(VersionMajor).$(VersionMinor).$(BuildNumber).0</FileVersion>
@@ -35,13 +37,13 @@
 [assembly: System.Reflection.AssemblyFileVersion("$(FileVersion)")]
 [assembly: System.Reflection.AssemblyInformationalVersion("$(InformationalVersion)")]</_GeneratedVersionContent>
     </PropertyGroup>
-    <WriteLinesToFile File="$(BuildVersionFile)" Lines="$(BuildNumber)" Overwrite="true" />
+    <WriteLinesToFile File="$(BuildVersionFile)" Lines="$(BuildNumber)" Overwrite="true" Condition="'$(SkipAutoIncrementVersion)' != 'true'" />
     <WriteLinesToFile File="$(_GeneratedVersionFile)" Lines="$(_GeneratedVersionContent)" Overwrite="true" />
     <ItemGroup>
       <Compile Include="$(_GeneratedVersionFile)" />
       <FileWrites Include="$(_GeneratedVersionFile)" />
     </ItemGroup>
-    <Message Text="FolderSyncEr.Client.App build version incremented to v$(Version)" Importance="High" />
+    <Message Text="FolderSyncEr.Client.App build version: v$(Version)" Importance="High" />
   </Target>
 
   <ItemGroup>
