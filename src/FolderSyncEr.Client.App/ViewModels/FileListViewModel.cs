@@ -177,8 +177,13 @@ public partial class FileListViewModel : ViewModelBase
 
             void UpdateUI()
             {
+                var sorted = items
+                    .OrderByDescending(f => f.LocalModifiedUtc ?? DateTime.MinValue)
+                    .ThenBy(f => f.Path, StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
                 _allFiles.Clear();
-                foreach (var it in items)
+                foreach (var it in sorted)
                 {
                     _allFiles.Add(it);
                 }
@@ -231,6 +236,10 @@ public partial class FileListViewModel : ViewModelBase
                 filtered = filtered.Where(f => f.Status.Equals(SelectedStatusFilter, StringComparison.OrdinalIgnoreCase));
             }
         }
+
+        filtered = filtered
+            .OrderByDescending(f => f.LocalModifiedUtc ?? DateTime.MinValue)
+            .ThenBy(f => f.Path, StringComparer.OrdinalIgnoreCase);
 
         Files = new ObservableCollection<FileItemViewModel>(filtered);
         SummaryText = $"{Files.Count} of {_allFiles.Count} files shown";

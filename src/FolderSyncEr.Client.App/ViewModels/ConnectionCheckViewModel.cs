@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FolderSyncEr.Client.Api;
@@ -21,7 +22,14 @@ public partial class ConnectionCheckViewModel : ViewModelBase
     private bool _isChecking;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ConnectionStatusBrush))]
     private bool _isConnected;
+
+    public IBrush ConnectionStatusBrush =>
+        IsConnected ? ConnectedBrush : DisconnectedBrush;
+
+    private static readonly IBrush ConnectedBrush = Brush.Parse("#10B981");
+    private static readonly IBrush DisconnectedBrush = Brush.Parse("#EF4444");
 
     [ObservableProperty]
     private string _statusText = "Not checked";

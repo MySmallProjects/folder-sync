@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Media;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FolderSyncEr.Client.Api;
@@ -26,6 +27,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     private readonly ClientSettingsManager _settingsManager;
     private readonly ILoggerFactory? _loggerFactory;
     private bool _isInitializing;
+    private Timer? _lastSyncTimer;
 
     public ConnectionCheckViewModel Connection { get; }
     public LoginViewModel Login { get; }
@@ -72,6 +74,51 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private string _syncStatusSummary = "Ready";
 
+    public IBrush ConnectionStatusBrush
+    {
+        get
+        {
+            if (Connection == null || !Connection.IsConnected)
+            {
+                return ServerNotFoundBrush;
+            }
+
+            if (Login == null || !Login.IsLoggedIn)
+            {
+                return ServerFoundNotLoggedInBrush;
+            }
+
+            return SignedInBrush;
+        }
+    }
+
+    public string ConnectionStatusToolTip
+    {
+        get
+        {
+            if (Connection == null || !Connection.IsConnected)
+            {
+                return "Server not found";
+            }
+
+            if (Login == null || !Login.IsLoggedIn)
+            {
+                return "Server online — Not signed in";
+            }
+
+            if (!string.IsNullOrWhiteSpace(Login.LoggedInUserText))
+            {
+                return $"Connected and signed in as {Login.LoggedInUserText}";
+            }
+
+            return "Connected and signed in";
+        }
+    }
+
+    private static readonly IBrush ServerNotFoundBrush = Brush.Parse("#EF4444"); // Red: server not found
+    private static readonly IBrush ServerFoundNotLoggedInBrush = Brush.Parse("#F59E0B"); // Amber: server found, not signed in
+    private static readonly IBrush SignedInBrush = Brush.Parse("#10B981"); // Green: signed in
+
     [ObservableProperty]
     private bool _showElevationWarning;
 
@@ -103,7 +150,15 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     private string _progressItem = string.Empty;
 
     [ObservableProperty]
+    private DateTime? _lastSuccessfulSyncUtc;
+
+    partial void OnLastSuccessfulSyncUtcChanged(DateTime? value) => UpdateLastSyncDisplay();
+
+    [ObservableProperty]
     private string _lastSyncText = "Never";
+
+    [ObservableProperty]
+    private string _lastSyncToolTip = "No successful sync yet";
 
     public bool IsReadyForSync => Connection.IsConnected && Login.IsLoggedIn && Folder.IsFolderSelected;
 
@@ -186,6 +241,12 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         };
         Connection.PropertyChanged += (_, e) =>
         {
+            if (e.PropertyName == nameof(Connection.IsConnected))
+            {
+                OnPropertyChanged(nameof(ConnectionStatusBrush));
+                OnPropertyChanged(nameof(ConnectionStatusToolTip));
+                UpdateLastSyncDisplay();
+            }
             OnPropertyChanged(nameof(IsReadyForSync));
             OnPropertyChanged(nameof(CurrentTrayIconState));
             if (!_isInitializing && e.PropertyName == nameof(Connection.IsConnected) && Connection.IsConnected && Coordinator == null)
@@ -228,6 +289,11 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         };
         Login.PropertyChanged += (_, e) =>
         {
+            if (e.PropertyName == nameof(Login.IsLoggedIn) || e.PropertyName == nameof(Login.LoggedInUserText))
+            {
+                OnPropertyChanged(nameof(ConnectionStatusBrush));
+                OnPropertyChanged(nameof(ConnectionStatusToolTip));
+            }
             OnPropertyChanged(nameof(IsReadyForSync));
             OnPropertyChanged(nameof(CurrentTrayIconState));
             if (e.PropertyName == nameof(Login.IsLoggedIn))
@@ -275,6 +341,9 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             OnPropertyChanged(nameof(IsReadyForSync));
             OnPropertyChanged(nameof(CurrentTrayIconState));
         };
+
+        UpdateLastSyncDisplay();
+        _lastSyncTimer = new Timer(_ => UpdateLastSyncDisplay(), null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
     }
 
     public bool IsStartupInitialized { get; private set; }
@@ -387,9 +456,9 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                         return;
 
                     IsSynchronizing = false;
-                    LastSyncText = DateTime.UtcNow.ToString("HH:mm:ss 'UTC'");
                     if (e.Result.Success)
                     {
+                        LastSuccessfulSyncUtc = DateTime.UtcNow;
                         Connection.IsConnected = true;
                         SyncStatusSummary = $"In Sync ({e.Result.ItemsProcessed} items, {e.Result.Duration.TotalSeconds:0.#}s)";
                     }
@@ -402,6 +471,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                         }
                         SyncStatusSummary = $"Sync error: {e.Result.ErrorMessage}";
                     }
+                    UpdateLastSyncDisplay();
 
                     OnPropertyChanged(nameof(CurrentTrayIconState));
 
@@ -502,8 +572,76 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         }
     }
 
+    public void UpdateLastSyncDisplay()
+    {
+        void DoUpdate()
+        {
+            if (LastSuccessfulSyncUtc == null)
+            {
+                LastSyncText = "Never";
+                LastSyncToolTip = "No successful sync yet";
+                return;
+            }
+
+            var dt = LastSuccessfulSyncUtc.Value;
+            var fullDateTimeStr = dt.ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
+
+            if (Connection?.IsConnected == true)
+            {
+                LastSyncText = dt.ToString("HH:mm:ss 'UTC'");
+                LastSyncToolTip = $"Last successful sync: {fullDateTimeStr}";
+            }
+            else
+            {
+                var timeAgo = FormatTimeAgo(DateTime.UtcNow - dt);
+                LastSyncText = timeAgo;
+                LastSyncToolTip = $"Last successful sync: {fullDateTimeStr} ({timeAgo})";
+            }
+        }
+
+        if (Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
+        {
+            DoUpdate();
+        }
+        else
+        {
+            Avalonia.Threading.Dispatcher.UIThread.Post(DoUpdate);
+        }
+    }
+
+    public static string FormatTimeAgo(TimeSpan diff)
+    {
+        if (diff < TimeSpan.Zero)
+            diff = TimeSpan.Zero;
+
+        if (diff.TotalMinutes < 1)
+        {
+            var sec = (int)diff.TotalSeconds;
+            return sec <= 1 ? "1s ago" : $"{sec}s ago";
+        }
+
+        if (diff.TotalHours < 1)
+        {
+            var mins = (int)diff.TotalMinutes;
+            return $"{mins}min ago";
+        }
+
+        if (diff.TotalDays >= 1)
+        {
+            var days = (int)diff.TotalDays;
+            var remHours = diff.Hours;
+            return remHours > 0 ? $"{days}d {remHours}hr ago" : $"{days}d ago";
+        }
+
+        var hours = (int)diff.TotalHours;
+        var remainingMins = diff.Minutes;
+        return remainingMins > 0 ? $"{hours}hr {remainingMins}min ago" : $"{hours}hr ago";
+    }
+
     public void Dispose()
     {
+        _lastSyncTimer?.Dispose();
+        _lastSyncTimer = null;
         Coordinator?.Dispose();
         Logs.Dispose();
     }

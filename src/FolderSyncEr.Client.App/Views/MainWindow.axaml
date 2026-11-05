@@ -18,14 +18,19 @@
                 <Grid ColumnDefinitions="Auto,*,Auto">
                     <!-- Title and Status -->
                     <StackPanel Grid.Column="0" Spacing="4">
-                        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <!-- Connection status indicator (Red = Server not found, Amber = Server online / not signed in, Green = Signed in) -->
+                            <Ellipse Width="10" Height="10"
+                                     Fill="{Binding ConnectionStatusBrush}"
+                                     VerticalAlignment="Center"
+                                     ToolTip.Tip="{Binding ConnectionStatusToolTip}"/>
                             <TextBlock Text="FolderSyncEr" FontSize="20" FontWeight="Bold" Foreground="#60A5FA"/>
                             <!-- Sync state badge -->
-                            <Border CornerRadius="12" Padding="8,2" Background="#374151">
+                            <Border CornerRadius="12" Padding="8,2" Background="#374151" Margin="2,0,0,0">
                                 <TextBlock Text="{Binding SyncStatusSummary}" FontSize="12" FontWeight="Medium" Foreground="#D1D5DB"/>
                             </Border>
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" Spacing="12">
+                        <StackPanel Orientation="Horizontal" Spacing="12" ToolTip.Tip="{Binding LastSyncToolTip}">
                             <TextBlock Text="Last Sync:" FontSize="11" Foreground="#9CA3AF"/>
                             <TextBlock Text="{Binding LastSyncText}" FontSize="11" FontWeight="SemiBold" Foreground="#E5E7EB"/>
                         </StackPanel>

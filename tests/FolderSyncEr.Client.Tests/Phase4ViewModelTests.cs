@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Media;
 using FolderSyncEr.Client.Api;
 using FolderSyncEr.Client.App.ViewModels;
 using FolderSyncEr.Client.Platform;
@@ -790,6 +791,126 @@ public class Phase4ViewModelTests
         {
             if (File.Exists(tempSettingsFile)) File.Delete(tempSettingsFile);
             if (Directory.Exists(tempSyncFolder)) Directory.Delete(tempSyncFolder, recursive: true);
+        }
+    }
+
+    [Fact]
+    public void MainWindowViewModel_ConnectionStatusIndicator_DistinguishesConnectionAndAuthenticationStates()
+    {
+        var api = new FakeFileSyncApi();
+        var secretStore = new TestSecretStore();
+        var tokenManager = new AuthTokenManager(secretStore, Microsoft.Extensions.Logging.Abstractions.NullLogger<AuthTokenManager>.Instance);
+        var connVm = new ConnectionCheckViewModel(api, secretStore);
+        var loginVm = new LoginViewModel(api, tokenManager);
+        var folderVm = new FolderSelectionViewModel(secretStore);
+
+        using var mainVm = new MainWindowViewModel(secretStore, api, connVm, loginVm, folderVm);
+
+        // 1. Initial State: Server not found (Disconnected) -> Red
+        Assert.False(connVm.IsConnected);
+        Assert.False(loginVm.IsLoggedIn);
+        Assert.Equal(Brush.Parse("#EF4444").ToString(), mainVm.ConnectionStatusBrush.ToString());
+        Assert.Contains("Server not found", mainVm.ConnectionStatusToolTip, StringComparison.OrdinalIgnoreCase);
+
+        // 2. Server Found, but not signed in -> Amber / Orange
+        connVm.IsConnected = true;
+        Assert.Equal(Brush.Parse("#F59E0B").ToString(), mainVm.ConnectionStatusBrush.ToString());
+        Assert.Contains("Not signed in", mainVm.ConnectionStatusToolTip, StringComparison.OrdinalIgnoreCase);
+
+        // 3. Signed In -> Green
+        loginVm.IsLoggedIn = true;
+        loginVm.LoggedInUserText = "admin (Admin)";
+        Assert.Equal(Brush.Parse("#10B981").ToString(), mainVm.ConnectionStatusBrush.ToString());
+        Assert.Contains("signed in", mainVm.ConnectionStatusToolTip, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("admin", mainVm.ConnectionStatusToolTip, StringComparison.OrdinalIgnoreCase);
+
+        // 4. User logs out while server still reachable -> returns to Amber
+        loginVm.IsLoggedIn = false;
+        Assert.Equal(Brush.Parse("#F59E0B").ToString(), mainVm.ConnectionStatusBrush.ToString());
+
+        // 5. Server drops -> transitions to Red
+        connVm.IsConnected = false;
+        Assert.Equal(Brush.Parse("#EF4444").ToString(), mainVm.ConnectionStatusBrush.ToString());
+    }
+
+    [Fact]
+    public void MainWindowViewModel_FormatTimeAgo_FormatsIntervalsAccurately()
+    {
+        Assert.Equal("30s ago", MainWindowViewModel.FormatTimeAgo(TimeSpan.FromSeconds(30)));
+        Assert.Equal("5min ago", MainWindowViewModel.FormatTimeAgo(TimeSpan.FromMinutes(5)));
+        Assert.Equal("1hr 25min ago", MainWindowViewModel.FormatTimeAgo(TimeSpan.FromMinutes(85)));
+        Assert.Equal("1hr ago", MainWindowViewModel.FormatTimeAgo(TimeSpan.FromHours(1)));
+        Assert.Equal("1d 3hr ago", MainWindowViewModel.FormatTimeAgo(TimeSpan.FromHours(27)));
+        Assert.Equal("2d ago", MainWindowViewModel.FormatTimeAgo(TimeSpan.FromDays(2)));
+    }
+
+    [Fact]
+    public void MainWindowViewModel_LastSyncDisplay_ShowsFullDateTimeAndRelativeWhenDisconnected()
+    {
+        var api = new FakeFileSyncApi();
+        var secretStore = new TestSecretStore();
+        var tokenManager = new AuthTokenManager(secretStore, Microsoft.Extensions.Logging.Abstractions.NullLogger<AuthTokenManager>.Instance);
+        var connVm = new ConnectionCheckViewModel(api, secretStore);
+        var loginVm = new LoginViewModel(api, tokenManager);
+        var folderVm = new FolderSelectionViewModel(secretStore);
+
+        using var mainVm = new MainWindowViewModel(secretStore, api, connVm, loginVm, folderVm);
+
+        // 1. Initial state: Never synced
+        Assert.Equal("Never", mainVm.LastSyncText);
+        Assert.Equal("No successful sync yet", mainVm.LastSyncToolTip);
+
+        // 2. Successful sync occurs while connected
+        connVm.IsConnected = true;
+        var syncTime = DateTime.UtcNow.AddMinutes(-5);
+        mainVm.LastSuccessfulSyncUtc = syncTime;
+
+        // Connected: LastSyncText is HH:mm:ss 'UTC', tooltip is full date/time
+        Assert.Equal(syncTime.ToString("HH:mm:ss 'UTC'"), mainVm.LastSyncText);
+        Assert.Contains(syncTime.ToString("yyyy-MM-dd HH:mm:ss 'UTC'"), mainVm.LastSyncToolTip);
+
+        // 3. Disconnects from server: LastSyncText shows relative time (e.g. 5min ago), tooltip includes full date & relative
+        connVm.IsConnected = false;
+        Assert.Equal("5min ago", mainVm.LastSyncText);
+        Assert.Contains("5min ago", mainVm.LastSyncToolTip);
+        Assert.Contains(syncTime.ToString("yyyy-MM-dd HH:mm:ss 'UTC'"), mainVm.LastSyncToolTip);
+    }
+
+    [Fact]
+    public async Task FileListViewModel_OrdersFilesByLocalDateDescending()
+    {
+        var tempDir = Path.Combine(Path.GetTempPath(), "FolderSyncEr_OrderTest_" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(tempDir);
+
+        try
+        {
+            var now = DateTime.UtcNow;
+            var oldFile = Path.Combine(tempDir, "old.txt");
+            var midFile = Path.Combine(tempDir, "mid.txt");
+            var newFile = Path.Combine(tempDir, "new.txt");
+
+            await File.WriteAllTextAsync(oldFile, "old");
+            File.SetLastWriteTimeUtc(oldFile, now.AddHours(-3));
+
+            await File.WriteAllTextAsync(midFile, "mid");
+            File.SetLastWriteTimeUtc(midFile, now.AddHours(-1));
+
+            await File.WriteAllTextAsync(newFile, "new");
+            File.SetLastWriteTimeUtc(newFile, now);
+
+            var api = new FakeFileSyncApi();
+            var vm = new FileListViewModel(api, () => tempDir);
+            await vm.RefreshAsync();
+
+            Assert.Equal(3, vm.Files.Count);
+            Assert.Equal("new.txt", vm.Files[0].Path);
+            Assert.Equal("mid.txt", vm.Files[1].Path);
+            Assert.Equal("old.txt", vm.Files[2].Path);
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir))
+                Directory.Delete(tempDir, recursive: true);
         }
     }
 
