@@ -42,7 +42,7 @@
                                      Foreground="#3B82F6" Background="#374151"/>
                     </StackPanel>
 
-                    <!-- Control Buttons & Secret Store Badge -->
+                    <!-- Control Buttons -->
                     <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                         <Button Content="Sync Now"
                                 Command="{Binding SyncNowCommand}"
@@ -54,14 +54,6 @@
                                 Command="{Binding TogglePauseResumeCommand}"
                                 Background="#374151" Foreground="#E5E7EB" FontWeight="Medium"
                                 Padding="12,7" CornerRadius="6"/>
-
-                        <!-- OS-native secret badge -->
-                        <Border CornerRadius="8" Padding="10,5" Background="#111827" BorderBrush="#374151" BorderThickness="1">
-                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                <Ellipse Width="7" Height="7" Fill="#10B981"/>
-                                <TextBlock Text="{Binding SecretStoreDescription}" FontSize="11" Foreground="#9CA3AF"/>
-                            </StackPanel>
-                        </Border>
                     </StackPanel>
                 </Grid>
             </Border>
@@ -507,6 +499,19 @@
                                                Foreground="#10B981"
                                                FontSize="11"
                                                IsVisible="{Binding HasOpenLogStatus}"/>
+
+                                    <TextBlock Text="Secure Credential &amp; Token Storage:"
+                                               FontSize="12" Foreground="#9CA3AF" Margin="0,6,0,0"/>
+
+                                    <Border CornerRadius="8" Padding="10,6" Background="#111827" BorderBrush="#374151" BorderThickness="1" HorizontalAlignment="Left">
+                                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                            <Ellipse Width="7" Height="7" Fill="#10B981"/>
+                                            <TextBlock Text="{Binding SecretStoreDescription}" FontSize="12" Foreground="#E5E7EB" FontWeight="Medium"/>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <TextBlock Text="Authentication tokens, device credentials, and server connection secrets are encrypted and stored using your operating system's native keyring service rather than in plaintext configuration files."
+                                               FontSize="11" Foreground="#9CA3AF" TextWrapping="Wrap"/>
                                 </StackPanel>
                             </Border>
 

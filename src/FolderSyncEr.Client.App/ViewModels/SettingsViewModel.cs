@@ -72,6 +72,9 @@ public partial class SettingsViewModel : ViewModelBase
     private string _currentLogFilePath = string.Empty;
 
     [ObservableProperty]
+    private string _secretStoreDescription = string.Empty;
+
+    [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasOpenLogStatus))]
     private string? _openLogStatus;
 
@@ -111,6 +114,7 @@ public partial class SettingsViewModel : ViewModelBase
         var configDir = Path.GetDirectoryName(_settingsManager.SettingsFilePath);
         var logsDir = !string.IsNullOrEmpty(configDir) ? Path.Combine(configDir, "Logs") : null;
         CurrentLogFilePath = ClientFileLoggerProvider.GetCurrentLogFilePath(logsDir);
+        SecretStoreDescription = _secretStore.Description;
 
         var appAssembly = typeof(SettingsViewModel).Assembly;
         AppVersion = BuildInfo.GetVersionString(appAssembly);
