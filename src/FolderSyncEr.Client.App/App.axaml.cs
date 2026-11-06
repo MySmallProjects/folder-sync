@@ -61,13 +61,65 @@ public partial class App : Application
             // Track explicit shutdown to prevent recursive Closing -> Shutdown -> Close -> Closing loop
             var isShuttingDown = false;
 
+            void PerformCleanShutdown()
+            {
+                if (isShuttingDown) return;
+                isShuttingDown = true;
+
+                try
+                {
+                    if (TrayIcon.GetIcons(this) is { } icons)
+                    {
+                        foreach (var icon in icons)
+                        {
+                            icon.IsVisible = false;
+                        }
+                    }
+                }
+                catch { }
+
+                try
+                {
+                    mainWindow.Hide();
+                }
+                catch { }
+
+                // Run disposal and exit in a background task off the UI thread
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        mainVm.Dispose();
+                    }
+                    catch { }
+
+                    try
+                    {
+                        desktop.Shutdown(0);
+                    }
+                    catch { }
+
+                    Environment.Exit(0);
+                });
+
+                // Guarantee process termination within 1 second under any circumstance
+                new System.Threading.Thread(() =>
+                {
+                    System.Threading.Thread.Sleep(1000);
+                    Environment.Exit(0);
+                })
+                {
+                    IsBackground = true
+                }.Start();
+            }
+
             desktop.ShutdownRequested += (_, _) =>
             {
-                isShuttingDown = true;
+                PerformCleanShutdown();
             };
 
             // Setup System Tray icon
-            SetupSystemTray(desktop, mainWindow, mainVm, defaultIcon, offlineIcon, syncedIcon, () => isShuttingDown = true);
+            SetupSystemTray(desktop, mainWindow, mainVm, defaultIcon, offlineIcon, syncedIcon, PerformCleanShutdown);
 
             // Handle close behavior (close-to-tray or quit)
             mainWindow.Closing += (s, e) =>
@@ -84,9 +136,7 @@ public partial class App : Application
                 }
                 else
                 {
-                    isShuttingDown = true;
-                    mainVm.Dispose();
-                    desktop.Shutdown();
+                    PerformCleanShutdown();
                 }
             };
         }
@@ -190,9 +240,12 @@ public partial class App : Application
             var quitItem = new NativeMenuItem("Quit");
             quitItem.Click += (_, _) =>
             {
+                try
+                {
+                    trayIcon.IsVisible = false;
+                }
+                catch { }
                 onQuit();
-                mainVm.Dispose();
-                desktop.Shutdown();
             };
 
             menu.Items.Add(openItem);

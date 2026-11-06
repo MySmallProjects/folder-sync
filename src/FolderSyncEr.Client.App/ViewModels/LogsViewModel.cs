@@ -16,6 +16,7 @@ public partial class LogsViewModel : ViewModelBase, IDisposable
     private readonly IFileSyncApi _api;
     private readonly Func<bool>? _canPoll;
     private Timer? _autoRefreshTimer;
+    private bool _isDisposed;
 
     [ObservableProperty]
     private ObservableCollection<ActivityLogDto> _logs = new();
@@ -69,6 +70,7 @@ public partial class LogsViewModel : ViewModelBase, IDisposable
         // Start auto-refresh timer (every 4 seconds)
         _autoRefreshTimer = new Timer(async _ =>
         {
+            if (_isDisposed) return;
             try
             {
                 if (AutoRefreshEnabled && !IsLoading && (_canPoll == null || _canPoll()))
@@ -99,6 +101,7 @@ public partial class LogsViewModel : ViewModelBase, IDisposable
 
     private async Task LoadLogsAsync(bool silent = false)
     {
+        if (_isDisposed) return;
         if (!silent) IsLoading = true;
 
         try
@@ -143,7 +146,14 @@ public partial class LogsViewModel : ViewModelBase, IDisposable
 
     public void Dispose()
     {
-        _autoRefreshTimer?.Dispose();
+        if (_isDisposed) return;
+        _isDisposed = true;
+        try
+        {
+            _autoRefreshTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+            _autoRefreshTimer?.Dispose();
+        }
+        catch { }
         _autoRefreshTimer = null;
     }
 }

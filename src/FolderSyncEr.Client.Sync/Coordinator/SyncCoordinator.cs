@@ -488,8 +488,12 @@ public sealed class SyncCoordinator : IDisposable
                 if (!IsPaused && !IsSynchronizing)
                 {
                     _logger.LogInformation("Periodic background sync timer fired.");
-                    await RunSyncAsync();
+                    await RunSyncAsync(_disposeCts.Token);
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                // Canceled during shutdown
             }
             catch (ObjectDisposedException)
             {
@@ -497,7 +501,10 @@ public sealed class SyncCoordinator : IDisposable
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in periodic background sync timer.");
+                if (!_isDisposed)
+                {
+                    _logger.LogError(ex, "Error in periodic background sync timer.");
+                }
             }
         }, null, interval, interval);
 
@@ -509,16 +516,30 @@ public sealed class SyncCoordinator : IDisposable
     {
         if (_watcher != null)
         {
-            _watcher.EnableRaisingEvents = false;
-            _watcher.Dispose();
+            try
+            {
+                _watcher.EnableRaisingEvents = false;
+                _watcher.Dispose();
+            }
+            catch { }
             _watcher = null;
         }
 
-        _debounceTimer?.Dispose();
+        try
+        {
+            _debounceTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+            _debounceTimer?.Dispose();
+        }
+        catch { }
         _debounceTimer = null;
         _firstChangeTimeUtc = null;
 
-        _periodicTimer?.Dispose();
+        try
+        {
+            _periodicTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+            _periodicTimer?.Dispose();
+        }
+        catch { }
         _periodicTimer = null;
 
         _logger.LogInformation("Background sync stopped.");
@@ -594,15 +615,21 @@ public sealed class SyncCoordinator : IDisposable
                             _firstChangeTimeUtc = null;
                         }
 
+                        if (_isDisposed) return;
+
                         if (!IsPaused && !IsSynchronizing)
                         {
                             _logger.LogInformation("Cooldown elapsed for local changes; starting sync.");
-                            await RunSyncAsync();
+                            await RunSyncAsync(_disposeCts.Token);
                         }
-                        else
+                        else if (!_isDisposed)
                         {
                             _pendingSyncRequested = true;
                         }
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // Canceled during shutdown
                     }
                     catch (ObjectDisposedException)
                     {
@@ -610,7 +637,10 @@ public sealed class SyncCoordinator : IDisposable
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex, "Error in file watcher cooldown sync.");
+                        if (!_isDisposed)
+                        {
+                            _logger.LogError(ex, "Error in file watcher cooldown sync.");
+                        }
                     }
                 }, null, delayMs, Timeout.Infinite);
             }
@@ -656,19 +686,25 @@ public sealed class SyncCoordinator : IDisposable
 
         StopBackgroundSync();
 
-        if (_syncLock.Wait(0))
+        // Allow any in-flight canceled sync up to 200ms to exit gracefully before disposing DB and engine
+        try
         {
-            try
-            {
-                _guardedDb?.Dispose();
-                _engine?.Dispose();
-            }
-            finally
-            {
-                _syncLock.Release();
-                _syncLock.Dispose();
-                _disposeCts.Dispose();
-            }
+            _syncLock.Wait(200);
         }
+        catch { }
+
+        try
+        {
+            _guardedDb?.Dispose();
+            _engine?.Dispose();
+        }
+        catch { }
+
+        try
+        {
+            _syncLock.Dispose();
+            _disposeCts.Dispose();
+        }
+        catch { }
     }
 }

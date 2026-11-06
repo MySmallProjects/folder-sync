@@ -746,8 +746,12 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
 
     public void UpdateStatusAndCountdownDisplay()
     {
+        if (_isDisposed) return;
+
         void DoUpdate()
         {
+            if (_isDisposed) return;
+
             if (LastSuccessfulSyncUtc == null)
             {
                 LastSyncText = "Never";
@@ -914,11 +918,16 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     {
         if (_isDisposed) return;
         _isDisposed = true;
-        _statusTickerTimer?.Dispose();
+        try
+        {
+            _statusTickerTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+            _statusTickerTimer?.Dispose();
+        }
+        catch { }
         _statusTickerTimer = null;
-        NetworkConnectivity.Dispose();
-        Coordinator?.Dispose();
-        Logs.Dispose();
-        ActivityService.Dispose();
+        try { NetworkConnectivity.Dispose(); } catch { }
+        try { Coordinator?.Dispose(); } catch { }
+        try { Logs.Dispose(); } catch { }
+        try { ActivityService.Dispose(); } catch { }
     }
 }

@@ -143,9 +143,15 @@ public class ClientActivityService : IClientActivityService
         lock (_lock)
         {
             if (_isDisposed) return;
-            _debounceSaveTimer?.Dispose();
+            try
+            {
+                _debounceSaveTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+                _debounceSaveTimer?.Dispose();
+            }
+            catch { }
             _debounceSaveTimer = new Timer(_ =>
             {
+                if (_isDisposed) return;
                 _ = SaveAsync();
             }, null, TimeSpan.FromMilliseconds(500), Timeout.InfiniteTimeSpan);
         }
@@ -169,7 +175,35 @@ public class ClientActivityService : IClientActivityService
 
             var tempPath = _filePath + $".{Guid.NewGuid():N}.tmp";
             var json = JsonSerializer.Serialize(snapshot, _jsonOptions);
-            await File.WriteAllTextAsync(tempPath, json);
+            await File.WriteAllTextAsync(tempPath, json).ConfigureAwait(false);
+
+            File.Move(tempPath, _filePath, overwrite: true);
+        }
+        catch
+        {
+            // Suppress save failures on disk edge cases
+        }
+    }
+
+    public void SaveSync()
+    {
+        List<ActivityRecord> snapshot;
+        lock (_lock)
+        {
+            snapshot = _activities.ToList();
+        }
+
+        try
+        {
+            var dir = Path.GetDirectoryName(_filePath);
+            if (!string.IsNullOrEmpty(dir) && !Directory.Exists(dir))
+            {
+                Directory.CreateDirectory(dir);
+            }
+
+            var tempPath = _filePath + $".{Guid.NewGuid():N}.tmp";
+            var json = JsonSerializer.Serialize(snapshot, _jsonOptions);
+            File.WriteAllText(tempPath, json);
 
             File.Move(tempPath, _filePath, overwrite: true);
         }
@@ -217,12 +251,17 @@ public class ClientActivityService : IClientActivityService
     {
         if (_isDisposed) return;
         _isDisposed = true;
-        _debounceSaveTimer?.Dispose();
+        try
+        {
+            _debounceSaveTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+            _debounceSaveTimer?.Dispose();
+        }
+        catch { }
         _debounceSaveTimer = null;
         try
         {
-            // Final synchronous save
-            SaveAsync().GetAwaiter().GetResult();
+            // Final synchronous save without async deadlock risk
+            SaveSync();
         }
         catch
         {

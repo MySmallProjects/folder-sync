@@ -87,7 +87,13 @@
             <!-- Bottom Navigation Tabs -->
             <TabControl SelectedIndex="{Binding SelectedTabIndex}" Margin="16">
                 <!-- TAB 1: FILES LIST -->
-                <TabItem Header="📁 Files" IsVisible="{Binding Settings.ShowFilesTab}">
+                <TabItem IsVisible="{Binding Settings.ShowFilesTab}">
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="📁" FontSize="14" VerticalAlignment="Center"/>
+                            <TextBlock Text="Files" FontSize="13" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
                     <Grid RowDefinitions="Auto,*" Margin="0,12,0,0" DataContext="{Binding FileList}">
                         <!-- File list toolbar -->
                         <Border Grid.Row="0" Background="#1F2937" CornerRadius="8" Padding="12" Margin="0,0,0,12" BorderBrush="#374151" BorderThickness="1">
@@ -156,7 +162,13 @@
                 </TabItem>
 
                 <!-- TAB 2: DELETED FILES (TRASH) -->
-                <TabItem Header="🗑️ Deleted" IsVisible="{Binding Settings.ShowDeletedTab}">
+                <TabItem IsVisible="{Binding Settings.ShowDeletedTab}">
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="🗑️" FontSize="14" VerticalAlignment="Center"/>
+                            <TextBlock Text="Deleted" FontSize="13" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
                     <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="0,12,0,0" DataContext="{Binding DeletedFiles}">
                         <!-- Deleted files toolbar -->
                         <Border Grid.Row="0" Background="#1F2937" CornerRadius="8" Padding="12" Margin="0,0,0,10" BorderBrush="#374151" BorderThickness="1">
@@ -268,7 +280,13 @@
                 </TabItem>
 
                 <!-- TAB 3: ACTIVITIES -->
-                <TabItem Header="⚡ Activities">
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="⚡" FontSize="14" VerticalAlignment="Center"/>
+                            <TextBlock Text="Activities" FontSize="13" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
                     <Grid RowDefinitions="Auto,*" Margin="0,12,0,0" DataContext="{Binding Activities}">
                         <!-- Activities Toolbar -->
                         <Border Grid.Row="0" Background="#1F2937" CornerRadius="8" Padding="12" Margin="0,0,0,12" BorderBrush="#374151" BorderThickness="1">
@@ -328,7 +346,13 @@
                 </TabItem>
 
                 <!-- TAB 4: SERVER ACTIVITY LOGS -->
-                <TabItem Header="📜 Server Logs" IsVisible="{Binding Settings.ShowServerLogsTab}">
+                <TabItem IsVisible="{Binding Settings.ShowServerLogsTab}">
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="📜" FontSize="14" VerticalAlignment="Center"/>
+                            <TextBlock Text="Server Logs" FontSize="13" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
                     <Grid RowDefinitions="Auto,*" Margin="0,12,0,0" DataContext="{Binding Logs}">
                         <!-- Logs Toolbar -->
                         <Border Grid.Row="0" Background="#1F2937" CornerRadius="8" Padding="12" Margin="0,0,0,12" BorderBrush="#374151" BorderThickness="1">
@@ -394,7 +418,13 @@
                 </TabItem>
 
                 <!-- TAB 5: SETTINGS -->
-                <TabItem Header="⚙️ Settings">
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="⚙️" FontSize="14" VerticalAlignment="Center"/>
+                            <TextBlock Text="Settings" FontSize="13" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="0,12,0,0" Spacing="16" DataContext="{Binding Settings}">
                             <!-- Sync Folder Settings Card -->
@@ -629,7 +659,13 @@
                 </TabItem>
 
                 <!-- TAB 6: ACCOUNTS -->
-                <TabItem Header="🔐 Accounts">
+                <TabItem>
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="🔐" FontSize="14" VerticalAlignment="Center"/>
+                            <TextBlock Text="Accounts" FontSize="13" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="0,12,0,0" Spacing="16">
                             <!-- Connection Status -->
