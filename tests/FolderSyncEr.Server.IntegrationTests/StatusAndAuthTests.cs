@@ -88,5 +88,29 @@ public class StatusAndAuthTests : IClassFixture<TestServerFixture>
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
+
+    [Fact]
+    public async Task RevokingDevice_ImmediatelyInvalidatesActiveAccessToken_AndRefreshToken()
+    {
+        var deviceId = $"dev-revoke-{Guid.NewGuid():N}";
+        var (client, login) = await _fixture.CreateAuthenticatedClientAsync(deviceId: deviceId);
+
+        // 1. Authenticated request succeeds initially with the active token
+        var initialRes = await client.GetAsync(ApiRoutes.Files);
+        Assert.Equal(HttpStatusCode.OK, initialRes.StatusCode);
+
+        // 2. Revoke the device (Sign out device)
+        var revokeRes = await client.DeleteAsync($"/api/devices/{deviceId}");
+        Assert.Equal(HttpStatusCode.NoContent, revokeRes.StatusCode);
+
+        // 3. Immediately next request with the existing access token must return 401 Unauthorized
+        var afterRevokeRes = await client.GetAsync(ApiRoutes.Files);
+        Assert.Equal(HttpStatusCode.Unauthorized, afterRevokeRes.StatusCode);
+
+        // 4. Attempting to refresh tokens for the revoked device must also be rejected
+        var refreshReq = new RefreshRequest(login.RefreshToken, deviceId);
+        var refreshRes = await client.PostAsJsonAsync(ApiRoutes.Refresh, refreshReq);
+        Assert.Equal(HttpStatusCode.Unauthorized, refreshRes.StatusCode);
+    }
 }
 

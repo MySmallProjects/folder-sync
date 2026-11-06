@@ -85,6 +85,18 @@ builder.Services.AddAuthentication(options =>
             if (!activeUser)
             {
                 context.Fail("User account is disabled or deleted.");
+                return;
+            }
+
+            var deviceId = context.Principal?.FindFirst("did")?.Value;
+            if (!string.IsNullOrEmpty(deviceId))
+            {
+                var isRevoked = await db.Devices.AsNoTracking()
+                    .AnyAsync(d => d.Id == deviceId && d.UserId == userId && d.IsRevoked, context.HttpContext.RequestAborted);
+                if (isRevoked)
+                {
+                    context.Fail("Device session has been revoked.");
+                }
             }
         }
     };

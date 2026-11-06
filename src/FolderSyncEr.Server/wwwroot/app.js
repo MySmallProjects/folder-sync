@@ -15,7 +15,7 @@ let allUsers = [];
 let selectedNodePath = null;
 let selectedNodeIsDir = false;
 let activePasswordEditUserId = null;
-const collapsedPaths = new Set();
+const expandedPaths = new Set();
 
 // DOM Elements
 const statusBadge = document.getElementById('server-status-badge');
@@ -248,6 +248,7 @@ logoutBtn.addEventListener('click', async () => {
         saveSession(null);
         allFiles = [];
         allUsers = [];
+        expandedPaths.clear();
         selectedNodePath = null;
         selectedNodeIsDir = false;
         activePasswordEditUserId = null;
@@ -863,7 +864,7 @@ function createNodeDom(node, depth) {
     }
     row.style.paddingLeft = `${12 + depth * 20}px`;
 
-    const isCollapsed = collapsedPaths.has(node.path);
+    const isCollapsed = searchInput.value.trim() ? false : !expandedPaths.has(node.path);
 
     const toggle = document.createElement('span');
     toggle.className = 'tree-toggle';
@@ -924,10 +925,10 @@ function createNodeDom(node, depth) {
         selectedNodeIsDir = Boolean(node.isDirectory);
 
         if (node.isDirectory && node.children.size > 0) {
-            if (collapsedPaths.has(node.path)) {
-                collapsedPaths.delete(node.path);
+            if (expandedPaths.has(node.path)) {
+                expandedPaths.delete(node.path);
             } else {
-                collapsedPaths.add(node.path);
+                expandedPaths.add(node.path);
             }
         }
 
@@ -1264,21 +1265,21 @@ refreshBtn.addEventListener('click', () => {
 });
 
 expandAllBtn.addEventListener('click', () => {
-    collapsedPaths.clear();
-    renderTree();
-});
-
-collapseAllBtn.addEventListener('click', () => {
     for (const f of allFiles) {
         const parts = f.path.split('/').filter(Boolean);
         let p = '';
         for (let i = 0; i < parts.length; i++) {
             p = p ? `${p}/${parts[i]}` : parts[i];
             if (i < parts.length - 1 || f.isDirectory) {
-                collapsedPaths.add(p);
+                expandedPaths.add(p);
             }
         }
     }
+    renderTree();
+});
+
+collapseAllBtn.addEventListener('click', () => {
+    expandedPaths.clear();
     renderTree();
 });
 
