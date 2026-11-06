@@ -203,6 +203,24 @@ public class BackoffAndConnectivityTests
         Assert.False(backoff.IsInBackoff);
     }
 
+    [Fact]
+    public async Task ServerUnreachable_SetsInternalFlag_DistinctFromNetworkOffline()
+    {
+        var testApi = new TestApi { IsReachable = false };
+        var connectionVm = new ConnectionCheckViewModel(testApi);
+
+        // Check connection when server is unreachable
+        await connectionVm.CheckConnectionAsync();
+        Assert.False(connectionVm.IsConnected);
+        Assert.True(connectionVm.IsServerUnreachable);
+
+        // Now server comes back online
+        testApi.IsReachable = true;
+        await connectionVm.CheckConnectionAsync();
+        Assert.True(connectionVm.IsConnected);
+        Assert.False(connectionVm.IsServerUnreachable);
+    }
+
     private class InMemorySecretStore : ISecretStore
     {
         public SecretStoreType StoreType => SecretStoreType.EncryptedFileFallback;

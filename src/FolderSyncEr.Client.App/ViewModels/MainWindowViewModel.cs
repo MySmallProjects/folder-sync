@@ -63,7 +63,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     {
         if (value == DeletedFilesTabIndex && Login.IsLoggedIn)
         {
-            _ = DeletedFiles.RefreshCommand.ExecuteAsync(null);
+            _ = DeletedFiles.RefreshAsync();
         }
         else if (value == ActivitiesTabIndex)
         {
@@ -71,13 +71,18 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         }
         else if (value == LogsTabIndex && Login.IsLoggedIn && Connection.IsConnected)
         {
-            _ = Logs.RefreshCommand.ExecuteAsync(null);
+            _ = Logs.RefreshAsync();
         }
         else if (value == AccountTabIndex && Login.IsLoggedIn)
         {
-            _ = Login.RefreshDevicesCommand.ExecuteAsync(null);
+            _ = Login.RefreshDevicesAsync();
         }
     }
+
+    [ObservableProperty]
+    private bool _isServerUnreachable;
+
+    public event EventHandler<bool>? ServerReachabilityChanged;
 
     [ObservableProperty]
     private string _secretStoreDescription;
@@ -112,6 +117,14 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         {
             if (Connection == null || !Connection.IsConnected)
             {
+                if (!NetworkConnectivity.IsNetworkAvailable)
+                {
+                    return "Server not found (Network offline)";
+                }
+                if (IsServerUnreachable)
+                {
+                    return "Server not found (Server unreachable)";
+                }
                 return "Server not found";
             }
 
@@ -284,26 +297,45 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                 OnPropertyChanged(nameof(ConnectionStatusToolTip));
                 if (Connection.IsConnected)
                 {
+                    IsServerUnreachable = false;
                     BackoffPolicy.Reset();
                     ShowRetryIndicator = false;
                     if (_lastReportedConnected == false)
                     {
                         ActivityService.LogActivity("Connection re-established", "Connection");
+                        ServerReachabilityChanged?.Invoke(this, true);
                     }
                 }
                 else
                 {
+                    if (NetworkConnectivity.IsNetworkAvailable)
+                    {
+                        IsServerUnreachable = true;
+                    }
                     if (!BackoffPolicy.IsInBackoff)
                     {
                         BackoffPolicy.RecordFailure();
                     }
                     if (_lastReportedConnected == true)
                     {
-                        ActivityService.LogActivity("Connection lost", "Connection");
+                        if (NetworkConnectivity.IsNetworkAvailable)
+                        {
+                            ActivityService.LogActivity("Server unreachable", "Connection");
+                            ServerReachabilityChanged?.Invoke(this, false);
+                        }
+                        else
+                        {
+                            ActivityService.LogActivity("Connection lost", "Connection");
+                        }
                     }
                 }
                 _lastReportedConnected = Connection.IsConnected;
                 UpdateStatusAndCountdownDisplay();
+            }
+            else if (e.PropertyName == nameof(Connection.IsServerUnreachable))
+            {
+                IsServerUnreachable = Connection.IsServerUnreachable;
+                OnPropertyChanged(nameof(ConnectionStatusToolTip));
             }
             OnPropertyChanged(nameof(IsReadyForSync));
             OnPropertyChanged(nameof(CurrentTrayIconState));
@@ -364,7 +396,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                     {
                         if (!Connection.IsConnected)
                         {
-                            _ = Connection.CheckConnectionCommand.ExecuteAsync(null);
+                            _ = Connection.CheckConnectionAsync();
                         }
                         if (Folder.IsFolderSelected)
                         {
@@ -414,13 +446,14 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             else
             {
                 ActivityService.LogActivity("Network offline", "Network");
+                IsServerUnreachable = false;
             }
             UpdateStatusAndCountdownDisplay();
         };
 
         NetworkConnectivity.AddressOrRouteChanged += (_, _) =>
         {
-            if (NetworkConnectivity.IsNetworkAvailable && !Connection.IsConnected)
+            if (NetworkConnectivity.IsNetworkAvailable)
             {
                 _ = TriggerReconnectAsync();
             }
@@ -463,7 +496,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             }
 
             await Connection.InitializeAsync();
-            await Connection.CheckConnectionCommand.ExecuteAsync(null);
+            await Connection.CheckConnectionAsync();
             await Login.InitializeSessionAsync(fetchDevicesFromServer: Connection.IsConnected);
             if (!string.IsNullOrWhiteSpace(_api.ServerUrl))
             {
@@ -487,7 +520,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         if (Login.IsLoggedIn && Folder.IsFolderSelected)
         {
             RebuildCoordinator();
-            await FileList.RefreshCommand.ExecuteAsync(null);
+            await FileList.RefreshAsync();
             SelectedTabIndex = 0; // Synced Files
         }
         else
@@ -547,6 +580,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                     {
                         LastSuccessfulSyncUtc = DateTime.UtcNow;
                         Connection.IsConnected = true;
+                        IsServerUnreachable = false;
                         BackoffPolicy.Reset();
                         ShowRetryIndicator = false;
                         SyncStatusSummary = $"In Sync ({e.Result.ItemsProcessed} items, {e.Result.Duration.TotalSeconds:0.#}s)";
@@ -557,6 +591,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                             e.Result.ErrorMessage.StartsWith("Server unreachable", StringComparison.OrdinalIgnoreCase))
                         {
                             Connection.IsConnected = false;
+                            IsServerUnreachable = true;
                         }
                         SyncStatusSummary = $"Sync error: {e.Result.ErrorMessage}";
                     }
@@ -565,12 +600,12 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                     OnPropertyChanged(nameof(CurrentTrayIconState));
 
                     // Refresh file list safely on the UI thread
-                    _ = FileList.RefreshCommand.ExecuteAsync(null);
+                    _ = FileList.RefreshAsync();
 
                     // Local deletions that were just pushed should show up in the Deleted Files tab
                     if (SelectedTabIndex == DeletedFilesTabIndex)
                     {
-                        _ = DeletedFiles.RefreshCommand.ExecuteAsync(null);
+                        _ = DeletedFiles.RefreshAsync();
                     }
                 }
 
@@ -615,7 +650,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
 
         if (!Connection.IsConnected)
         {
-            await Connection.CheckConnectionCommand.ExecuteAsync(null);
+            await Connection.CheckConnectionAsync();
         }
 
         IsSynchronizing = true;
@@ -648,7 +683,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             IsSynchronizing = false;
             if (Login.IsLoggedIn)
             {
-                await FileList.RefreshCommand.ExecuteAsync(null);
+                await FileList.RefreshAsync();
             }
         }
     }
@@ -753,6 +788,14 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         }
     }
 
+    private static void RunOnUi(Action action)
+    {
+        if (Avalonia.Application.Current == null || Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
+            action();
+        else
+            Avalonia.Threading.Dispatcher.UIThread.Post(action);
+    }
+
     public async Task TriggerReconnectAsync()
     {
         if (_isReconnecting || _isDisposed) return;
@@ -762,11 +805,12 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             if (!NetworkConnectivity.IsNetworkAvailable)
                 return;
 
-            await Connection.CheckConnectionCommand.ExecuteAsync(null);
+            await Connection.CheckConnectionAsync();
             if (Connection.IsConnected)
             {
+                IsServerUnreachable = false;
                 BackoffPolicy.Reset();
-                ShowRetryIndicator = false;
+                RunOnUi(() => ShowRetryIndicator = false);
                 if (Login.IsLoggedIn && Folder.IsFolderSelected)
                 {
                     if (Coordinator == null)
@@ -781,11 +825,20 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             }
             else
             {
+                if (NetworkConnectivity.IsNetworkAvailable)
+                {
+                    IsServerUnreachable = true;
+                }
                 BackoffPolicy.RecordFailure();
             }
         }
-        catch
+        catch (Exception ex)
         {
+            _loggerFactory?.CreateLogger<MainWindowViewModel>()?.LogWarning(ex, "Failed during reconnect attempt.");
+            if (NetworkConnectivity.IsNetworkAvailable)
+            {
+                IsServerUnreachable = true;
+            }
             BackoffPolicy.RecordFailure();
         }
         finally

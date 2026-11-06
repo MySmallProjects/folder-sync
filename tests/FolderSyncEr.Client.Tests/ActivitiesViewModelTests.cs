@@ -208,5 +208,19 @@ public class ActivitiesViewModelTests
         Assert.Equal(2, segments.Count);
         Assert.Equal("re-established", segments[1].Text);
         Assert.Equal(ActivityItemViewModel.SuccessBrush, segments[1].Brush);
+
+        // 6. Server unreachable / Server online
+        segments = ActivityItemViewModel.ParseSegments("Server unreachable");
+        Assert.Equal(2, segments.Count);
+        Assert.Equal("Server ", segments[0].Text);
+        Assert.Equal(ActivityItemViewModel.DefaultBrush, segments[0].Brush);
+        Assert.Equal("unreachable", segments[1].Text);
+        Assert.Equal(ActivityItemViewModel.FailureBrush, segments[1].Brush);
+
+        segments = ActivityItemViewModel.ParseSegments("Server online");
+        Assert.Equal(2, segments.Count);
+        Assert.Equal("Server ", segments[0].Text);
+        Assert.Equal("online", segments[1].Text);
+        Assert.Equal(ActivityItemViewModel.SuccessBrush, segments[1].Brush);
     }
 }

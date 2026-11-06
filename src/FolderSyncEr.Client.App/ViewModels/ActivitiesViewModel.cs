@@ -109,6 +109,22 @@ public partial class ActivityItemViewModel : ViewModelBase
             return list;
         }
 
+        // 4b. "Server unreachable"
+        if (text.Equals("Server unreachable", StringComparison.OrdinalIgnoreCase))
+        {
+            list.Add(new ActivitySegment("Server ", DefaultBrush));
+            list.Add(new ActivitySegment("unreachable", FailureBrush, FontWeight.SemiBold));
+            return list;
+        }
+
+        // 4c. "Server online"
+        if (text.Equals("Server online", StringComparison.OrdinalIgnoreCase))
+        {
+            list.Add(new ActivitySegment("Server ", DefaultBrush));
+            list.Add(new ActivitySegment("online", SuccessBrush, FontWeight.SemiBold));
+            return list;
+        }
+
         // 5. "Network offline"
         if (text.Equals("Network offline", StringComparison.OrdinalIgnoreCase))
         {

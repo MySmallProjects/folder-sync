@@ -178,13 +178,13 @@ public partial class App : Application
             var syncNowItem = new NativeMenuItem("Sync Now");
             syncNowItem.Click += async (_, _) =>
             {
-                await mainVm.SyncNowCommand.ExecuteAsync(null);
+                await mainVm.SyncNowAsync();
             };
 
             var pauseResumeItem = new NativeMenuItem("Pause / Resume");
             pauseResumeItem.Click += async (_, _) =>
             {
-                await mainVm.TogglePauseResumeCommand.ExecuteAsync(null);
+                await mainVm.TogglePauseResumeAsync();
             };
 
             var quitItem = new NativeMenuItem("Quit");
