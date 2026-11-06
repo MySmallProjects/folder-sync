@@ -185,6 +185,14 @@ public partial class LoginViewModel : ViewModelBase
         }
     }
 
+    private static void RunOnUi(Action action)
+    {
+        if (Avalonia.Application.Current == null || Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
+            action();
+        else
+            Avalonia.Threading.Dispatcher.UIThread.Post(action);
+    }
+
     [RelayCommand]
     public async Task RefreshDevicesAsync()
     {
@@ -193,30 +201,33 @@ public partial class LoginViewModel : ViewModelBase
             return;
         }
 
-        IsLoadingDevices = true;
+        RunOnUi(() => IsLoadingDevices = true);
         try
         {
             var devices = await _api.GetDevicesAsync();
             var currentId = DeviceId;
 
-            // Update DeviceName from the server record for the current device if available
-            var currentRecord = devices.FirstOrDefault(d => string.Equals(d.Id, currentId, StringComparison.OrdinalIgnoreCase));
-            if (currentRecord != null && !string.IsNullOrWhiteSpace(currentRecord.Name))
+            RunOnUi(() =>
             {
-                DeviceName = currentRecord.Name;
-            }
+                // Update DeviceName from the server record for the current device if available
+                var currentRecord = devices.FirstOrDefault(d => string.Equals(d.Id, currentId, StringComparison.OrdinalIgnoreCase));
+                if (currentRecord != null && !string.IsNullOrWhiteSpace(currentRecord.Name))
+                {
+                    DeviceName = currentRecord.Name;
+                }
 
-            LoggedInDevices.Clear();
-            foreach (var d in devices
-                .OrderByDescending(x => string.Equals(x.Id, currentId, StringComparison.OrdinalIgnoreCase))
-                .ThenByDescending(x => x.LastSeenUtc))
-            {
-                var isCurrent = string.Equals(d.Id, currentId, StringComparison.OrdinalIgnoreCase);
-                LoggedInDevices.Add(new LoggedInDeviceItemViewModel(d, isCurrent, RevokeDeviceAsync));
-            }
+                LoggedInDevices.Clear();
+                foreach (var d in devices
+                    .OrderByDescending(x => string.Equals(x.Id, currentId, StringComparison.OrdinalIgnoreCase))
+                    .ThenByDescending(x => x.LastSeenUtc))
+                {
+                    var isCurrent = string.Equals(d.Id, currentId, StringComparison.OrdinalIgnoreCase);
+                    LoggedInDevices.Add(new LoggedInDeviceItemViewModel(d, isCurrent, RevokeDeviceAsync));
+                }
 
-            OnPropertyChanged(nameof(DeviceId));
-            OnPropertyChanged(nameof(CurrentDeviceDisplay));
+                OnPropertyChanged(nameof(DeviceId));
+                OnPropertyChanged(nameof(CurrentDeviceDisplay));
+            });
         }
         catch
         {
@@ -224,7 +235,7 @@ public partial class LoginViewModel : ViewModelBase
         }
         finally
         {
-            IsLoadingDevices = false;
+            RunOnUi(() => IsLoadingDevices = false);
         }
     }
 
@@ -235,12 +246,12 @@ public partial class LoginViewModel : ViewModelBase
             var ok = await _api.RevokeDeviceAsync(item.Id);
             if (ok)
             {
-                LoggedInDevices.Remove(item);
+                RunOnUi(() => LoggedInDevices.Remove(item));
             }
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Could not revoke device '{item.Name}': {ex.Message}";
+            RunOnUi(() => ErrorMessage = $"Could not revoke device '{item.Name}': {ex.Message}");
         }
     }
 

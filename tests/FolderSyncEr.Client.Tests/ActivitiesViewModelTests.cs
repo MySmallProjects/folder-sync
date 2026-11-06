@@ -160,5 +160,53 @@ public class ActivitiesViewModelTests
             }
         }
     }
-}
 
+    [Fact]
+    public void ParseSegments_ColorsDynamicEntitiesAccurately()
+    {
+        // 1. Sync successful with items
+        var segments = ActivityItemViewModel.ParseSegments("Sync successful (3 items)");
+        Assert.Equal(3, segments.Count);
+        Assert.Equal("Sync ", segments[0].Text);
+        Assert.Equal(ActivityItemViewModel.DefaultBrush, segments[0].Brush);
+        Assert.Equal("successful", segments[1].Text);
+        Assert.Equal(ActivityItemViewModel.SuccessBrush, segments[1].Brush);
+        Assert.Equal(" (3 items)", segments[2].Text);
+        Assert.Equal(ActivityItemViewModel.FileBrush, segments[2].Brush);
+
+        // 2. Sync failed with error message
+        segments = ActivityItemViewModel.ParseSegments("Sync failed: Server unreachable");
+        Assert.Equal(3, segments.Count);
+        Assert.Equal("Sync ", segments[0].Text);
+        Assert.Equal("failed", segments[1].Text);
+        Assert.Equal(ActivityItemViewModel.FailureBrush, segments[1].Brush);
+        Assert.Equal(": Server unreachable", segments[2].Text);
+        Assert.Equal(ActivityItemViewModel.FailureBrush, segments[2].Brush);
+
+        // 3. You deleted <file>
+        segments = ActivityItemViewModel.ParseSegments("You deleted readme.txt");
+        Assert.Equal(2, segments.Count);
+        Assert.Equal("You deleted ", segments[0].Text);
+        Assert.Equal(ActivityItemViewModel.DefaultBrush, segments[0].Brush);
+        Assert.Equal("readme.txt", segments[1].Text);
+        Assert.Equal(ActivityItemViewModel.FileBrush, segments[1].Brush);
+
+        // 4. Logged in as <user>
+        segments = ActivityItemViewModel.ParseSegments("Logged in as Admin");
+        Assert.Equal(2, segments.Count);
+        Assert.Equal("Logged in as ", segments[0].Text);
+        Assert.Equal("Admin", segments[1].Text);
+        Assert.Equal(ActivityItemViewModel.UserBrush, segments[1].Brush);
+
+        // 5. Connection lost / re-established
+        segments = ActivityItemViewModel.ParseSegments("Connection lost");
+        Assert.Equal(2, segments.Count);
+        Assert.Equal("lost", segments[1].Text);
+        Assert.Equal(ActivityItemViewModel.FailureBrush, segments[1].Brush);
+
+        segments = ActivityItemViewModel.ParseSegments("Connection re-established");
+        Assert.Equal(2, segments.Count);
+        Assert.Equal("re-established", segments[1].Text);
+        Assert.Equal(ActivityItemViewModel.SuccessBrush, segments[1].Brush);
+    }
+}

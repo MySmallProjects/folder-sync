@@ -72,7 +72,9 @@ public class FileSyncApiClient : IFileSyncApi
         var uri = BuildUri(ApiRoutes.Status);
         try
         {
-            using var response = await _httpClient.GetAsync(uri, ct);
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct, timeoutCts.Token);
+            using var response = await _httpClient.GetAsync(uri, linkedCts.Token);
             sw.Stop();
 
             if (!response.IsSuccessStatusCode)
@@ -82,7 +84,7 @@ public class FileSyncApiClient : IFileSyncApi
                 return new ApiConnectionStatus(false, "Unreachable", "Unknown", null, sw.ElapsedMilliseconds, errMsg);
             }
 
-            var status = await response.Content.ReadFromJsonAsync<StatusResponse>(cancellationToken: ct);
+            var status = await response.Content.ReadFromJsonAsync<StatusResponse>(cancellationToken: linkedCts.Token);
             if (status == null)
             {
                 _logger.LogWarning("Server connection failed ({Url}): Failed to deserialize status response.", uri);
@@ -112,8 +114,10 @@ public class FileSyncApiClient : IFileSyncApi
         catch (Exception ex)
         {
             sw.Stop();
-            _logger.LogWarning("Server connection failed ({Url}): {Error}", uri, ex.Message);
-            return new ApiConnectionStatus(false, "Offline", "Unknown", null, sw.ElapsedMilliseconds, ex.Message);
+            var isTimeout = (ex is OperationCanceledException || ex is TimeoutException) && !ct.IsCancellationRequested;
+            var errMessage = isTimeout ? "Connection timed out after 5 seconds" : ex.Message;
+            _logger.LogWarning("Server connection failed ({Url}): {Error}", uri, errMessage);
+            return new ApiConnectionStatus(false, "Offline", "Unknown", null, sw.ElapsedMilliseconds, errMessage);
         }
     }
 
@@ -182,9 +186,11 @@ public class FileSyncApiClient : IFileSyncApi
     public async Task<IReadOnlyList<DeviceDto>> GetDevicesAsync(CancellationToken ct = default)
     {
         var uri = BuildUri(ApiRoutes.Devices);
-        using var response = await _httpClient.GetAsync(uri, ct);
+        using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(ct, timeoutCts.Token);
+        using var response = await _httpClient.GetAsync(uri, linkedCts.Token);
         response.EnsureSuccessStatusCode();
-        return (await response.Content.ReadFromJsonAsync<List<DeviceDto>>(cancellationToken: ct)) ?? new List<DeviceDto>();
+        return (await response.Content.ReadFromJsonAsync<List<DeviceDto>>(cancellationToken: linkedCts.Token)) ?? new List<DeviceDto>();
     }
 
     public async Task<bool> RevokeDeviceAsync(string deviceId, CancellationToken ct = default)

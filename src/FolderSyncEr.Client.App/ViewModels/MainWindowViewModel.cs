@@ -629,6 +629,10 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             if (result.Success)
             {
                 SyncStatusSummary = $"Sync completed ({result.ItemsProcessed} items).";
+                if (result.ItemsProcessed == 0)
+                {
+                    ActivityService.LogActivity("Sync successful", "Sync");
+                }
             }
             else
             {

@@ -25,6 +25,9 @@ public partial class ConnectionCheckViewModel : ViewModelBase
     [NotifyPropertyChangedFor(nameof(ConnectionStatusBrush))]
     private bool _isConnected;
 
+    [ObservableProperty]
+    private bool _isServerUnreachable;
+
     public IBrush ConnectionStatusBrush =>
         IsConnected ? ConnectedBrush : DisconnectedBrush;
 
@@ -127,12 +130,24 @@ public partial class ConnectionCheckViewModel : ViewModelBase
         SaveMessage = $"Server URL saved: {trimmed}";
     }
 
+    private static void RunOnUi(Action action)
+    {
+        if (Avalonia.Application.Current == null || Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
+            action();
+        else
+            Avalonia.Threading.Dispatcher.UIThread.Post(action);
+    }
+
     [RelayCommand]
     public async Task CheckConnectionAsync()
     {
-        IsChecking = true;
-        ErrorMessage = null;
-        SaveMessage = null;
+        RunOnUi(() =>
+        {
+            IsChecking = true;
+            ErrorMessage = null;
+            SaveMessage = null;
+        });
+
         if (!string.IsNullOrWhiteSpace(ServerUrl))
         {
             _api.ServerUrl = ServerUrl.Trim().TrimEnd('/');
@@ -141,27 +156,35 @@ public partial class ConnectionCheckViewModel : ViewModelBase
         try
         {
             var result = await _api.CheckConnectionAsync();
-            IsConnected = result.IsConnected;
-            StatusText = result.Status;
-            ServerVersionText = !string.IsNullOrWhiteSpace(result.Version) ? $"v{result.Version}" : "-";
-            LatencyText = $"{result.LatencyMs} ms";
-            ServerTimeText = result.ServerTimeUtc?.ToString("yyyy-MM-dd HH:mm:ss 'UTC'") ?? "-";
-            ServerCompiledText = result.CompiledUtc?.ToString("yyyy-MM-dd HH:mm:ss 'UTC'") ?? "-";
-            ErrorMessage = result.ErrorMessage;
+            RunOnUi(() =>
+            {
+                IsConnected = result.IsConnected;
+                IsServerUnreachable = !result.IsConnected;
+                StatusText = result.Status;
+                ServerVersionText = !string.IsNullOrWhiteSpace(result.Version) ? $"v{result.Version}" : "-";
+                LatencyText = $"{result.LatencyMs} ms";
+                ServerTimeText = result.ServerTimeUtc?.ToString("yyyy-MM-dd HH:mm:ss 'UTC'") ?? "-";
+                ServerCompiledText = result.CompiledUtc?.ToString("yyyy-MM-dd HH:mm:ss 'UTC'") ?? "-";
+                ErrorMessage = result.ErrorMessage;
+            });
         }
         catch (Exception ex)
         {
-            IsConnected = false;
-            StatusText = "Error";
-            ServerVersionText = "-";
-            LatencyText = "-";
-            ServerTimeText = "-";
-            ServerCompiledText = "-";
-            ErrorMessage = $"{ex.Message} (Target: {_api.ServerUrl})";
+            RunOnUi(() =>
+            {
+                IsConnected = false;
+                IsServerUnreachable = true;
+                StatusText = "Error";
+                ServerVersionText = "-";
+                LatencyText = "-";
+                ServerTimeText = "-";
+                ServerCompiledText = "-";
+                ErrorMessage = $"{ex.Message} (Target: {_api.ServerUrl})";
+            });
         }
         finally
         {
-            IsChecking = false;
+            RunOnUi(() => IsChecking = false);
         }
     }
 }

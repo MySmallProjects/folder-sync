@@ -82,6 +82,7 @@ public sealed class SyncCoordinator : IDisposable
     public string LocalFolderPath => _localFolderPath;
     public bool IsSynchronizing { get; private set; }
     public bool IsPaused { get; private set; }
+    public bool IsServerUnreachable { get; private set; }
     public DateTime? LastSyncTimeUtc { get; private set; }
     public string? LastError { get; private set; }
     public BackoffRetryPolicy BackoffPolicy { get; }
@@ -203,10 +204,6 @@ public sealed class SyncCoordinator : IDisposable
 
         _localStorage.ProgressChanged += (s, e) => FileProgressChanged?.Invoke(this, e);
         _remoteStorage.ProgressChanged += (s, e) => FileProgressChanged?.Invoke(this, e);
-        _localStorage.FileSynced += (_, path) => _activityService?.LogActivity($"Synced {path}", "Sync");
-        _localStorage.DirectorySynced += (_, path) => _activityService?.LogActivity($"Synced {path}", "Sync");
-        _remoteStorage.FileSynced += (_, path) => _activityService?.LogActivity($"Synced {path}", "Sync");
-        _remoteStorage.DirectorySynced += (_, path) => _activityService?.LogActivity($"Synced {path}", "Sync");
     }
 
     public async Task<ClientSyncResult> RunSyncAsync(CancellationToken cancellationToken = default)
@@ -250,6 +247,7 @@ public sealed class SyncCoordinator : IDisposable
                 var status = await _api.CheckConnectionAsync(ct);
                 if (!status.IsConnected)
                 {
+                    IsServerUnreachable = true;
                     var msg = $"Server unreachable: {status.ErrorMessage ?? status.Status}";
                     _logger.LogWarning("Preflight failed: {Error}", msg);
                     LastError = msg;
@@ -263,9 +261,12 @@ public sealed class SyncCoordinator : IDisposable
                     catch (ObjectDisposedException) { }
 
                     var unreachableResult = new ClientSyncResult(false, 0, 0, 1, sw.Elapsed, msg);
+                    _activityService?.LogActivity("Sync failed: Server unreachable", "Sync");
                     SyncCompleted?.Invoke(this, new CoordinatorSyncCompletedEventArgs { Result = unreachableResult });
                     return unreachableResult;
                 }
+
+                IsServerUnreachable = false;
 
                 if (BackoffPolicy.IsInBackoff)
                 {
@@ -327,6 +328,20 @@ public sealed class SyncCoordinator : IDisposable
                     ErrorMessage: syncResult.Error?.Message ?? _failureRegistry.GetAllFailures().FirstOrDefault().Value?.Message
                 );
 
+                if (lastResult.Success)
+                {
+                    if (lastResult.ItemsProcessed > 0)
+                    {
+                        var itemText = lastResult.ItemsProcessed == 1 ? "1 item" : $"{lastResult.ItemsProcessed} items";
+                        _activityService?.LogActivity($"Sync successful ({itemText})", "Sync");
+                    }
+                }
+                else
+                {
+                    var err = !string.IsNullOrWhiteSpace(lastResult.ErrorMessage) ? $": {lastResult.ErrorMessage}" : string.Empty;
+                    _activityService?.LogActivity($"Sync failed{err}", "Sync");
+                }
+
                 SyncCompleted?.Invoke(this, new CoordinatorSyncCompletedEventArgs { Result = lastResult });
 
             } while (_pendingSyncRequested && !_isDisposed && !ct.IsCancellationRequested);
@@ -345,11 +360,13 @@ public sealed class SyncCoordinator : IDisposable
         {
             _logger.LogError(ex, "Sync cycle failed with exception");
             LastError = ex.Message;
-            if (ex is System.Net.Http.HttpRequestException || ex is System.IO.IOException || ex is TimeoutException)
+            if (ex is System.Net.Http.HttpRequestException || ex is System.IO.IOException || ex is TimeoutException || ex is OperationCanceledException)
             {
+                IsServerUnreachable = true;
                 var delay = BackoffPolicy.RecordFailure();
                 try { _periodicTimer?.Change(delay, delay); } catch (ObjectDisposedException) { }
             }
+            _activityService?.LogActivity($"Sync failed: {ex.Message}", "Sync");
             var result = new ClientSyncResult(false, 0, 0, 1, sw.Elapsed, ex.Message);
             SyncCompleted?.Invoke(this, new CoordinatorSyncCompletedEventArgs { Result = result });
             return result;
