@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using FolderSyncEr.Client.Api;
+using FolderSyncEr.Client.Platform;
 using FolderSyncEr.Client.Sync.Common;
 using FolderSyncEr.Client.Sync.Conflicts;
 using FolderSyncEr.Client.Sync.Database;
@@ -69,6 +70,7 @@ public sealed class SyncCoordinator : IDisposable
     private FileSystemWatcher? _watcher;
     private Timer? _debounceTimer;
     private Timer? _periodicTimer;
+    private TimeSpan _periodicInterval = TimeSpan.FromMinutes(5);
     private DateTime? _firstChangeTimeUtc;
     private TimeSpan _cooldownDuration = TimeSpan.FromSeconds(30);
     private TimeSpan _maxWaitDuration = TimeSpan.FromSeconds(300);
@@ -81,6 +83,7 @@ public sealed class SyncCoordinator : IDisposable
     public bool IsPaused { get; private set; }
     public DateTime? LastSyncTimeUtc { get; private set; }
     public string? LastError { get; private set; }
+    public BackoffRetryPolicy BackoffPolicy { get; }
 
     public TimeSpan CooldownDuration
     {
@@ -115,7 +118,8 @@ public sealed class SyncCoordinator : IDisposable
         string deviceId,
         ConflictPolicy policy = ConflictPolicy.KeepBoth,
         IConflictPromptHandler? promptHandler = null,
-        ILoggerFactory? loggerFactory = null)
+        ILoggerFactory? loggerFactory = null,
+        BackoffRetryPolicy? backoffPolicy = null)
     {
         _api = api ?? throw new ArgumentNullException(nameof(api));
         _localFolderPath = Path.GetFullPath(localFolderPath ?? throw new ArgumentNullException(nameof(localFolderPath)));
@@ -123,6 +127,7 @@ public sealed class SyncCoordinator : IDisposable
         _promptHandler = promptHandler;
         _loggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
         _logger = _loggerFactory.CreateLogger<SyncCoordinator>();
+        BackoffPolicy = backoffPolicy ?? new BackoffRetryPolicy();
 
         InitializeEngine(policy);
     }
@@ -240,9 +245,28 @@ public sealed class SyncCoordinator : IDisposable
                     var msg = $"Server unreachable: {status.ErrorMessage ?? status.Status}";
                     _logger.LogWarning("Preflight failed: {Error}", msg);
                     LastError = msg;
+                    var delay = BackoffPolicy.RecordFailure();
+                    _logger.LogInformation("Applying truncated exponential backoff: next attempt in {DelaySeconds}s (attempt #{Attempt})",
+                        delay.TotalSeconds, BackoffPolicy.ConsecutiveFailures);
+                    try
+                    {
+                        _periodicTimer?.Change(delay, delay);
+                    }
+                    catch (ObjectDisposedException) { }
+
                     var unreachableResult = new ClientSyncResult(false, 0, 0, 1, sw.Elapsed, msg);
                     SyncCompleted?.Invoke(this, new CoordinatorSyncCompletedEventArgs { Result = unreachableResult });
                     return unreachableResult;
+                }
+
+                if (BackoffPolicy.IsInBackoff)
+                {
+                    BackoffPolicy.Reset();
+                    try
+                    {
+                        _periodicTimer?.Change(_periodicInterval, _periodicInterval);
+                    }
+                    catch (ObjectDisposedException) { }
                 }
 
                 // 2. Fetch fresh remote snapshot (Mitigating Risk R2)
@@ -313,6 +337,11 @@ public sealed class SyncCoordinator : IDisposable
         {
             _logger.LogError(ex, "Sync cycle failed with exception");
             LastError = ex.Message;
+            if (ex is System.Net.Http.HttpRequestException || ex is System.IO.IOException || ex is TimeoutException)
+            {
+                var delay = BackoffPolicy.RecordFailure();
+                try { _periodicTimer?.Change(delay, delay); } catch (ObjectDisposedException) { }
+            }
             var result = new ClientSyncResult(false, 0, 0, 1, sw.Elapsed, ex.Message);
             SyncCompleted?.Invoke(this, new CoordinatorSyncCompletedEventArgs { Result = result });
             return result;
@@ -424,7 +453,8 @@ public sealed class SyncCoordinator : IDisposable
         _watcher.EnableRaisingEvents = true;
 
         // 2. Periodic background scan
-        var interval = periodicInterval ?? TimeSpan.FromMinutes(5);
+        _periodicInterval = periodicInterval ?? TimeSpan.FromMinutes(5);
+        var interval = _periodicInterval;
         _periodicTimer = new Timer(async _ =>
         {
             if (_isDisposed) return;

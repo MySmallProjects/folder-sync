@@ -45,6 +45,8 @@ internal class Program
 
             // Platform & Secrets
             services.AddSingleton<ClientSettingsManager>();
+            services.AddSingleton<INetworkConnectivityService, NetworkConnectivityService>();
+            services.AddSingleton<BackoffRetryPolicy>();
             services.AddSingleton<ISecretStore>(sp =>
             {
                 var logger = sp.GetService<ILogger<ISecretStore>>();

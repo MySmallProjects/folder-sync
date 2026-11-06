@@ -191,6 +191,50 @@ dotnet run --project src/FolderSyncEr.Client.App
   - `Prompt`: Triggers `IConflictPromptHandler` to allow interactive decision (Keep Local / Keep Server / Keep Both).
 - **`SyncCoordinator`**: Top-level coordinator managing `FileSystemWatcher` debounced change detection, periodic background scans, pre-sync untracked seeding (Mitigating R8), and pause/resume lifecycle controls.
 
+### 4. Server Reconnection & Network Resilience (Exponential Backoff with Jitter)
+FolderSyncEr features robust network disconnection handling and intelligent server reconnection coordination (`BackoffRetryPolicy` & `NetworkConnectivityService`):
+
+#### Truncated Exponential Backoff with Jitter
+When the server cannot be reached during periodic syncs, file change pushes, or background connection checks, the client uses **Truncated Exponential Backoff with Jitter** to progressively scale back retry attempts, preventing server thundering-herd spikes while remaining responsive.
+
+- **Formula**:
+  $$\text{Delay} = \min(\text{MaxInterval}, \text{BaseInterval} \times \text{Multiplier}^{(\text{attempt} - 1)}) \times (1 \pm \text{JitterRatio})$$
+- **Parameters**:
+  - `BaseInterval`: **1 minute** (60 seconds)
+  - `Multiplier`: **2.0**
+  - `MaxInterval (Cap)`: **60 minutes** (3,600 seconds)
+  - `JitterRatio`: **±10%** (multiplied by a uniform random factor between $0.90$ and $1.10$)
+
+#### Retry Schedule Timeline
+| Attempt | Calculation | Scheduled Range (±10% Jitter) | Approx Delay | Cumulative Elapsed Time |
+|---|---|---|---|---|
+| **#1** | $1\text{m} \times 2^0 = 1\text{m}$ | $54\text{s} - 66\text{s}$ | $\sim 1\text{ min}$ | $\sim 1\text{ min}$ |
+| **#2** | $1\text{m} \times 2^1 = 2\text{m}$ | $108\text{s} - 132\text{s}$ | $\sim 2\text{ min}$ | $\sim 3\text{ min}$ |
+| **#3** | $1\text{m} \times 2^2 = 4\text{m}$ | $3.6\text{m} - 4.4\text{m}$ | $\sim 4\text{ min}$ | $\sim 7\text{ min}$ |
+| **#4** | $1\text{m} \times 2^3 = 8\text{m}$ | $7.2\text{m} - 8.8\text{m}$ | $\sim 8\text{ min}$ | $\sim 15\text{ min}$ |
+| **#5** | $1\text{m} \times 2^4 = 16\text{m}$ | $14.4\text{m} - 17.6\text{m}$ | $\sim 16\text{ min}$ | $\sim 31\text{ min}$ |
+| **#6** | $1\text{m} \times 2^5 = 32\text{m}$ | $28.8\text{m} - 35.2\text{m}$ | $\sim 32\text{ min}$ | $\sim 1\text{ hr } 3\text{ min}$ |
+| **#7** | $\min(60\text{m}, 64\text{m}) = 60\text{m}$ | $54\text{m} - 66\text{m}$ | $\sim 60\text{ min (Cap)}$ | $\sim 2\text{ hr } 3\text{ min}$ |
+| **#8+** | $\min(60\text{m}, 128\text{m}) = 60\text{m}$ | $54\text{m} - 66\text{m}$ | $\sim 60\text{ min (Cap)}$ | $+60\text{ min}$ per attempt |
+
+#### Multi-Port OS Network Detection (`INetworkConnectivityService`)
+- **Native OS Event Listeners**: Hooks `NetworkChange.NetworkAvailabilityChanged` and `NetworkChange.NetworkAddressChanged` across Windows and Linux.
+- **Multi-Port Awareness**: Supports systems with multiple network interfaces (e.g. Wi-Fi + Ethernet, dual 10GbE NICs, or VPNs). Inspects all non-loopback network adapters with `OperationalStatus.Up` and valid assigned unicast IP addresses.
+- **Offline Pause**: If all network interfaces are disconnected or cables are unplugged, retries are paused immediately to prevent useless TCP socket exhaustion and CPU churn.
+
+#### State Reset Conventions
+The backoff policy resets to attempt 0 and restores normal scheduling under the following conditions:
+1. **Successful Sync / Connection**: As soon as the server is reached and preflight or sync succeeds, failure counters reset.
+2. **Network Restored**: When OS network connectivity returns (e.g., Ethernet plugged in or Wi-Fi reconnects), backoff is reset immediately and an immediate reconnection probe is executed.
+3. **Manual Action**: Clicking **Sync Now** immediately resets the backoff policy and attempts a connection.
+
+#### Front-End Countdown & Tooltips
+- Under the title in the client's top bar:
+  - **Server Unreachable**: Displays an amber indicator with a live countdown `• Next retry in 00:45` updating every second.
+  - **Countdown Tooltip**: Displays the attempt count, approximate interval, and cause: `Attempt #2 • Backoff interval: ~2m (Server unreachable)`.
+  - **Network Offline**: If the machine's physical network adapters are disconnected, displays a red indicator `• Network Offline` with tooltip `No active network adapters detected (Retries paused until network reconnects)`.
+  - **Last Sync Indicator**: Displays exact UTC time when connected, or relative time (`5min ago`, `1hr 25min ago`) when disconnected, updated every 10 seconds.
+
 ---
 
 ## Running the Tests
@@ -215,9 +259,9 @@ To run with detailed test log output:
 dotnet test --logger "console;verbosity=normal"
 ```
 
-### Test Suites (140 Tests Total)
-- **`FolderSyncEr.Server.IntegrationTests` (22 tests)**: Full ASP.NET Core Web API server tests against SQLite EF Core, verifying JWT auth, token rotation, device management & revocation, streaming uploads/downloads, atomic writes, optimistic concurrency, soft delete tombstones, and admin ZIP export.
-- **`FolderSyncEr.Client.Tests` (31 tests)**: Client platform and UI viewmodel tests verifying OS secret stores (`ISecretStore`), daily rolling file logger (`ClientFileLoggerProvider`) with 30-day pruning, token management with 401 automatic single-flight token refresh and offline resilience, `FileListViewModel` (local/remote merge & badge logic), `LogsViewModel` (filters & pagination), `ConflictPromptViewModel` (interactive resolution), `SettingsViewModel` (folder migration warning, URL persistence, `StartMinimized`, `settings.json` & log file links, and ZIP export), `ClientSettingsManager` (atomic JSON loading & saving), `LoginViewModel` (active devices list & remote device sign-out), and `ConnectionCheckViewModel` (explicit URL save & persistence).
+### Test Suites (152 Tests Total)
+- **`FolderSyncEr.Server.IntegrationTests` (23 tests)**: Full ASP.NET Core Web API server tests against SQLite EF Core, verifying JWT auth, immediate device token revocation in validation pipeline, token rotation, device management & revocation, streaming uploads/downloads, atomic writes, optimistic concurrency, soft delete tombstones, and admin ZIP export.
+- **`FolderSyncEr.Client.Tests` (42 tests)**: Client platform and UI viewmodel tests verifying Truncated Exponential Backoff with Jitter scheduling & formatting, multi-NIC network detection (`INetworkConnectivityService`), countdown UI indicators & state resets, OS secret stores (`ISecretStore`), daily rolling file logger (`ClientFileLoggerProvider`) with 30-day pruning, token management with 401 automatic single-flight token refresh and offline resilience, `FileListViewModel` (local/remote merge, badge logic, and descending local date sorting), `LogsViewModel` (filters & pagination), `ConflictPromptViewModel` (interactive resolution), `SettingsViewModel` (folder migration warning, URL persistence, `StartMinimized`, `settings.json` & log file links, and ZIP export), `ClientSettingsManager` (atomic JSON loading & saving), `LoginViewModel` (active devices list & remote device sign-out), and `ConnectionCheckViewModel` (explicit URL save & persistence).
 - **`FolderSyncEr.Client.Sync.Tests` (87 tests)**: SharpSync integration and hardening tests verifying `RestRemoteStorage`, `SafeLocalStorage` (atomic writes + trash recovery + hash cache + sharing violation resilience), `GuardedSyncDatabase` (R1 failure suppression + version tagging), `PolicyConflictResolver` (keep-both, newest-wins, prompt), `SyncCoordinator` (cooldown debounce, max wait ceiling, single-flight sync), and exhaustive cross-platform path validation rules (`PathRules`).
 
 ### Integration Test Credentials

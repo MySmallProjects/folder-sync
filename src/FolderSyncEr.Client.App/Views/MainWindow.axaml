@@ -30,9 +30,20 @@
                                 <TextBlock Text="{Binding SyncStatusSummary}" FontSize="12" FontWeight="Medium" Foreground="#D1D5DB"/>
                             </Border>
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" Spacing="12" ToolTip.Tip="{Binding LastSyncToolTip}">
-                            <TextBlock Text="Last Sync:" FontSize="11" Foreground="#9CA3AF"/>
-                            <TextBlock Text="{Binding LastSyncText}" FontSize="11" FontWeight="SemiBold" Foreground="#E5E7EB"/>
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <StackPanel Orientation="Horizontal" Spacing="4" ToolTip.Tip="{Binding LastSyncToolTip}">
+                                <TextBlock Text="Last Sync:" FontSize="11" Foreground="#9CA3AF"/>
+                                <TextBlock Text="{Binding LastSyncText}" FontSize="11" FontWeight="SemiBold" Foreground="#E5E7EB"/>
+                            </StackPanel>
+
+                            <!-- Backoff retry / Network status countdown indicator -->
+                            <StackPanel Orientation="Horizontal" Spacing="6"
+                                        IsVisible="{Binding ShowRetryIndicator}"
+                                        ToolTip.Tip="{Binding RetryToolTip}">
+                                <TextBlock Text="•" FontSize="11" Foreground="#6B7280"/>
+                                <TextBlock Text="{Binding RetryStatusText}" FontSize="11" FontWeight="SemiBold"
+                                           Foreground="{Binding RetryStatusBrush}"/>
+                            </StackPanel>
                         </StackPanel>
                     </StackPanel>
 

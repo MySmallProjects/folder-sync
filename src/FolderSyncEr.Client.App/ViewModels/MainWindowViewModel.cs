@@ -27,7 +27,9 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     private readonly ClientSettingsManager _settingsManager;
     private readonly ILoggerFactory? _loggerFactory;
     private bool _isInitializing;
-    private Timer? _lastSyncTimer;
+    private Timer? _statusTickerTimer;
+    private bool _isReconnecting;
+    private bool _isDisposed;
 
     public ConnectionCheckViewModel Connection { get; }
     public LoginViewModel Login { get; }
@@ -37,6 +39,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     public LogsViewModel Logs { get; }
     public SettingsViewModel Settings { get; }
     public ConflictPromptViewModel ConflictPrompt { get; }
+    public INetworkConnectivityService NetworkConnectivity { get; }
+    public BackoffRetryPolicy BackoffPolicy { get; }
 
     public SyncCoordinator? Coordinator { get; private set; }
 
@@ -160,6 +164,21 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private string _lastSyncToolTip = "No successful sync yet";
 
+    [ObservableProperty]
+    private bool _showRetryIndicator;
+
+    [ObservableProperty]
+    private string _retryStatusText = string.Empty;
+
+    [ObservableProperty]
+    private string _retryToolTip = string.Empty;
+
+    [ObservableProperty]
+    private IBrush _retryStatusBrush = RetryAmberBrush;
+
+    private static readonly IBrush RetryAmberBrush = Brush.Parse("#F59E0B"); // Amber
+    private static readonly IBrush RetryRedBrush = Brush.Parse("#EF4444");   // Red
+
     public bool IsReadyForSync => Connection.IsConnected && Login.IsLoggedIn && Folder.IsFolderSelected;
 
     public TrayIconState CurrentTrayIconState
@@ -181,7 +200,9 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         LoginViewModel login,
         FolderSelectionViewModel folder,
         ClientSettingsManager? settingsManager = null,
-        ILoggerFactory? loggerFactory = null)
+        ILoggerFactory? loggerFactory = null,
+        INetworkConnectivityService? networkConnectivity = null,
+        BackoffRetryPolicy? backoffPolicy = null)
     {
         _secretStore = secretStore ?? throw new ArgumentNullException(nameof(secretStore));
         _api = api ?? throw new ArgumentNullException(nameof(api));
@@ -190,6 +211,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         Connection = connection ?? throw new ArgumentNullException(nameof(connection));
         Login = login ?? throw new ArgumentNullException(nameof(login));
         Folder = folder ?? throw new ArgumentNullException(nameof(folder));
+        NetworkConnectivity = networkConnectivity ?? new NetworkConnectivityService();
+        BackoffPolicy = backoffPolicy ?? new BackoffRetryPolicy();
 
         ConflictPrompt = new ConflictPromptViewModel();
 
@@ -245,7 +268,19 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             {
                 OnPropertyChanged(nameof(ConnectionStatusBrush));
                 OnPropertyChanged(nameof(ConnectionStatusToolTip));
-                UpdateLastSyncDisplay();
+                if (Connection.IsConnected)
+                {
+                    BackoffPolicy.Reset();
+                    ShowRetryIndicator = false;
+                }
+                else
+                {
+                    if (!BackoffPolicy.IsInBackoff)
+                    {
+                        BackoffPolicy.RecordFailure();
+                    }
+                }
+                UpdateStatusAndCountdownDisplay();
             }
             OnPropertyChanged(nameof(IsReadyForSync));
             OnPropertyChanged(nameof(CurrentTrayIconState));
@@ -342,8 +377,27 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             OnPropertyChanged(nameof(CurrentTrayIconState));
         };
 
-        UpdateLastSyncDisplay();
-        _lastSyncTimer = new Timer(_ => UpdateLastSyncDisplay(), null, TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(10));
+        NetworkConnectivity.ConnectivityChanged += (_, isAvailable) =>
+        {
+            if (isAvailable)
+            {
+                BackoffPolicy.Reset();
+                _ = TriggerReconnectAsync();
+            }
+            UpdateStatusAndCountdownDisplay();
+        };
+
+        NetworkConnectivity.AddressOrRouteChanged += (_, _) =>
+        {
+            if (NetworkConnectivity.IsNetworkAvailable && !Connection.IsConnected)
+            {
+                _ = TriggerReconnectAsync();
+            }
+            UpdateStatusAndCountdownDisplay();
+        };
+
+        UpdateStatusAndCountdownDisplay();
+        _statusTickerTimer = new Timer(_ => UpdateStatusAndCountdownDisplay(), null, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
     }
 
     public bool IsStartupInitialized { get; private set; }
@@ -427,7 +481,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                 deviceId: deviceId,
                 policy: Settings.SelectedConflictPolicy,
                 promptHandler: ConflictPrompt,
-                loggerFactory: _loggerFactory);
+                loggerFactory: _loggerFactory,
+                backoffPolicy: BackoffPolicy);
 
             Coordinator.ProgressChanged += (s, e) =>
             {
@@ -460,6 +515,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                     {
                         LastSuccessfulSyncUtc = DateTime.UtcNow;
                         Connection.IsConnected = true;
+                        BackoffPolicy.Reset();
+                        ShowRetryIndicator = false;
                         SyncStatusSummary = $"In Sync ({e.Result.ItemsProcessed} items, {e.Result.Duration.TotalSeconds:0.#}s)";
                     }
                     else
@@ -471,7 +528,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                         }
                         SyncStatusSummary = $"Sync error: {e.Result.ErrorMessage}";
                     }
-                    UpdateLastSyncDisplay();
+                    UpdateStatusAndCountdownDisplay();
 
                     OnPropertyChanged(nameof(CurrentTrayIconState));
 
@@ -511,6 +568,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [RelayCommand]
     public async Task SyncNowAsync()
     {
+        BackoffPolicy.Reset();
+
         if (Coordinator == null)
         {
             RebuildCoordinator();
@@ -520,6 +579,11 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         {
             SyncStatusSummary = "Complete setup before syncing.";
             return;
+        }
+
+        if (!Connection.IsConnected)
+        {
+            await Connection.CheckConnectionCommand.ExecuteAsync(null);
         }
 
         IsSynchronizing = true;
@@ -572,7 +636,9 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         }
     }
 
-    public void UpdateLastSyncDisplay()
+    public void UpdateLastSyncDisplay() => UpdateStatusAndCountdownDisplay();
+
+    public void UpdateStatusAndCountdownDisplay()
     {
         void DoUpdate()
         {
@@ -580,22 +646,60 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             {
                 LastSyncText = "Never";
                 LastSyncToolTip = "No successful sync yet";
-                return;
-            }
-
-            var dt = LastSuccessfulSyncUtc.Value;
-            var fullDateTimeStr = dt.ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
-
-            if (Connection?.IsConnected == true)
-            {
-                LastSyncText = dt.ToString("HH:mm:ss 'UTC'");
-                LastSyncToolTip = $"Last successful sync: {fullDateTimeStr}";
             }
             else
             {
-                var timeAgo = FormatTimeAgo(DateTime.UtcNow - dt);
-                LastSyncText = timeAgo;
-                LastSyncToolTip = $"Last successful sync: {fullDateTimeStr} ({timeAgo})";
+                var dt = LastSuccessfulSyncUtc.Value;
+                var fullDateTimeStr = dt.ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
+
+                if (Connection?.IsConnected == true)
+                {
+                    LastSyncText = dt.ToString("HH:mm:ss 'UTC'");
+                    LastSyncToolTip = $"Last successful sync: {fullDateTimeStr}";
+                }
+                else
+                {
+                    var timeAgo = FormatTimeAgo(DateTime.UtcNow - dt);
+                    LastSyncText = timeAgo;
+                    LastSyncToolTip = $"Last successful sync: {fullDateTimeStr} ({timeAgo})";
+                }
+            }
+
+            var isNetworkAvailable = NetworkConnectivity.IsNetworkAvailable;
+            if (!isNetworkAvailable)
+            {
+                ShowRetryIndicator = true;
+                RetryStatusText = "Network Offline";
+                RetryToolTip = "No active network adapters detected (Retries paused until network reconnects)";
+                RetryStatusBrush = RetryRedBrush;
+                return;
+            }
+
+            if (Connection == null || !Connection.IsConnected)
+            {
+                ShowRetryIndicator = true;
+                var remaining = BackoffPolicy.GetRemainingTime();
+                if (remaining != null && remaining.Value > TimeSpan.Zero)
+                {
+                    RetryStatusText = $"Next retry in {BackoffRetryPolicy.FormatCountdown(remaining.Value)}";
+                    var approx = BackoffRetryPolicy.FormatInterval(BackoffPolicy.CurrentDelay);
+                    RetryToolTip = $"Attempt #{BackoffPolicy.ConsecutiveFailures} • Backoff interval: ~{approx} (Server unreachable)";
+                    RetryStatusBrush = RetryAmberBrush;
+                }
+                else
+                {
+                    if (!_isReconnecting)
+                    {
+                        _ = TriggerReconnectAsync();
+                    }
+                    RetryStatusText = "Connecting...";
+                    RetryToolTip = "Attempting to reconnect to server...";
+                    RetryStatusBrush = RetryAmberBrush;
+                }
+            }
+            else
+            {
+                ShowRetryIndicator = false;
             }
         }
 
@@ -606,6 +710,48 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         else
         {
             Avalonia.Threading.Dispatcher.UIThread.Post(DoUpdate);
+        }
+    }
+
+    public async Task TriggerReconnectAsync()
+    {
+        if (_isReconnecting || _isDisposed) return;
+        _isReconnecting = true;
+        try
+        {
+            if (!NetworkConnectivity.IsNetworkAvailable)
+                return;
+
+            await Connection.CheckConnectionCommand.ExecuteAsync(null);
+            if (Connection.IsConnected)
+            {
+                BackoffPolicy.Reset();
+                ShowRetryIndicator = false;
+                if (Login.IsLoggedIn && Folder.IsFolderSelected)
+                {
+                    if (Coordinator == null)
+                    {
+                        RebuildCoordinator();
+                    }
+                    else
+                    {
+                        _ = Coordinator.RunSyncAsync();
+                    }
+                }
+            }
+            else
+            {
+                BackoffPolicy.RecordFailure();
+            }
+        }
+        catch
+        {
+            BackoffPolicy.RecordFailure();
+        }
+        finally
+        {
+            _isReconnecting = false;
+            UpdateStatusAndCountdownDisplay();
         }
     }
 
@@ -640,8 +786,11 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
 
     public void Dispose()
     {
-        _lastSyncTimer?.Dispose();
-        _lastSyncTimer = null;
+        if (_isDisposed) return;
+        _isDisposed = true;
+        _statusTickerTimer?.Dispose();
+        _statusTickerTimer = null;
+        NetworkConnectivity.Dispose();
         Coordinator?.Dispose();
         Logs.Dispose();
     }
