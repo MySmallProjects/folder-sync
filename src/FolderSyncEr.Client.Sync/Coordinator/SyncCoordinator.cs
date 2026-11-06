@@ -54,6 +54,7 @@ public sealed class SyncCoordinator : IDisposable
     private readonly IConflictPromptHandler? _promptHandler;
     private readonly ILogger<SyncCoordinator> _logger;
     private readonly ILoggerFactory _loggerFactory;
+    private readonly IClientActivityService? _activityService;
 
     private readonly SemaphoreSlim _syncLock = new(1, 1);
     private readonly CancellationTokenSource _disposeCts = new();
@@ -119,7 +120,8 @@ public sealed class SyncCoordinator : IDisposable
         ConflictPolicy policy = ConflictPolicy.KeepBoth,
         IConflictPromptHandler? promptHandler = null,
         ILoggerFactory? loggerFactory = null,
-        BackoffRetryPolicy? backoffPolicy = null)
+        BackoffRetryPolicy? backoffPolicy = null,
+        IClientActivityService? activityService = null)
     {
         _api = api ?? throw new ArgumentNullException(nameof(api));
         _localFolderPath = Path.GetFullPath(localFolderPath ?? throw new ArgumentNullException(nameof(localFolderPath)));
@@ -128,6 +130,7 @@ public sealed class SyncCoordinator : IDisposable
         _loggerFactory = loggerFactory ?? NullLoggerFactory.Instance;
         _logger = _loggerFactory.CreateLogger<SyncCoordinator>();
         BackoffPolicy = backoffPolicy ?? new BackoffRetryPolicy();
+        _activityService = activityService;
 
         InitializeEngine(policy);
     }
@@ -194,11 +197,16 @@ public sealed class SyncCoordinator : IDisposable
 
         _engine.ConflictDetected += (s, e) =>
         {
+            _activityService?.LogActivity($"Conflict detected on {e.Path}", "Conflict");
             ConflictDetected?.Invoke(this, e);
         };
 
         _localStorage.ProgressChanged += (s, e) => FileProgressChanged?.Invoke(this, e);
         _remoteStorage.ProgressChanged += (s, e) => FileProgressChanged?.Invoke(this, e);
+        _localStorage.FileSynced += (_, path) => _activityService?.LogActivity($"Synced {path}", "Sync");
+        _localStorage.DirectorySynced += (_, path) => _activityService?.LogActivity($"Synced {path}", "Sync");
+        _remoteStorage.FileSynced += (_, path) => _activityService?.LogActivity($"Synced {path}", "Sync");
+        _remoteStorage.DirectorySynced += (_, path) => _activityService?.LogActivity($"Synced {path}", "Sync");
     }
 
     public async Task<ClientSyncResult> RunSyncAsync(CancellationToken cancellationToken = default)
@@ -525,10 +533,23 @@ public sealed class SyncCoordinator : IDisposable
         if (e is RenamedEventArgs renamed)
         {
             _logger.LogInformation("Local file/folder rename detected: '{OldPath}' -> '{NewPath}'", renamed.OldName, renamed.Name);
+            _activityService?.LogActivity($"You renamed {renamed.OldName} to {renamed.Name}", "File");
         }
         else
         {
             _logger.LogInformation("Local file/folder {ChangeType} detected: '{Path}'", e.ChangeType, e.Name);
+            if (e.ChangeType == WatcherChangeTypes.Created)
+            {
+                _activityService?.LogActivity($"You created {e.Name}", "File");
+            }
+            else if (e.ChangeType == WatcherChangeTypes.Deleted)
+            {
+                _activityService?.LogActivity($"You deleted {e.Name}", "File");
+            }
+            else if (e.ChangeType == WatcherChangeTypes.Changed)
+            {
+                _activityService?.LogActivity($"You modified {e.Name}", "File");
+            }
         }
 
         lock (_debounceLock)

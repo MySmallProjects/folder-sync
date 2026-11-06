@@ -47,6 +47,7 @@ internal class Program
             services.AddSingleton<ClientSettingsManager>();
             services.AddSingleton<INetworkConnectivityService, NetworkConnectivityService>();
             services.AddSingleton<BackoffRetryPolicy>();
+            services.AddSingleton<IClientActivityService, ClientActivityService>();
             services.AddSingleton<ISecretStore>(sp =>
             {
                 var logger = sp.GetService<ILogger<ISecretStore>>();
@@ -118,6 +119,7 @@ internal class Program
             services.AddTransient<ConnectionCheckViewModel>();
             services.AddTransient<LoginViewModel>();
             services.AddTransient<FolderSelectionViewModel>();
+            services.AddTransient<ActivitiesViewModel>();
             services.AddTransient<MainWindowViewModel>();
 
             App.Services = services.BuildServiceProvider();

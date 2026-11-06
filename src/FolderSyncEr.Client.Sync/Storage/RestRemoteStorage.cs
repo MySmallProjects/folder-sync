@@ -54,6 +54,8 @@ public sealed class RestRemoteStorage : ISyncStorage
     public string RootPath => _api.ServerUrl;
 
     public event EventHandler<StorageProgressEventArgs>? ProgressChanged;
+    public event EventHandler<string>? FileSynced;
+    public event EventHandler<string>? DirectorySynced;
 
     public Task<IEnumerable<SyncItem>> ListItemsAsync(string path, CancellationToken cancellationToken = default)
     {
@@ -210,6 +212,7 @@ public sealed class RestRemoteStorage : ISyncStorage
             }
 
             _snapshot.AddOrUpdate(result.File);
+            FileSynced?.Invoke(this, path);
         }
         catch (Exception ex)
         {
@@ -227,6 +230,7 @@ public sealed class RestRemoteStorage : ISyncStorage
         {
             var dto = await _api.CreateDirectoryAsync(path, cancellationToken);
             _snapshot.AddOrUpdate(dto);
+            DirectorySynced?.Invoke(this, path);
         }
         catch (Exception ex)
         {

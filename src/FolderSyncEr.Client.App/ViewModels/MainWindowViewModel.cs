@@ -36,28 +36,38 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     public FolderSelectionViewModel Folder { get; }
     public FileListViewModel FileList { get; }
     public DeletedFilesViewModel DeletedFiles { get; }
+    public ActivitiesViewModel Activities { get; }
     public LogsViewModel Logs { get; }
     public SettingsViewModel Settings { get; }
     public ConflictPromptViewModel ConflictPrompt { get; }
     public INetworkConnectivityService NetworkConnectivity { get; }
     public BackoffRetryPolicy BackoffPolicy { get; }
+    public IClientActivityService ActivityService { get; }
 
     public SyncCoordinator? Coordinator { get; private set; }
+
+    private bool? _lastReportedConnected;
 
     [ObservableProperty]
     private int _selectedTabIndex;
 
-    // Tab order in MainWindow.axaml
+    // Tab order in MainWindow.axaml: Files | Deleted | Activities | Server Logs | Settings | Accounts
     public const int FilesTabIndex = 0;
     public const int DeletedFilesTabIndex = 1;
-    public const int LogsTabIndex = 2;
-    public const int AccountTabIndex = 4;
+    public const int ActivitiesTabIndex = 2;
+    public const int LogsTabIndex = 3;
+    public const int SettingsTabIndex = 4;
+    public const int AccountTabIndex = 5;
 
     partial void OnSelectedTabIndexChanged(int value)
     {
         if (value == DeletedFilesTabIndex && Login.IsLoggedIn)
         {
             _ = DeletedFiles.RefreshCommand.ExecuteAsync(null);
+        }
+        else if (value == ActivitiesTabIndex)
+        {
+            Activities.UpdateWhenTimes();
         }
         else if (value == LogsTabIndex && Login.IsLoggedIn && Connection.IsConnected)
         {
@@ -202,7 +212,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         ClientSettingsManager? settingsManager = null,
         ILoggerFactory? loggerFactory = null,
         INetworkConnectivityService? networkConnectivity = null,
-        BackoffRetryPolicy? backoffPolicy = null)
+        BackoffRetryPolicy? backoffPolicy = null,
+        IClientActivityService? activityService = null)
     {
         _secretStore = secretStore ?? throw new ArgumentNullException(nameof(secretStore));
         _api = api ?? throw new ArgumentNullException(nameof(api));
@@ -213,6 +224,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         Folder = folder ?? throw new ArgumentNullException(nameof(folder));
         NetworkConnectivity = networkConnectivity ?? new NetworkConnectivityService();
         BackoffPolicy = backoffPolicy ?? new BackoffRetryPolicy();
+        ActivityService = activityService ?? new ClientActivityService();
+        Activities = new ActivitiesViewModel(ActivityService);
 
         ConflictPrompt = new ConflictPromptViewModel();
 
@@ -221,7 +234,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         DeletedFiles = new DeletedFilesViewModel(
             _api,
             () => Folder.SelectedFolderPath,
-            () => SyncNowAsync());
+            () => SyncNowAsync(),
+            ActivityService);
 
         Logs = new LogsViewModel(_api, () => Connection.IsConnected && Login.IsLoggedIn && SelectedTabIndex == LogsTabIndex);
 
@@ -272,6 +286,10 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                 {
                     BackoffPolicy.Reset();
                     ShowRetryIndicator = false;
+                    if (_lastReportedConnected == false)
+                    {
+                        ActivityService.LogActivity("Connection re-established", "Connection");
+                    }
                 }
                 else
                 {
@@ -279,7 +297,12 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                     {
                         BackoffPolicy.RecordFailure();
                     }
+                    if (_lastReportedConnected == true)
+                    {
+                        ActivityService.LogActivity("Connection lost", "Connection");
+                    }
                 }
+                _lastReportedConnected = Connection.IsConnected;
                 UpdateStatusAndCountdownDisplay();
             }
             OnPropertyChanged(nameof(IsReadyForSync));
@@ -335,6 +358,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             {
                 if (Login.IsLoggedIn)
                 {
+                    var user = !string.IsNullOrWhiteSpace(Login.LoggedInUserText) ? Login.LoggedInUserText : "User";
+                    ActivityService.LogActivity($"Logged in as {user}", "Auth");
                     if (!_isInitializing)
                     {
                         if (!Connection.IsConnected)
@@ -349,6 +374,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                 }
                 else
                 {
+                    ActivityService.LogActivity("Logged out", "Auth");
                     Coordinator?.Dispose();
                     Coordinator = null;
                     IsSynchronizing = false;
@@ -381,8 +407,13 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         {
             if (isAvailable)
             {
+                ActivityService.LogActivity("Network restored", "Network");
                 BackoffPolicy.Reset();
                 _ = TriggerReconnectAsync();
+            }
+            else
+            {
+                ActivityService.LogActivity("Network offline", "Network");
             }
             UpdateStatusAndCountdownDisplay();
         };
@@ -482,7 +513,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                 policy: Settings.SelectedConflictPolicy,
                 promptHandler: ConflictPrompt,
                 loggerFactory: _loggerFactory,
-                backoffPolicy: BackoffPolicy);
+                backoffPolicy: BackoffPolicy,
+                activityService: ActivityService);
 
             Coordinator.ProgressChanged += (s, e) =>
             {
@@ -627,12 +659,14 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             await Coordinator.ResumeAsync();
             IsPaused = false;
             SyncStatusSummary = "Sync resumed.";
+            ActivityService.LogActivity("Sync resumed", "Sync");
         }
         else
         {
             await Coordinator.PauseAsync();
             IsPaused = true;
             SyncStatusSummary = "Sync paused.";
+            ActivityService.LogActivity("Sync paused", "Sync");
         }
     }
 
@@ -701,6 +735,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             {
                 ShowRetryIndicator = false;
             }
+
+            Activities.UpdateWhenTimes();
         }
 
         if (Avalonia.Threading.Dispatcher.UIThread.CheckAccess())
@@ -793,5 +829,6 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         NetworkConnectivity.Dispose();
         Coordinator?.Dispose();
         Logs.Dispose();
+        ActivityService.Dispose();
     }
 }

@@ -131,7 +131,33 @@ dotnet run --project src/FolderSyncEr.Client.App
   - Lists soft-deleted (tombstoned) files and folders from `/api/trash`, folding children into their deleted parent folder with item count and total size.
   - **Restore**: Restores a deleted file or folder (including contents deleted with the folder). If a file or folder now exists at the original path, restores it alongside as `name (restored yyyy-MM-dd).ext`.
   - **Delete Forever & Empty Trash**: Per-item permanent deletion and full trash purge with inline confirmation dialogs.
-- **Activity Logs Viewer**:
+- **Activities View**:
+  - A user-friendly 2-column activity feed: **Activity** and **When** (e.g. `You deleted readme.txt • 5min`, `Synced MyFile.doc • 8min`, `You created MyFile.doc • 1h`, `Connection lost • 2h`, `Connection re-established • 10min`, `Logged in as Admin • 1h 30m`).
+  - Search box to filter events live by path, action, or keyword.
+  - Persisted locally to disk (`activities.json` in the client configuration folder) with rolling retention (up to 1,000 entries) across application restarts.
+  - Captures local file watcher events (`You created...`, `You modified...`, `You deleted...`, `You renamed...`), sync transfers (`Synced <file/folder>`), conflict warnings, connection lifecycle (`Connection lost` / `re-established`), OS network status (`Network offline` / `restored`), and auth session events (`Logged in as <User>`, `Logged out`).
+
+####  Event Coverage:
+Local File Actions:
+ - You created <file>
+ - You modified <file>
+ - You deleted <file>
+ - You renamed <old> to <new>
+Sync Operations:
+ - Synced <file> (when files are uploaded or downloaded by the sync engine)
+ - Synced <folder> (when directories are created)
+ - Conflict detected on <file>
+Trash Actions:
+ - Restored <file>
+ - You deleted <file> forever
+ - Trash emptied
+Connection & Session Lifecycle:
+ - Connection lost / Connection re-established
+ - Network offline / Network restored
+ - Logged in as <User> / Logged out
+ - Sync paused / Sync resumed
+
+- **Server Activity Logs Viewer**:
   - Paged server-side audit logs fetched directly from `/api/logs`.
   - Optional auto-refresh toggle (disabled by default to avoid unnecessary background polling; polls every 4 seconds when enabled).
   - Filter by action (`Upload`, `Download`, `Conflict`, `Delete`, `Move`, `Login`, `Error`) and result (`Success`, `Failure`, `Conflict`, `Rejected`).
@@ -259,9 +285,9 @@ To run with detailed test log output:
 dotnet test --logger "console;verbosity=normal"
 ```
 
-### Test Suites (152 Tests Total)
+### Test Suites (157 Tests Total)
 - **`FolderSyncEr.Server.IntegrationTests` (23 tests)**: Full ASP.NET Core Web API server tests against SQLite EF Core, verifying JWT auth, immediate device token revocation in validation pipeline, token rotation, device management & revocation, streaming uploads/downloads, atomic writes, optimistic concurrency, soft delete tombstones, and admin ZIP export.
-- **`FolderSyncEr.Client.Tests` (42 tests)**: Client platform and UI viewmodel tests verifying Truncated Exponential Backoff with Jitter scheduling & formatting, multi-NIC network detection (`INetworkConnectivityService`), countdown UI indicators & state resets, OS secret stores (`ISecretStore`), daily rolling file logger (`ClientFileLoggerProvider`) with 30-day pruning, token management with 401 automatic single-flight token refresh and offline resilience, `FileListViewModel` (local/remote merge, badge logic, and descending local date sorting), `LogsViewModel` (filters & pagination), `ConflictPromptViewModel` (interactive resolution), `SettingsViewModel` (folder migration warning, URL persistence, `StartMinimized`, `settings.json` & log file links, and ZIP export), `ClientSettingsManager` (atomic JSON loading & saving), `LoginViewModel` (active devices list & remote device sign-out), and `ConnectionCheckViewModel` (explicit URL save & persistence).
+- **`FolderSyncEr.Client.Tests` (47 tests)**: Client platform and UI viewmodel tests verifying Activities feed persistence, deduplication, search filtering and relative time formatting (`ActivitiesViewModel`), Truncated Exponential Backoff with Jitter scheduling & formatting, multi-NIC network detection (`INetworkConnectivityService`), countdown UI indicators & state resets, OS secret stores (`ISecretStore`), daily rolling file logger (`ClientFileLoggerProvider`) with 30-day pruning, token management with 401 automatic single-flight token refresh and offline resilience, `FileListViewModel` (local/remote merge, badge logic, and descending local date sorting), `LogsViewModel` (filters & pagination), `ConflictPromptViewModel` (interactive resolution), `SettingsViewModel` (folder migration warning, URL persistence, `StartMinimized`, `settings.json` & log file links, and ZIP export), `ClientSettingsManager` (atomic JSON loading & saving), `LoginViewModel` (active devices list & remote device sign-out), and `ConnectionCheckViewModel` (explicit URL save & persistence).
 - **`FolderSyncEr.Client.Sync.Tests` (87 tests)**: SharpSync integration and hardening tests verifying `RestRemoteStorage`, `SafeLocalStorage` (atomic writes + trash recovery + hash cache + sharing violation resilience), `GuardedSyncDatabase` (R1 failure suppression + version tagging), `PolicyConflictResolver` (keep-both, newest-wins, prompt), `SyncCoordinator` (cooldown debounce, max wait ceiling, single-flight sync), and exhaustive cross-platform path validation rules (`PathRules`).
 
 ### Integration Test Credentials

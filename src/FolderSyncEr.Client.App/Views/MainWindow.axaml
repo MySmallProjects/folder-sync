@@ -267,7 +267,54 @@
                     </Grid>
                 </TabItem>
 
-                <!-- TAB 3: SERVER ACTIVITY LOGS -->
+                <!-- TAB 3: ACTIVITIES -->
+                <TabItem Header="Activities">
+                    <Grid RowDefinitions="Auto,*" Margin="0,12,0,0" DataContext="{Binding Activities}">
+                        <!-- Activities Toolbar -->
+                        <Border Grid.Row="0" Background="#1F2937" CornerRadius="8" Padding="12" Margin="0,0,0,12" BorderBrush="#374151" BorderThickness="1">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBox Grid.Column="0" Text="{Binding SearchText, Mode=TwoWay}"
+                                         Watermark="Search activities..." Margin="0,0,12,0"/>
+                                <TextBlock Grid.Column="1" Text="{Binding SummaryText}"
+                                           Foreground="#9CA3AF" FontSize="12" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Activities 2-Column List: Activity | When -->
+                        <Border Grid.Row="1" Background="#1F2937" CornerRadius="8" BorderBrush="#374151" BorderThickness="1">
+                            <Panel>
+                                <TextBlock Text="No activities yet — file syncs, edits, and app events will appear here."
+                                           IsVisible="{Binding IsEmpty}"
+                                           Foreground="#9CA3AF" FontSize="13"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+
+                                <ListBox ItemsSource="{Binding FilteredActivities}" Background="Transparent" IsVisible="{Binding HasActivities}">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:ActivityItemViewModel">
+                                            <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="12,10">
+                                                <Grid ColumnDefinitions="*,Auto">
+                                                    <!-- Activity description (Column 1) -->
+                                                    <TextBlock Grid.Column="0" Text="{Binding Activity}"
+                                                               FontSize="13" FontWeight="Medium" Foreground="#F3F4F6"
+                                                               VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+
+                                                    <!-- When (Column 2) with tooltip showing full timestamp -->
+                                                    <TextBlock Grid.Column="1" Text="{Binding WhenText}"
+                                                               FontSize="12" Foreground="#9CA3AF" FontWeight="Normal"
+                                                               HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                               Margin="16,0,4,0"
+                                                               ToolTip.Tip="{Binding FullTimestampText}"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Panel>
+                        </Border>
+                    </Grid>
+                </TabItem>
+
+                <!-- TAB 4: SERVER ACTIVITY LOGS -->
                 <TabItem Header="Server Logs">
                     <Grid RowDefinitions="Auto,*" Margin="0,12,0,0" DataContext="{Binding Logs}">
                         <!-- Logs Toolbar -->

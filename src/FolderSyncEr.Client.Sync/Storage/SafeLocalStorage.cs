@@ -54,6 +54,8 @@ public sealed class SafeLocalStorage : ISyncStorage
     public string RootPath => _rootPath;
 
     public event EventHandler<StorageProgressEventArgs>? ProgressChanged;
+    public event EventHandler<string>? FileSynced;
+    public event EventHandler<string>? DirectorySynced;
 
     public Task<IEnumerable<SyncItem>> ListItemsAsync(string path, CancellationToken cancellationToken)
     {
@@ -139,6 +141,7 @@ public sealed class SafeLocalStorage : ISyncStorage
 
             // Invalidate hash cache for this path
             _hashCache.TryRemove(path, out _);
+            FileSynced?.Invoke(this, path);
         }
         catch (Exception ex)
         {
@@ -185,6 +188,7 @@ public sealed class SafeLocalStorage : ISyncStorage
     {
         await _inner.CreateDirectoryAsync(path, cancellationToken);
         _logger.LogInformation("Local folder created: '{Path}'", path);
+        DirectorySynced?.Invoke(this, path);
     }
 
     public async Task MoveAsync(string sourcePath, string targetPath, CancellationToken cancellationToken)

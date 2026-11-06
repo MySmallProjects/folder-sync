@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using FolderSyncEr.Client.Api;
+using FolderSyncEr.Client.Platform;
 using FolderSyncEr.Contracts;
 
 namespace FolderSyncEr.Client.App.ViewModels;
@@ -23,6 +24,7 @@ public partial class DeletedFilesViewModel : ViewModelBase
     private readonly IFileSyncApi _api;
     private readonly Func<string?> _getSyncFolder;
     private readonly Func<Task> _requestSync;
+    private readonly IClientActivityService? _activityService;
     private readonly List<DeletedItemViewModel> _allItems = new();
     private Func<Task>? _pendingConfirmAction;
 
@@ -62,11 +64,12 @@ public partial class DeletedFilesViewModel : ViewModelBase
     public string StatusColor => IsStatusError ? "#F87171" : "#34D399";
     public Avalonia.Media.IBrush StatusBrush => Avalonia.Media.Brush.Parse(StatusColor);
 
-    public DeletedFilesViewModel(IFileSyncApi api, Func<string?> getSyncFolder, Func<Task> requestSync)
+    public DeletedFilesViewModel(IFileSyncApi api, Func<string?> getSyncFolder, Func<Task> requestSync, IClientActivityService? activityService = null)
     {
         _api = api ?? throw new ArgumentNullException(nameof(api));
         _getSyncFolder = getSyncFolder ?? throw new ArgumentNullException(nameof(getSyncFolder));
         _requestSync = requestSync ?? throw new ArgumentNullException(nameof(requestSync));
+        _activityService = activityService;
     }
 
     partial void OnSearchQueryChanged(string value) => ApplyFilter();
@@ -187,6 +190,8 @@ public partial class DeletedFilesViewModel : ViewModelBase
                 : $"'{item.Path}' already exists locally, so it was restored as '{restoredPath}'{countText}.",
                 isError: false);
 
+            _activityService?.LogActivity($"Restored {Path.GetFileName(restoredPath)}", "File");
+
             await RefreshAsync();
 
             // Pull the restored content down right away instead of waiting for the next interval
@@ -224,6 +229,7 @@ public partial class DeletedFilesViewModel : ViewModelBase
                 if (result.IsSuccess && result.Value != null)
                 {
                     SetStatus($"Permanently deleted '{item.Path}' ({FormatSize(result.Value.FreedBytes)} freed).", isError: false);
+                    _activityService?.LogActivity($"You deleted {item.Name} forever", "File");
                 }
                 else
                 {
@@ -245,6 +251,7 @@ public partial class DeletedFilesViewModel : ViewModelBase
             {
                 var result = await _api.EmptyTrashAsync();
                 SetStatus($"Trash emptied: {result.PurgedCount} item(s) permanently deleted ({FormatSize(result.FreedBytes)} freed).", isError: false);
+                _activityService?.LogActivity("Trash emptied", "File");
                 await RefreshAsync();
             });
     }
