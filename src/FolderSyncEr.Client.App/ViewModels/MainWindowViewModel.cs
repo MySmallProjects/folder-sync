@@ -376,6 +376,27 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             {
                 Coordinator.MaxWaitDuration = TimeSpan.FromSeconds(Settings.MaxWaitSeconds);
             }
+            if (e.PropertyName == nameof(Settings.ShowFilesTab))
+            {
+                if (SelectedTabIndex == FilesTabIndex && !Settings.ShowFilesTab)
+                {
+                    SelectedTabIndex = ActivitiesTabIndex;
+                }
+            }
+            else if (e.PropertyName == nameof(Settings.ShowDeletedTab))
+            {
+                if (SelectedTabIndex == DeletedFilesTabIndex && !Settings.ShowDeletedTab)
+                {
+                    SelectedTabIndex = ActivitiesTabIndex;
+                }
+            }
+            else if (e.PropertyName == nameof(Settings.ShowServerLogsTab))
+            {
+                if (SelectedTabIndex == LogsTabIndex && !Settings.ShowServerLogsTab)
+                {
+                    SelectedTabIndex = SettingsTabIndex;
+                }
+            }
         };
         Login.PropertyChanged += (_, e) =>
         {
@@ -390,8 +411,17 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             {
                 if (Login.IsLoggedIn)
                 {
-                    var user = !string.IsNullOrWhiteSpace(Login.LoggedInUserText) ? Login.LoggedInUserText : "User";
-                    ActivityService.LogActivity($"Logged in as {user}", "Auth");
+                    var username = !string.IsNullOrWhiteSpace(Login.LoggedInUsername) ? Login.LoggedInUsername : Login.Username;
+                    if (string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(Login.LoggedInUserText))
+                    {
+                        var idx = Login.LoggedInUserText.IndexOf(" (");
+                        username = idx > 0 ? Login.LoggedInUserText.Substring(0, idx) : Login.LoggedInUserText;
+                    }
+                    if (string.IsNullOrWhiteSpace(username))
+                    {
+                        username = "User";
+                    }
+                    ActivityService.LogActivity($"Logged in as {username}", "Auth");
                     if (!_isInitializing)
                     {
                         if (!Connection.IsConnected)
@@ -483,6 +513,9 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                 Settings.CloseToTray = appSettings.CloseToTray;
                 Settings.StartMinimized = appSettings.StartMinimized;
                 Settings.AllowUntrustedCertificates = appSettings.AllowUntrustedCertificates;
+                Settings.ShowFilesTab = appSettings.ShowFilesTab;
+                Settings.ShowDeletedTab = appSettings.ShowDeletedTab;
+                Settings.ShowServerLogsTab = appSettings.ShowServerLogsTab;
                 if (Enum.TryParse<ConflictPolicy>(appSettings.ConflictPolicy, out var pol))
                 {
                     Settings.SelectedConflictPolicy = pol;
@@ -521,7 +554,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         {
             RebuildCoordinator();
             await FileList.RefreshAsync();
-            SelectedTabIndex = 0; // Synced Files
+            SelectedTabIndex = Settings.ShowFilesTab ? FilesTabIndex : ActivitiesTabIndex;
         }
         else
         {

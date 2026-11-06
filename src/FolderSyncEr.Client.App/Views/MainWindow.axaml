@@ -87,7 +87,7 @@
             <!-- Bottom Navigation Tabs -->
             <TabControl SelectedIndex="{Binding SelectedTabIndex}" Margin="16">
                 <!-- TAB 1: FILES LIST -->
-                <TabItem Header="Files">
+                <TabItem Header="📁 Files" IsVisible="{Binding Settings.ShowFilesTab}">
                     <Grid RowDefinitions="Auto,*" Margin="0,12,0,0" DataContext="{Binding FileList}">
                         <!-- File list toolbar -->
                         <Border Grid.Row="0" Background="#1F2937" CornerRadius="8" Padding="12" Margin="0,0,0,12" BorderBrush="#374151" BorderThickness="1">
@@ -156,7 +156,7 @@
                 </TabItem>
 
                 <!-- TAB 2: DELETED FILES (TRASH) -->
-                <TabItem Header="Deleted">
+                <TabItem Header="🗑️ Deleted" IsVisible="{Binding Settings.ShowDeletedTab}">
                     <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="0,12,0,0" DataContext="{Binding DeletedFiles}">
                         <!-- Deleted files toolbar -->
                         <Border Grid.Row="0" Background="#1F2937" CornerRadius="8" Padding="12" Margin="0,0,0,10" BorderBrush="#374151" BorderThickness="1">
@@ -268,7 +268,7 @@
                 </TabItem>
 
                 <!-- TAB 3: ACTIVITIES -->
-                <TabItem Header="Activities">
+                <TabItem Header="⚡ Activities">
                     <Grid RowDefinitions="Auto,*" Margin="0,12,0,0" DataContext="{Binding Activities}">
                         <!-- Activities Toolbar -->
                         <Border Grid.Row="0" Background="#1F2937" CornerRadius="8" Padding="12" Margin="0,0,0,12" BorderBrush="#374151" BorderThickness="1">
@@ -328,7 +328,7 @@
                 </TabItem>
 
                 <!-- TAB 4: SERVER ACTIVITY LOGS -->
-                <TabItem Header="Server Logs">
+                <TabItem Header="📜 Server Logs" IsVisible="{Binding Settings.ShowServerLogsTab}">
                     <Grid RowDefinitions="Auto,*" Margin="0,12,0,0" DataContext="{Binding Logs}">
                         <!-- Logs Toolbar -->
                         <Border Grid.Row="0" Background="#1F2937" CornerRadius="8" Padding="12" Margin="0,0,0,12" BorderBrush="#374151" BorderThickness="1">
@@ -393,8 +393,8 @@
                     </Grid>
                 </TabItem>
 
-                <!-- TAB 4: SETTINGS -->
-                <TabItem Header="Settings">
+                <!-- TAB 5: SETTINGS -->
+                <TabItem Header="⚙️ Settings">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="0,12,0,0" Spacing="16" DataContext="{Binding Settings}">
                             <!-- Sync Folder Settings Card -->
@@ -505,6 +505,23 @@
                                 </StackPanel>
                             </Border>
 
+                            <!-- Tab Visibility Configuration Card -->
+                            <Border Background="#1F2937" CornerRadius="10" Padding="20" BorderBrush="#374151" BorderThickness="1">
+                                <StackPanel Spacing="14">
+                                    <TextBlock Text="Tabs" FontSize="16" FontWeight="SemiBold" Foreground="#F3F4F6"/>
+                                    <TextBlock Text="Choose which tabs are displayed in the navigation bar:" FontSize="12" Foreground="#9CA3AF"/>
+
+                                    <CheckBox Content="Show Files tab (📁 Files)"
+                                              IsChecked="{Binding ShowFilesTab, Mode=TwoWay}"/>
+
+                                    <CheckBox Content="Show Deleted tab (🗑️ Deleted)"
+                                              IsChecked="{Binding ShowDeletedTab, Mode=TwoWay}"/>
+
+                                    <CheckBox Content="Show Server Logs tab (📜 Server Logs)"
+                                              IsChecked="{Binding ShowServerLogsTab, Mode=TwoWay}"/>
+                                </StackPanel>
+                            </Border>
+
                             <!-- Admin Inspection & Archive Export Card -->
                             <Border Background="#1F2937" CornerRadius="10" Padding="20" BorderBrush="#374151" BorderThickness="1">
                                 <StackPanel Spacing="12">
@@ -595,12 +612,15 @@
                             <Border Background="#1F2937" CornerRadius="10" Padding="20" BorderBrush="#374151" BorderThickness="1">
                                 <StackPanel Spacing="10">
                                     <TextBlock Text="Application Information" FontSize="16" FontWeight="SemiBold" Foreground="#F3F4F6"/>
-                                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" Margin="0,4,0,0">
+                                    <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto,Auto" Margin="0,4,0,0">
                                         <TextBlock Grid.Row="0" Grid.Column="0" Text="Client Version:" Foreground="#9CA3AF" FontSize="12" Margin="0,0,16,6"/>
                                         <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding AppVersion}" Foreground="#60A5FA" FontWeight="SemiBold" FontSize="12"/>
 
-                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Compiled DateTime:" Foreground="#9CA3AF" FontSize="12"/>
+                                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Compiled DateTime:" Foreground="#9CA3AF" FontSize="12" Margin="0,0,16,6"/>
                                         <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding AppCompileDateTime}" Foreground="#E5E7EB" FontWeight="Medium" FontSize="12"/>
+
+                                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Running From:" Foreground="#9CA3AF" FontSize="12"/>
+                                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding ExecutablePath}" Foreground="#E5E7EB" FontWeight="Medium" FontSize="12" TextWrapping="Wrap"/>
                                     </Grid>
                                 </StackPanel>
                             </Border>
@@ -608,8 +628,8 @@
                     </ScrollViewer>
                 </TabItem>
 
-                <!-- TAB 5: ACCOUNTS -->
-                <TabItem Header="Accounts">
+                <!-- TAB 6: ACCOUNTS -->
+                <TabItem Header="🔐 Accounts">
                     <ScrollViewer VerticalScrollBarVisibility="Auto">
                         <StackPanel Margin="0,12,0,0" Spacing="16">
                             <!-- Connection Status -->

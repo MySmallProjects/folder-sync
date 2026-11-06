@@ -1187,4 +1187,63 @@ public class Phase4ViewModelTests
         Assert.Empty(mainVm.DeletedFiles.Items);
         Assert.Empty(mainVm.Logs.Logs);
     }
+
+    [Fact]
+    public void MainWindowViewModel_LogsExactUsernameInActivities_WhenLoggedIn()
+    {
+        var api = new FakeFileSyncApi();
+        var store = new TestSecretStore();
+        var tokenMgr = new AuthTokenManager(store, Microsoft.Extensions.Logging.Abstractions.NullLogger<AuthTokenManager>.Instance);
+        var connVm = new ConnectionCheckViewModel(api, store);
+        var loginVm = new LoginViewModel(api, tokenMgr);
+        var folderVm = new FolderSelectionViewModel(store);
+        var actService = new ClientActivityService();
+
+        using var mainVm = new MainWindowViewModel(store, api, connVm, loginVm, folderVm, activityService: actService);
+
+        // Sign in as "Ice" who has the role "User"
+        loginVm.LoggedInUsername = "Ice";
+        loginVm.LoggedInUserText = "Ice (User)";
+        loginVm.IsLoggedIn = true;
+
+        var activities = actService.GetActivities();
+        Assert.Contains(activities, a => a.Activity == "Logged in as Ice");
+    }
+
+    [Fact]
+    public async Task SettingsViewModel_TabVisibilityAndExecutablePath_ConfiguredAccurately()
+    {
+        var api = new FakeFileSyncApi();
+        var store = new TestSecretStore();
+        var tempSettingsFile = Path.Combine(Path.GetTempPath(), $"settings_tab_{Guid.NewGuid():N}.json");
+        var settingsMgr = new ClientSettingsManager(tempSettingsFile);
+
+        try
+        {
+            var vm = new SettingsViewModel(api, store, settingsMgr, () => "/tmp", _ => Task.CompletedTask, _ => { });
+            vm.IsInitialized = true;
+
+            Assert.False(string.IsNullOrWhiteSpace(vm.ExecutablePath));
+            Assert.True(vm.ShowFilesTab);
+            Assert.True(vm.ShowDeletedTab);
+            Assert.True(vm.ShowServerLogsTab);
+
+            // Hide Deleted and Server Logs
+            vm.ShowDeletedTab = false;
+            vm.ShowServerLogsTab = false;
+            await vm.PersistCurrentSettingsAsync();
+
+            var saved = await settingsMgr.LoadSettingsAsync();
+            Assert.True(saved.ShowFilesTab);
+            Assert.False(saved.ShowDeletedTab);
+            Assert.False(saved.ShowServerLogsTab);
+        }
+        finally
+        {
+            if (File.Exists(tempSettingsFile))
+            {
+                try { File.Delete(tempSettingsFile); } catch { }
+            }
+        }
+    }
 }

@@ -51,6 +51,30 @@ public partial class SettingsViewModel : ViewModelBase
     private bool _startMinimized;
 
     [ObservableProperty]
+    private bool _showFilesTab = true;
+
+    [ObservableProperty]
+    private bool _showDeletedTab = true;
+
+    [ObservableProperty]
+    private bool _showServerLogsTab = true;
+
+    partial void OnShowFilesTabChanged(bool value)
+    {
+        if (IsInitialized) _ = PersistCurrentSettingsAsync();
+    }
+
+    partial void OnShowDeletedTabChanged(bool value)
+    {
+        if (IsInitialized) _ = PersistCurrentSettingsAsync();
+    }
+
+    partial void OnShowServerLogsTabChanged(bool value)
+    {
+        if (IsInitialized) _ = PersistCurrentSettingsAsync();
+    }
+
+    [ObservableProperty]
     private bool _showFolderChangeConfirmation;
 
     [ObservableProperty]
@@ -119,7 +143,10 @@ public partial class SettingsViewModel : ViewModelBase
         var appAssembly = typeof(SettingsViewModel).Assembly;
         AppVersion = BuildInfo.GetVersionString(appAssembly);
         AppCompileDateTime = BuildInfo.GetBuildDateUtc(appAssembly).ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
+        ExecutablePath = Environment.ProcessPath ?? Environment.GetCommandLineArgs().FirstOrDefault() ?? AppContext.BaseDirectory;
     }
+
+    public string ExecutablePath { get; }
 
     public bool IsInitialized { get; set; }
 
@@ -305,6 +332,9 @@ public partial class SettingsViewModel : ViewModelBase
             settings.MaxWaitSeconds = MaxWaitSeconds;
             settings.CloseToTray = CloseToTray;
             settings.StartMinimized = StartMinimized;
+            settings.ShowFilesTab = ShowFilesTab;
+            settings.ShowDeletedTab = ShowDeletedTab;
+            settings.ShowServerLogsTab = ShowServerLogsTab;
             settings.LastUpdatedUtc = DateTime.UtcNow;
             await _settingsManager.SaveSettingsAsync(settings);
         }

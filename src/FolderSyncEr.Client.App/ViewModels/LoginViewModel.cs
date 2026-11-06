@@ -59,6 +59,9 @@ public partial class LoginViewModel : ViewModelBase
     private bool _isLoggedIn;
 
     [ObservableProperty]
+    private string _loggedInUsername = string.Empty;
+
+    [ObservableProperty]
     private string _loggedInUserText = string.Empty;
 
     [ObservableProperty]
@@ -89,8 +92,9 @@ public partial class LoginViewModel : ViewModelBase
         {
             void HandleSessionExpired()
             {
-                IsLoggedIn = false;
+                LoggedInUsername = string.Empty;
                 LoggedInUserText = string.Empty;
+                IsLoggedIn = false;
                 LoggedInDevices.Clear();
                 ErrorMessage = "Your session has expired or was reset on the server. Please sign in again.";
                 OnPropertyChanged(nameof(DeviceId));
@@ -131,8 +135,9 @@ public partial class LoginViewModel : ViewModelBase
                 _api.ServerUrl = session.ServerUrl;
             }
 
-            IsLoggedIn = true;
+            LoggedInUsername = session.Username;
             LoggedInUserText = $"{session.Username} ({session.Role})";
+            IsLoggedIn = true;
             OnPropertyChanged(nameof(DeviceId));
             OnPropertyChanged(nameof(CurrentDeviceDisplay));
 
@@ -167,8 +172,9 @@ public partial class LoginViewModel : ViewModelBase
         try
         {
             var response = await _api.LoginAsync(Username, Password, DeviceName);
-            IsLoggedIn = true;
+            LoggedInUsername = response.User.Username;
             LoggedInUserText = $"{response.User.Username} ({response.User.Role})";
+            IsLoggedIn = true;
             Password = string.Empty; // Clear password from memory after successful login
             OnPropertyChanged(nameof(DeviceId));
             OnPropertyChanged(nameof(CurrentDeviceDisplay));
@@ -264,8 +270,9 @@ public partial class LoginViewModel : ViewModelBase
         }
         finally
         {
-            IsLoggedIn = false;
+            LoggedInUsername = string.Empty;
             LoggedInUserText = string.Empty;
+            IsLoggedIn = false;
             LoggedInDevices.Clear();
             OnPropertyChanged(nameof(DeviceId));
             OnPropertyChanged(nameof(CurrentDeviceDisplay));
