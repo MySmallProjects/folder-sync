@@ -549,6 +549,9 @@
 
                                     <CheckBox Content="Show Server Logs tab (📜 Server Logs)"
                                               IsChecked="{Binding ShowServerLogsTab, Mode=TwoWay}"/>
+
+                                    <CheckBox Content="Show Notes tab (📝 Notes)"
+                                              IsChecked="{Binding ShowNotesTab, Mode=TwoWay}"/>
                                 </StackPanel>
                             </Border>
 
@@ -787,6 +790,90 @@
                             </Border>
                         </StackPanel>
                     </ScrollViewer>
+                </TabItem>
+
+                <!-- TAB 7: NOTES -->
+                <TabItem IsVisible="{Binding Settings.ShowNotesTab}">
+                    <TabItem.Header>
+                        <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="📝" FontSize="14" VerticalAlignment="Center"/>
+                            <TextBlock Text="Notes" FontSize="13" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </TabItem.Header>
+                    <Grid RowDefinitions="Auto,*,Auto" Margin="0,12,0,0" DataContext="{Binding Notes}">
+                        <!-- Unsaved Changes Warning Banner -->
+                        <Border Grid.Row="0" IsVisible="{Binding ShowUnsavedChangesDialog}"
+                                Background="#451A03" BorderBrush="#B45309" BorderThickness="1"
+                                CornerRadius="8" Padding="14" Margin="0,0,0,10">
+                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                <StackPanel Grid.Column="0" Spacing="2" VerticalAlignment="Center">
+                                    <TextBlock Text="⚠️ Unsaved Changes" FontWeight="Bold" FontSize="13" Foreground="#FDE047"/>
+                                    <TextBlock Text="Any unsaved changes will be lost if you switch to view mode." FontSize="12" Foreground="#FEF08A"/>
+                                </StackPanel>
+                                <Button Grid.Column="1" Content="OK"
+                                        Command="{Binding ConfirmDiscardChangesCommand}"
+                                        Background="#DC2626" Foreground="White" FontWeight="SemiBold"
+                                        Padding="14,6" Margin="12,0,8,0" VerticalAlignment="Center"/>
+                                <Button Grid.Column="2" Content="Cancel"
+                                        Command="{Binding CancelDiscardChangesCommand}"
+                                        Background="#374151" Foreground="#F3F4F6"
+                                        Padding="14,6" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Main Notes Content Display (Full Size) -->
+                        <Border Grid.Row="1" Background="#1F2937" CornerRadius="8" BorderBrush="#374151" BorderThickness="1" Padding="14">
+                            <Panel>
+                                <!-- View Mode: Multi-line Full-size Label -->
+                                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                                              IsVisible="{Binding !IsEditing}">
+                                    <SelectableTextBlock Text="{Binding Content}"
+                                                         TextWrapping="Wrap"
+                                                         FontSize="13"
+                                                         FontFamily="Consolas, Menlo, Monospace, Default"
+                                                         Foreground="#F3F4F6"
+                                                         LineHeight="20"/>
+                                </ScrollViewer>
+
+                                <!-- Edit Mode: Multi-line Full-size TextBox -->
+                                <TextBox Text="{Binding Content, Mode=TwoWay}"
+                                         IsVisible="{Binding IsEditing}"
+                                         AcceptsReturn="True"
+                                         AcceptsTab="True"
+                                         TextWrapping="Wrap"
+                                         FontSize="13"
+                                         FontFamily="Consolas, Menlo, Monospace, Default"
+                                         Foreground="#F3F4F6"
+                                         Background="Transparent"
+                                         BorderThickness="0"
+                                         Watermark="Write your notes or ideas here..."
+                                         HorizontalAlignment="Stretch"
+                                         VerticalAlignment="Stretch"/>
+                            </Panel>
+                        </Border>
+
+                        <!-- Bottom Action Bar -->
+                        <Border Grid.Row="2" Background="#1F2937" CornerRadius="8" Padding="12" Margin="0,10,0,0" BorderBrush="#374151" BorderThickness="1">
+                            <Grid ColumnDefinitions="*,Auto,Auto">
+                                <TextBlock Grid.Column="0" Text="{Binding StatusMessage}"
+                                           Foreground="#9CA3AF" FontSize="12" VerticalAlignment="Center"/>
+
+                                <!-- Save Button: Hidden in view mode, visible in edit mode, enabled only when text changed -->
+                                <Button Grid.Column="1" Content="Save"
+                                        Command="{Binding SaveCommand}"
+                                        IsVisible="{Binding IsSaveVisible}"
+                                        IsEnabled="{Binding CanSave}"
+                                        Background="#059669" Foreground="White" FontWeight="SemiBold"
+                                        Padding="16,7" Margin="0,0,10,0" CornerRadius="6"/>
+
+                                <!-- Edit / View Mode Toggle Button -->
+                                <Button Grid.Column="2" Content="{Binding EditButtonText}"
+                                        Command="{Binding ToggleEditModeCommand}"
+                                        Background="#2563EB" Foreground="White" FontWeight="SemiBold"
+                                        Padding="16,7" CornerRadius="6"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
                 </TabItem>
             </TabControl>
         </DockPanel>

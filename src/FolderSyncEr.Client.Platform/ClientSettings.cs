@@ -16,6 +16,7 @@ public class ClientSettings
     public bool ShowFilesTab { get; set; } = true;
     public bool ShowDeletedTab { get; set; } = true;
     public bool ShowServerLogsTab { get; set; } = true;
+    public bool ShowNotesTab { get; set; } = true;
     public DateTime LastUpdatedUtc { get; set; } = DateTime.UtcNow;
 }
 

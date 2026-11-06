@@ -39,6 +39,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     public ActivitiesViewModel Activities { get; }
     public LogsViewModel Logs { get; }
     public SettingsViewModel Settings { get; }
+    public NotesViewModel Notes { get; }
     public ConflictPromptViewModel ConflictPrompt { get; }
     public INetworkConnectivityService NetworkConnectivity { get; }
     public BackoffRetryPolicy BackoffPolicy { get; }
@@ -51,13 +52,14 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
     [ObservableProperty]
     private int _selectedTabIndex;
 
-    // Tab order in MainWindow.axaml: Files | Deleted | Activities | Server Logs | Settings | Accounts
+    // Tab order in MainWindow.axaml: Files | Deleted | Activities | Server Logs | Settings | Accounts | Notes
     public const int FilesTabIndex = 0;
     public const int DeletedFilesTabIndex = 1;
     public const int ActivitiesTabIndex = 2;
     public const int LogsTabIndex = 3;
     public const int SettingsTabIndex = 4;
     public const int AccountTabIndex = 5;
+    public const int NotesTabIndex = 6;
 
     partial void OnSelectedTabIndexChanged(int value)
     {
@@ -76,6 +78,10 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
         else if (value == AccountTabIndex && Login.IsLoggedIn)
         {
             _ = Login.RefreshDevicesAsync();
+        }
+        else if (value == NotesTabIndex)
+        {
+            _ = Notes.RefreshFromDiskAsync();
         }
     }
 
@@ -269,6 +275,8 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                 }
             });
 
+        Notes = new NotesViewModel(() => Folder.SelectedFolderPath, ActivityService);
+
         _secretStoreDescription = secretStore.Description;
         _isSecretStoreInsecure = secretStore.IsInsecureFallback;
 
@@ -397,6 +405,13 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                     SelectedTabIndex = SettingsTabIndex;
                 }
             }
+            else if (e.PropertyName == nameof(Settings.ShowNotesTab))
+            {
+                if (SelectedTabIndex == NotesTabIndex && !Settings.ShowNotesTab)
+                {
+                    SelectedTabIndex = ActivitiesTabIndex;
+                }
+            }
         };
         Login.PropertyChanged += (_, e) =>
         {
@@ -456,6 +471,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                 {
                     Settings.CurrentSyncFolder = Folder.SelectedFolderPath ?? string.Empty;
                 }
+                _ = Notes.RefreshFromDiskAsync();
                 if (!_isInitializing && Folder.IsFolderSelected && Login.IsLoggedIn)
                 {
                     RebuildCoordinator();
@@ -516,6 +532,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                 Settings.ShowFilesTab = appSettings.ShowFilesTab;
                 Settings.ShowDeletedTab = appSettings.ShowDeletedTab;
                 Settings.ShowServerLogsTab = appSettings.ShowServerLogsTab;
+                Settings.ShowNotesTab = appSettings.ShowNotesTab;
                 if (Enum.TryParse<ConflictPolicy>(appSettings.ConflictPolicy, out var pol))
                 {
                     Settings.SelectedConflictPolicy = pol;
@@ -541,6 +558,7 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
             {
                 await Folder.SaveAndSetFolderPathAsync(appSettings.SyncFolderPath);
             }
+            await Notes.LoadAsync();
 
             Settings.CurrentSyncFolder = Folder.SelectedFolderPath ?? string.Empty;
             Settings.IsInitialized = true;
@@ -640,6 +658,9 @@ public partial class MainWindowViewModel : ViewModelBase, IDisposable
                     {
                         _ = DeletedFiles.RefreshAsync();
                     }
+
+                    // Auto-update notes from disk if synced from another device
+                    _ = Notes.RefreshFromDiskAsync();
                 }
 
                 if (Avalonia.Threading.Dispatcher.UIThread.CheckAccess())

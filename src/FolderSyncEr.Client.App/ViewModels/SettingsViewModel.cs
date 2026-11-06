@@ -59,6 +59,9 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty]
     private bool _showServerLogsTab = true;
 
+    [ObservableProperty]
+    private bool _showNotesTab = true;
+
     partial void OnShowFilesTabChanged(bool value)
     {
         if (IsInitialized) _ = PersistCurrentSettingsAsync();
@@ -70,6 +73,11 @@ public partial class SettingsViewModel : ViewModelBase
     }
 
     partial void OnShowServerLogsTabChanged(bool value)
+    {
+        if (IsInitialized) _ = PersistCurrentSettingsAsync();
+    }
+
+    partial void OnShowNotesTabChanged(bool value)
     {
         if (IsInitialized) _ = PersistCurrentSettingsAsync();
     }
@@ -335,6 +343,7 @@ public partial class SettingsViewModel : ViewModelBase
             settings.ShowFilesTab = ShowFilesTab;
             settings.ShowDeletedTab = ShowDeletedTab;
             settings.ShowServerLogsTab = ShowServerLogsTab;
+            settings.ShowNotesTab = ShowNotesTab;
             settings.LastUpdatedUtc = DateTime.UtcNow;
             await _settingsManager.SaveSettingsAsync(settings);
         }
