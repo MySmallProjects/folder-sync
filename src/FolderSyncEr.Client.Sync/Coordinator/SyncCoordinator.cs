@@ -26,7 +26,8 @@ public record ClientSyncResult(
     int ConflictsResolved,
     int ErrorsCount,
     TimeSpan Duration,
-    string? ErrorMessage
+    string? ErrorMessage,
+    SyncRunDetails? Details = null
 );
 
 public sealed class CoordinatorProgressEventArgs : EventArgs
@@ -303,6 +304,27 @@ public sealed class SyncCoordinator : IDisposable
                     _watcher.EnableRaisingEvents = false;
                 }
 
+                var uploaded = new System.Collections.Concurrent.ConcurrentBag<string>();
+                var downloaded = new System.Collections.Concurrent.ConcurrentBag<string>();
+                var conflicted = new System.Collections.Concurrent.ConcurrentBag<string>();
+                var evaluated = new System.Collections.Concurrent.ConcurrentBag<string>();
+
+                void OnUpload(object? s, string p) => uploaded.Add(p.Replace('\\', '/'));
+                void OnDownload(object? s, string p) => downloaded.Add(p.Replace('\\', '/'));
+                void OnConflict(object? s, FileConflictEventArgs e) => conflicted.Add(e.Path.Replace('\\', '/'));
+                void OnProgress(object? s, CoordinatorProgressEventArgs e)
+                {
+                    if (!string.IsNullOrWhiteSpace(e.CurrentItem))
+                    {
+                        evaluated.Add(e.CurrentItem.Replace('\\', '/'));
+                    }
+                }
+
+                if (_remoteStorage != null) _remoteStorage.FileSynced += OnUpload;
+                if (_localStorage != null) _localStorage.FileSynced += OnDownload;
+                ConflictDetected += OnConflict;
+                ProgressChanged += OnProgress;
+
                 SyncResult syncResult;
                 try
                 {
@@ -310,6 +332,11 @@ public sealed class SyncCoordinator : IDisposable
                 }
                 finally
                 {
+                    if (_remoteStorage != null) _remoteStorage.FileSynced -= OnUpload;
+                    if (_localStorage != null) _localStorage.FileSynced -= OnDownload;
+                    ConflictDetected -= OnConflict;
+                    ProgressChanged -= OnProgress;
+
                     if (_watcher != null && !_isDisposed)
                     {
                         _watcher.EnableRaisingEvents = true;
@@ -319,27 +346,82 @@ public sealed class SyncCoordinator : IDisposable
                 LastSyncTimeUtc = DateTime.UtcNow;
                 LastError = null;
 
+                var upList = uploaded.Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
+                var downList = downloaded.Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
+                var confList = conflicted.Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
+
+                var allFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                try
+                {
+                    var di = new DirectoryInfo(_localFolderPath);
+                    if (di.Exists)
+                    {
+                        foreach (var fi in di.EnumerateFiles("*", SearchOption.AllDirectories))
+                        {
+                            var rel = Path.GetRelativePath(_localFolderPath, fi.FullName).Replace('\\', '/');
+                            if (!rel.StartsWith(".foldersyncer", StringComparison.OrdinalIgnoreCase) &&
+                                !rel.StartsWith("~") && !rel.EndsWith(".tmp") && !rel.EndsWith(".swp") && !rel.EndsWith(".crswap"))
+                            {
+                                allFiles.Add(rel);
+                            }
+                        }
+                    }
+                }
+                catch { }
+
+                foreach (var p in evaluated)
+                {
+                    if (!string.IsNullOrWhiteSpace(p))
+                    {
+                        allFiles.Add(p);
+                    }
+                }
+
+                var verifiedList = allFiles
+                    .Where(f => !upList.Contains(f, StringComparer.OrdinalIgnoreCase) &&
+                                !downList.Contains(f, StringComparer.OrdinalIgnoreCase) &&
+                                !confList.Contains(f, StringComparer.OrdinalIgnoreCase))
+                    .OrderBy(x => x)
+                    .ToList();
+
+                var syncSuccess = syncResult.Success && _failureRegistry.GetAllFailures().Count == 0;
+                var syncErrMsg = syncResult.Error?.Message ?? _failureRegistry.GetAllFailures().FirstOrDefault().Value?.Message;
+
+                var details = new SyncRunDetails
+                {
+                    TimestampUtc = DateTime.UtcNow,
+                    DurationSeconds = sw.Elapsed.TotalSeconds,
+                    Success = syncSuccess,
+                    ErrorMessage = syncErrMsg,
+                    UploadedFiles = upList,
+                    DownloadedFiles = downList,
+                    ConflictedFiles = confList,
+                    VerifiedFiles = verifiedList
+                };
+
                 lastResult = new ClientSyncResult(
-                    Success: syncResult.Success && _failureRegistry.GetAllFailures().Count == 0,
-                    ItemsProcessed: (int)syncResult.TotalFilesProcessed,
+                    Success: syncSuccess,
+                    ItemsProcessed: details.TotalItemsProcessed > 0 ? details.TotalItemsProcessed : (int)syncResult.TotalFilesProcessed,
                     ConflictsResolved: (int)syncResult.FilesConflicted,
                     ErrorsCount: _failureRegistry.GetAllFailures().Count + (syncResult.Error != null ? 1 : 0),
                     Duration: sw.Elapsed,
-                    ErrorMessage: syncResult.Error?.Message ?? _failureRegistry.GetAllFailures().FirstOrDefault().Value?.Message
+                    ErrorMessage: syncErrMsg,
+                    Details: details
                 );
 
                 if (lastResult.Success)
                 {
-                    if (lastResult.ItemsProcessed > 0)
+                    if (lastResult.ItemsProcessed > 0 || upList.Count > 0 || downList.Count > 0)
                     {
-                        var itemText = lastResult.ItemsProcessed == 1 ? "1 item" : $"{lastResult.ItemsProcessed} items";
-                        _activityService?.LogActivity($"Sync successful ({itemText})", "Sync");
+                        var total = details.TotalItemsProcessed > 0 ? details.TotalItemsProcessed : lastResult.ItemsProcessed;
+                        var itemText = total == 1 ? "1 item" : $"{total} items";
+                        _activityService?.LogActivity($"Sync successful ({itemText})", "Sync", syncDetails: details);
                     }
                 }
                 else
                 {
                     var err = !string.IsNullOrWhiteSpace(lastResult.ErrorMessage) ? $": {lastResult.ErrorMessage}" : string.Empty;
-                    _activityService?.LogActivity($"Sync failed{err}", "Sync");
+                    _activityService?.LogActivity($"Sync failed{err}", "Sync", syncDetails: details);
                 }
 
                 SyncCompleted?.Invoke(this, new CoordinatorSyncCompletedEventArgs { Result = lastResult });

@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:FolderSyncEr.Client.App.ViewModels"
+        xmlns:platform="using:FolderSyncEr.Client.Platform"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="960" d:DesignHeight="780"
@@ -310,8 +311,8 @@
                                     <ListBox.ItemTemplate>
                                         <DataTemplate x:DataType="vm:ActivityItemViewModel">
                                             <Border BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="12,10">
-                                                <Grid ColumnDefinitions="*,Auto">
-                                                    <!-- Activity description with dynamic colored highlighting (Column 1) -->
+                                                <Grid ColumnDefinitions="*,Auto,Auto">
+                                                    <!-- Activity description with dynamic colored highlighting (Column 0) -->
                                                     <ItemsControl Grid.Column="0" ItemsSource="{Binding Segments}" VerticalAlignment="Center">
                                                         <ItemsControl.ItemsPanel>
                                                             <ItemsPanelTemplate>
@@ -329,8 +330,17 @@
                                                         </ItemsControl.ItemTemplate>
                                                     </ItemsControl>
 
+                                                    <!-- Details button (Column 1) -->
+                                                    <Button Grid.Column="1" Content="Details"
+                                                            Command="{Binding OpenDetailsCommand}"
+                                                            IsVisible="{Binding HasSyncDetails}"
+                                                            Background="#1E3A8A" Foreground="#93C5FD" BorderBrush="#3B82F6" BorderThickness="1"
+                                                            FontSize="11" FontWeight="SemiBold"
+                                                            Padding="10,3" CornerRadius="5" Margin="12,0,4,0" VerticalAlignment="Center"
+                                                            ToolTip.Tip="View full sync details (uploaded, downloaded, and verified files)"/>
+
                                                     <!-- When (Column 2) with tooltip showing full timestamp -->
-                                                    <TextBlock Grid.Column="1" Text="{Binding WhenText}"
+                                                    <TextBlock Grid.Column="2" Text="{Binding WhenText}"
                                                                FontSize="12" Foreground="#9CA3AF" FontWeight="Normal"
                                                                HorizontalAlignment="Right" VerticalAlignment="Center"
                                                                Margin="16,0,4,0"
@@ -431,11 +441,11 @@
                             <Border Background="#1F2937" CornerRadius="10" Padding="20" BorderBrush="#374151" BorderThickness="1">
                                 <StackPanel Spacing="12">
                                     <TextBlock Text="Local Sync Directory" FontSize="16" FontWeight="SemiBold" Foreground="#F3F4F6"/>
-                                    <TextBlock Text="{Binding CurrentSyncFolder}" FontSize="13" Foreground="#60A5FA" FontWeight="Medium"/>
+                                    <TextBlock Text="The local directory synchronized with the server:" FontSize="12" Foreground="#9CA3AF"/>
 
-                                    <Grid ColumnDefinitions="*,Auto" Margin="0,6,0,0">
+                                    <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
                                         <TextBox Grid.Column="0" Text="{Binding NewSyncFolderInput, Mode=TwoWay}"
-                                                 Watermark="Enter new absolute folder path to switch directory..."
+                                                 Watermark="Enter absolute folder path..."
                                                  Margin="0,0,10,0"/>
                                         <Button Grid.Column="1" Content="Change Folder"
                                                 Command="{Binding RequestChangeFolderCommand}"
@@ -932,6 +942,169 @@
                                    FontSize="11" Foreground="#9CA3AF" HorizontalAlignment="Center"/>
                     </StackPanel>
                 </StackPanel>
+            </Border>
+        </Border>
+
+        <!-- Sync Details Dialog Modal Overlay -->
+        <Border Background="#B2000000" IsVisible="{Binding Activities.IsSyncDetailsVisible}"
+                HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <Border Background="#1F2937" BorderBrush="#3B82F6" BorderThickness="2"
+                    CornerRadius="14" Padding="24" Width="720" MaxHeight="680"
+                    HorizontalAlignment="Center" VerticalAlignment="Center"
+                    DataContext="{Binding Activities}" x:DataType="vm:ActivitiesViewModel">
+                <Grid RowDefinitions="Auto,Auto,*,Auto">
+                    <!-- Header -->
+                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,16">
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                            <TextBlock Text="📊" FontSize="22" VerticalAlignment="Center"/>
+                            <TextBlock Text="Sync Run Details" FontSize="20" FontWeight="Bold" Foreground="#60A5FA" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <Button Grid.Column="1" Content="✕"
+                                Command="{Binding CloseSyncDetailsCommand}"
+                                Background="Transparent" Foreground="#9CA3AF" BorderThickness="0"
+                                FontSize="16" FontWeight="Bold" Padding="8,4" Cursor="Hand"/>
+                    </Grid>
+
+                    <!-- Meta Summary Banner -->
+                    <Border Grid.Row="1" Background="#111827" CornerRadius="8" Padding="14,10" Margin="0,0,0,16" BorderBrush="#374151" BorderThickness="1">
+                        <Grid ColumnDefinitions="Auto,Auto,Auto,*,Auto">
+                            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" Margin="0,0,16,0">
+                                <TextBlock Text="Status:" Foreground="#9CA3AF" FontSize="12" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding SelectedSyncDetails.StatusText}"
+                                           Foreground="{Binding SyncDetailsStatusBrush}"
+                                           FontSize="12" FontWeight="Bold"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" Margin="0,0,16,0">
+                                <TextBlock Text="Items:" Foreground="#9CA3AF" FontSize="12" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding SelectedSyncDetails.TotalItemsProcessed}"
+                                           Foreground="#F3F4F6" FontSize="12" FontWeight="Bold"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" Margin="0,0,16,0">
+                                <TextBlock Text="Duration:" Foreground="#9CA3AF" FontSize="12" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding SelectedSyncDetails.DurationFormatted}"
+                                           Foreground="#F3F4F6" FontSize="12" FontWeight="Bold"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="6">
+                                <TextBlock Text="Finished:" Foreground="#9CA3AF" FontSize="12" FontWeight="SemiBold"/>
+                                <TextBlock Text="{Binding SelectedSyncDetails.TimestampFormatted}"
+                                           Foreground="#9CA3AF" FontSize="12"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Body Content: Lists of files -->
+                    <ScrollViewer Grid.Row="2" MaxHeight="440" Margin="0,0,0,16">
+                        <StackPanel Spacing="14" DataContext="{Binding SelectedSyncDetails}" x:DataType="platform:SyncRunDetails">
+                            <!-- Error Message Banner if Failed -->
+                            <Border Background="#450A0A" BorderBrush="#EF4444" BorderThickness="1" CornerRadius="6" Padding="12,8"
+                                    IsVisible="{Binding !Success}">
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="Error Encountered" FontWeight="Bold" Foreground="#F87171" FontSize="12"/>
+                                    <TextBlock Text="{Binding ErrorMessage}" Foreground="#FECACA" FontSize="12" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 1. Uploaded Files Card -->
+                            <Border Background="#111827" CornerRadius="8" Padding="14" BorderBrush="#059669" BorderThickness="1">
+                                <StackPanel Spacing="8">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="⬆" FontSize="14" Foreground="#34D399" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding UploadedHeader}" FontWeight="Bold" FontSize="13" Foreground="#34D399"/>
+                                    </StackPanel>
+                                    <TextBlock Text="No files were uploaded during this sync."
+                                               IsVisible="{Binding !HasUploadedFiles}"
+                                               FontSize="12" Foreground="#6B7280" Margin="22,0,0,0"/>
+                                    <ItemsControl ItemsSource="{Binding UploadedFiles}" IsVisible="{Binding HasUploadedFiles}" Margin="12,0,0,0">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="x:String">
+                                                <Grid ColumnDefinitions="Auto,*" Margin="0,2">
+                                                    <TextBlock Grid.Column="0" Text="• " Foreground="#34D399" FontSize="12"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding}" Foreground="#E5E7EB" FontSize="12" TextWrapping="Wrap"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 2. Downloaded Files Card -->
+                            <Border Background="#111827" CornerRadius="8" Padding="14" BorderBrush="#2563EB" BorderThickness="1">
+                                <StackPanel Spacing="8">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="⬇" FontSize="14" Foreground="#60A5FA" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding DownloadedHeader}" FontWeight="Bold" FontSize="13" Foreground="#60A5FA"/>
+                                    </StackPanel>
+                                    <TextBlock Text="No files were downloaded during this sync."
+                                               IsVisible="{Binding !HasDownloadedFiles}"
+                                               FontSize="12" Foreground="#6B7280" Margin="22,0,0,0"/>
+                                    <ItemsControl ItemsSource="{Binding DownloadedFiles}" IsVisible="{Binding HasDownloadedFiles}" Margin="12,0,0,0">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="x:String">
+                                                <Grid ColumnDefinitions="Auto,*" Margin="0,2">
+                                                    <TextBlock Grid.Column="0" Text="• " Foreground="#60A5FA" FontSize="12"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding}" Foreground="#E5E7EB" FontSize="12" TextWrapping="Wrap"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 3. Conflicted Files Card (if any) -->
+                            <Border Background="#111827" CornerRadius="8" Padding="14" BorderBrush="#D97706" BorderThickness="1"
+                                    IsVisible="{Binding HasConflictedFiles}">
+                                <StackPanel Spacing="8">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="⚠️" FontSize="14" Foreground="#FBBF24" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding ConflictedHeader}" FontWeight="Bold" FontSize="13" Foreground="#FBBF24"/>
+                                    </StackPanel>
+                                    <ItemsControl ItemsSource="{Binding ConflictedFiles}" Margin="12,0,0,0">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="x:String">
+                                                <Grid ColumnDefinitions="Auto,*" Margin="0,2">
+                                                    <TextBlock Grid.Column="0" Text="• " Foreground="#FBBF24" FontSize="12"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding}" Foreground="#FDE68A" FontSize="12" TextWrapping="Wrap"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- 4. Verified / Up to Date Files Card -->
+                            <Border Background="#111827" CornerRadius="8" Padding="14" BorderBrush="#374151" BorderThickness="1">
+                                <StackPanel Spacing="8">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="✓" FontSize="14" Foreground="#9CA3AF" FontWeight="Bold"/>
+                                        <TextBlock Text="{Binding VerifiedHeader}" FontWeight="Bold" FontSize="13" Foreground="#9CA3AF"/>
+                                    </StackPanel>
+                                    <TextBlock Text="No other files verified."
+                                               IsVisible="{Binding !HasVerifiedFiles}"
+                                               FontSize="12" Foreground="#6B7280" Margin="22,0,0,0"/>
+                                    <ItemsControl ItemsSource="{Binding VerifiedFiles}" IsVisible="{Binding HasVerifiedFiles}" Margin="12,0,0,0">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="x:String">
+                                                <Grid ColumnDefinitions="Auto,*" Margin="0,2">
+                                                    <TextBlock Grid.Column="0" Text="• " Foreground="#6B7280" FontSize="12"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding}" Foreground="#9CA3AF" FontSize="12" TextWrapping="Wrap"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <!-- Footer Action -->
+                    <Button Grid.Row="3" Content="Close"
+                            Command="{Binding CloseSyncDetailsCommand}"
+                            Background="#374151" Foreground="White" FontWeight="SemiBold"
+                            Padding="20,8" CornerRadius="6" HorizontalAlignment="Right"/>
+                </Grid>
             </Border>
         </Border>
     </Grid>

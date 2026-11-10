@@ -5,6 +5,7 @@ using System.Linq;
 using Avalonia.Media;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using FolderSyncEr.Client.Platform;
 
 namespace FolderSyncEr.Client.App.ViewModels;
@@ -29,7 +30,11 @@ public partial class ActivityItemViewModel : ViewModelBase
     public string Activity { get; }
     public DateTime TimestampUtc { get; }
     public string? Category { get; }
+    public SyncRunDetails? SyncDetails { get; }
+    public bool HasSyncDetails => SyncDetails != null;
     public IReadOnlyList<ActivitySegment> Segments { get; }
+
+    private readonly Action<SyncRunDetails>? _openDetailsAction;
 
     [ObservableProperty]
     private string _whenText = string.Empty;
@@ -44,14 +49,25 @@ public partial class ActivityItemViewModel : ViewModelBase
     public static readonly IBrush WarningBrush = Brush.Parse("#FBBF24"); // Amber (conflict/warning/paused)
     public static readonly IBrush MutedBrush = Brush.Parse("#9CA3AF");   // Muted gray
 
-    public ActivityItemViewModel(ActivityRecord record, DateTime? nowUtc = null)
+    public ActivityItemViewModel(ActivityRecord record, DateTime? nowUtc = null, Action<SyncRunDetails>? openDetailsAction = null)
     {
         Id = record.Id;
         Activity = record.Activity;
         TimestampUtc = record.TimestampUtc;
         Category = record.Category;
+        SyncDetails = record.SyncDetails;
+        _openDetailsAction = openDetailsAction;
         Segments = ParseSegments(Activity);
         RefreshWhen(nowUtc);
+    }
+
+    [RelayCommand]
+    public void OpenDetails()
+    {
+        if (SyncDetails != null)
+        {
+            _openDetailsAction?.Invoke(SyncDetails);
+        }
     }
 
     public void RefreshWhen(DateTime? nowUtc = null)
@@ -283,6 +299,32 @@ public partial class ActivitiesViewModel : ViewModelBase
     public bool HasActivities => FilteredActivities.Count > 0;
     public bool IsEmpty => FilteredActivities.Count == 0;
 
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(SyncDetailsStatusBrush))]
+    private SyncRunDetails? _selectedSyncDetails;
+
+    [ObservableProperty]
+    private bool _isSyncDetailsVisible;
+
+    public IBrush SyncDetailsStatusBrush => SelectedSyncDetails?.Success == true
+        ? ActivityItemViewModel.SuccessBrush
+        : ActivityItemViewModel.FailureBrush;
+
+    [RelayCommand]
+    public void OpenSyncDetails(SyncRunDetails? details)
+    {
+        if (details == null) return;
+        SelectedSyncDetails = details;
+        IsSyncDetailsVisible = true;
+    }
+
+    [RelayCommand]
+    public void CloseSyncDetails()
+    {
+        IsSyncDetailsVisible = false;
+        SelectedSyncDetails = null;
+    }
+
     public ActivitiesViewModel(IClientActivityService activityService)
     {
         _activityService = activityService ?? throw new ArgumentNullException(nameof(activityService));
@@ -292,7 +334,7 @@ public partial class ActivitiesViewModel : ViewModelBase
         var now = DateTime.UtcNow;
         foreach (var record in existing)
         {
-            Activities.Add(new ActivityItemViewModel(record, now));
+            Activities.Add(new ActivityItemViewModel(record, now, OpenSyncDetails));
         }
 
         ApplyFilter();
@@ -304,7 +346,7 @@ public partial class ActivitiesViewModel : ViewModelBase
     {
         void AddToUi()
         {
-            var item = new ActivityItemViewModel(record);
+            var item = new ActivityItemViewModel(record, openDetailsAction: OpenSyncDetails);
             Activities.Insert(0, item);
             ApplyFilter();
         }

@@ -14,13 +14,14 @@ public record ActivityRecord
     public string Activity { get; init; } = string.Empty;
     public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
     public string? Category { get; init; }
+    public SyncRunDetails? SyncDetails { get; init; }
 }
 
 public interface IClientActivityService : IDisposable
 {
     event EventHandler<ActivityRecord>? ActivityAdded;
     IReadOnlyList<ActivityRecord> GetActivities();
-    void LogActivity(string activity, string? category = null, DateTime? timestampUtc = null);
+    void LogActivity(string activity, string? category = null, DateTime? timestampUtc = null, SyncRunDetails? syncDetails = null);
     Task SaveAsync();
 }
 
@@ -101,7 +102,7 @@ public class ClientActivityService : IClientActivityService
         }
     }
 
-    public void LogActivity(string activity, string? category = null, DateTime? timestampUtc = null)
+    public void LogActivity(string activity, string? category = null, DateTime? timestampUtc = null, SyncRunDetails? syncDetails = null)
     {
         if (string.IsNullOrWhiteSpace(activity))
             return;
@@ -110,8 +111,9 @@ public class ClientActivityService : IClientActivityService
 
         lock (_lock)
         {
-            // Debounce duplicate events within 3 seconds (e.g. multiple FileSystemWatcher changed events for the same file)
-            if (string.Equals(_lastLoggedActivity, activity, StringComparison.OrdinalIgnoreCase) &&
+            // Debounce duplicate events within 3 seconds, unless distinct sync run details are attached
+            if (syncDetails == null &&
+                string.Equals(_lastLoggedActivity, activity, StringComparison.OrdinalIgnoreCase) &&
                 (now - _lastLoggedUtc).TotalSeconds < 3.0)
             {
                 return;
@@ -124,7 +126,8 @@ public class ClientActivityService : IClientActivityService
             {
                 Activity = activity.Trim(),
                 TimestampUtc = now,
-                Category = category
+                Category = category,
+                SyncDetails = syncDetails
             };
 
             _activities.Insert(0, record);

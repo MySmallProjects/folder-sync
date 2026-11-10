@@ -23,6 +23,14 @@ public partial class SettingsViewModel : ViewModelBase
     [ObservableProperty]
     private string _currentSyncFolder = string.Empty;
 
+    partial void OnCurrentSyncFolderChanged(string value)
+    {
+        if (!ShowFolderChangeConfirmation)
+        {
+            NewSyncFolderInput = value;
+        }
+    }
+
     [ObservableProperty]
     private string _newSyncFolderInput = string.Empty;
 
@@ -141,6 +149,7 @@ public partial class SettingsViewModel : ViewModelBase
         _setConflictPolicy = setConflictPolicy ?? throw new ArgumentNullException(nameof(setConflictPolicy));
 
         CurrentSyncFolder = _getSyncFolder() ?? string.Empty;
+        NewSyncFolderInput = CurrentSyncFolder;
         ServerUrl = _api.ServerUrl;
         SettingsFilePath = _settingsManager.SettingsFilePath;
         var configDir = Path.GetDirectoryName(_settingsManager.SettingsFilePath);
@@ -369,6 +378,12 @@ public partial class SettingsViewModel : ViewModelBase
             return;
         }
 
+        if (string.Equals(fullPath, CurrentSyncFolder, StringComparison.OrdinalIgnoreCase))
+        {
+            StatusMessage = "Folder is already set to this path.";
+            return;
+        }
+
         // Show confirmation explaining what happens to existing sync state
         ShowFolderChangeConfirmation = true;
     }
@@ -379,7 +394,7 @@ public partial class SettingsViewModel : ViewModelBase
         var fullPath = Path.GetFullPath(NewSyncFolderInput.Trim());
         await _setSyncFolder(fullPath);
         CurrentSyncFolder = fullPath;
-        NewSyncFolderInput = string.Empty;
+        NewSyncFolderInput = fullPath;
         ShowFolderChangeConfirmation = false;
         await PersistCurrentSettingsAsync();
         StatusMessage = $"Sync folder successfully switched to: {fullPath}";
@@ -391,7 +406,7 @@ public partial class SettingsViewModel : ViewModelBase
     public void CancelChangeFolder()
     {
         ShowFolderChangeConfirmation = false;
-        NewSyncFolderInput = string.Empty;
+        NewSyncFolderInput = CurrentSyncFolder;
     }
 
     [RelayCommand]

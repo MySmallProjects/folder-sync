@@ -223,4 +223,80 @@ public class ActivitiesViewModelTests
         Assert.Equal("online", segments[1].Text);
         Assert.Equal(ActivityItemViewModel.SuccessBrush, segments[1].Brush);
     }
+
+    [Fact]
+    public void SyncRunDetails_CalculatesItemCountsAndHeadersCorrectly()
+    {
+        var details = new SyncRunDetails
+        {
+            DurationSeconds = 1.45,
+            Success = true,
+            UploadedFiles = new() { "doc1.txt", "doc2.txt" },
+            DownloadedFiles = new() { "report.pdf" },
+            VerifiedFiles = new() { "logo.png", "data.json", "notes.txt" },
+            ConflictedFiles = new() { "readme.md" }
+        };
+
+        Assert.Equal(7, details.TotalItemsProcessed);
+        Assert.True(details.HasUploadedFiles);
+        Assert.True(details.HasDownloadedFiles);
+        Assert.True(details.HasVerifiedFiles);
+        Assert.True(details.HasConflictedFiles);
+        Assert.False(details.HasDeletedFiles);
+
+        Assert.Equal("Uploaded to Server (2)", details.UploadedHeader);
+        Assert.Equal("Downloaded from Server (1)", details.DownloadedHeader);
+        Assert.Equal("Verified / Up to Date (3)", details.VerifiedHeader);
+        Assert.Equal("Conflicts (1)", details.ConflictedHeader);
+        Assert.Equal("1.45s", details.DurationFormatted);
+        Assert.Equal("Successful", details.StatusText);
+    }
+
+    [Fact]
+    public void ActivitiesViewModel_SyncDetailsDialog_OpensAndCloses()
+    {
+        var tempFile = Path.Combine(Path.GetTempPath(), $"act_details_{Guid.NewGuid():N}.json");
+        try
+        {
+            using var service = new ClientActivityService(tempFile);
+            var details = new SyncRunDetails
+            {
+                Success = true,
+                UploadedFiles = new() { "fileA.txt" },
+                DownloadedFiles = new() { "fileB.txt" }
+            };
+
+            service.LogActivity("Sync successful (2 items)", "Sync", syncDetails: details);
+
+            var vm = new ActivitiesViewModel(service);
+            Assert.Single(vm.Activities);
+
+            var item = vm.Activities[0];
+            Assert.True(item.HasSyncDetails);
+            Assert.Same(details, item.SyncDetails);
+
+            Assert.False(vm.IsSyncDetailsVisible);
+            Assert.Null(vm.SelectedSyncDetails);
+
+            // Trigger open
+            item.OpenDetailsCommand.Execute(null);
+
+            Assert.True(vm.IsSyncDetailsVisible);
+            Assert.Same(details, vm.SelectedSyncDetails);
+            Assert.Equal(ActivityItemViewModel.SuccessBrush, vm.SyncDetailsStatusBrush);
+
+            // Close dialog
+            vm.CloseSyncDetailsCommand.Execute(null);
+
+            Assert.False(vm.IsSyncDetailsVisible);
+            Assert.Null(vm.SelectedSyncDetails);
+        }
+        finally
+        {
+            if (File.Exists(tempFile))
+            {
+                try { File.Delete(tempFile); } catch { }
+            }
+        }
+    }
 }
