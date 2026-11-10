@@ -346,9 +346,27 @@ public sealed class SyncCoordinator : IDisposable
                 LastSyncTimeUtc = DateTime.UtcNow;
                 LastError = null;
 
-                var upList = uploaded.Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
-                var downList = downloaded.Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
-                var confList = conflicted.Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
+                bool IsFile(string rel)
+                {
+                    if (string.IsNullOrWhiteSpace(rel)) return false;
+                    var norm = RemoteSnapshot.NormalizePath(rel);
+                    var fullLocal = Path.Combine(_localFolderPath, norm.Replace('/', Path.DirectorySeparatorChar));
+                    if (Directory.Exists(fullLocal))
+                        return false;
+
+                    if (_currentSnapshot != null)
+                    {
+                        var item = _currentSnapshot.GetItem(norm);
+                        if (item != null && item.IsDirectory)
+                            return false;
+                    }
+
+                    return true;
+                }
+
+                var upList = uploaded.Where(IsFile).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
+                var downList = downloaded.Where(IsFile).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
+                var confList = conflicted.Where(IsFile).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(x => x).ToList();
 
                 var allFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                 try
@@ -369,15 +387,37 @@ public sealed class SyncCoordinator : IDisposable
                 }
                 catch { }
 
+                if (_currentSnapshot != null)
+                {
+                    foreach (var remote in _currentSnapshot.GetAllItems())
+                    {
+                        if (!remote.IsDeleted && !remote.IsDirectory)
+                        {
+                            var rel = RemoteSnapshot.NormalizePath(remote.Path);
+                            if (!rel.StartsWith(".foldersyncer", StringComparison.OrdinalIgnoreCase) &&
+                                !rel.StartsWith("~") && !rel.EndsWith(".tmp") && !rel.EndsWith(".swp") && !rel.EndsWith(".crswap"))
+                            {
+                                allFiles.Add(rel);
+                            }
+                        }
+                    }
+                }
+
                 foreach (var p in evaluated)
                 {
-                    if (!string.IsNullOrWhiteSpace(p))
+                    if (IsFile(p))
                     {
-                        allFiles.Add(p);
+                        var norm = RemoteSnapshot.NormalizePath(p);
+                        if (!norm.StartsWith(".foldersyncer", StringComparison.OrdinalIgnoreCase) &&
+                            !norm.StartsWith("~") && !norm.EndsWith(".tmp") && !norm.EndsWith(".swp") && !norm.EndsWith(".crswap"))
+                        {
+                            allFiles.Add(norm);
+                        }
                     }
                 }
 
                 var verifiedList = allFiles
+                    .Where(IsFile)
                     .Where(f => !upList.Contains(f, StringComparer.OrdinalIgnoreCase) &&
                                 !downList.Contains(f, StringComparer.OrdinalIgnoreCase) &&
                                 !confList.Contains(f, StringComparer.OrdinalIgnoreCase))
