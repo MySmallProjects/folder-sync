@@ -30,16 +30,47 @@ public partial class ActivityItemViewModel : ViewModelBase
     public string Activity { get; }
     public DateTime TimestampUtc { get; }
     public string? Category { get; }
-    public SyncRunDetails? SyncDetails { get; }
-    public bool HasSyncDetails => SyncDetails != null;
     public IReadOnlyList<ActivitySegment> Segments { get; }
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EffectiveTimestampUtc))]
+    [NotifyPropertyChangedFor(nameof(FullTimestampText))]
+    [NotifyPropertyChangedFor(nameof(HasRepeatCount))]
+    [NotifyPropertyChangedFor(nameof(RepeatCountText))]
+    [NotifyPropertyChangedFor(nameof(RepeatCountTooltip))]
+    private DateTime? _timestampEndUtc;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasRepeatCount))]
+    [NotifyPropertyChangedFor(nameof(RepeatCountText))]
+    [NotifyPropertyChangedFor(nameof(RepeatCountTooltip))]
+    [NotifyPropertyChangedFor(nameof(FullTimestampText))]
+    private int _repeatCount = 1;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSyncDetails))]
+    private SyncRunDetails? _syncDetails;
+
+    public bool HasSyncDetails => SyncDetails != null;
+
+    public DateTime EffectiveTimestampUtc => TimestampEndUtc ?? TimestampUtc;
+
+    public bool HasRepeatCount => RepeatCount > 1;
+
+    public string RepeatCountText => $"x{RepeatCount}";
+
+    public string RepeatCountTooltip => HasRepeatCount
+        ? $"Occurred {RepeatCount} times between {TimestampUtc:yyyy-MM-dd HH:mm:ss} UTC and {EffectiveTimestampUtc:yyyy-MM-dd HH:mm:ss} UTC"
+        : TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
+
+    public string FullTimestampText => HasRepeatCount
+        ? $"Started:  {TimestampUtc:yyyy-MM-dd HH:mm:ss 'UTC'}\nLast Run: {EffectiveTimestampUtc:yyyy-MM-dd HH:mm:ss 'UTC'} ({RepeatCount} runs)"
+        : TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
 
     private readonly Action<SyncRunDetails>? _openDetailsAction;
 
     [ObservableProperty]
     private string _whenText = string.Empty;
-
-    public string FullTimestampText => TimestampUtc.ToString("yyyy-MM-dd HH:mm:ss 'UTC'");
 
     public static readonly IBrush DefaultBrush = Brush.Parse("#D1D5DB"); // Silver / neutral
     public static readonly IBrush FileBrush = Brush.Parse("#60A5FA");    // Bright blue (file/folder)
@@ -54,10 +85,20 @@ public partial class ActivityItemViewModel : ViewModelBase
         Id = record.Id;
         Activity = record.Activity;
         TimestampUtc = record.TimestampUtc;
+        TimestampEndUtc = record.TimestampEndUtc;
+        RepeatCount = record.RepeatCount;
         Category = record.Category;
         SyncDetails = record.SyncDetails;
         _openDetailsAction = openDetailsAction;
         Segments = ParseSegments(Activity);
+        RefreshWhen(nowUtc);
+    }
+
+    public void UpdateFrom(ActivityRecord record, DateTime? nowUtc = null)
+    {
+        TimestampEndUtc = record.TimestampEndUtc;
+        RepeatCount = record.RepeatCount;
+        SyncDetails = record.SyncDetails;
         RefreshWhen(nowUtc);
     }
 
@@ -66,13 +107,15 @@ public partial class ActivityItemViewModel : ViewModelBase
     {
         if (SyncDetails != null)
         {
+            SyncDetails.TimestampStartUtc = HasRepeatCount ? TimestampUtc : null;
+            SyncDetails.RepeatCount = RepeatCount;
             _openDetailsAction?.Invoke(SyncDetails);
         }
     }
 
     public void RefreshWhen(DateTime? nowUtc = null)
     {
-        WhenText = ClientActivityService.FormatRelativeTime(TimestampUtc, nowUtc);
+        WhenText = ClientActivityService.FormatRelativeTime(EffectiveTimestampUtc, nowUtc);
     }
 
     public static IReadOnlyList<ActivitySegment> ParseSegments(string activity)
@@ -340,6 +383,7 @@ public partial class ActivitiesViewModel : ViewModelBase
         ApplyFilter();
 
         _activityService.ActivityAdded += OnActivityAdded;
+        _activityService.ActivityUpdated += OnActivityUpdated;
     }
 
     private void OnActivityAdded(object? sender, ActivityRecord record)
@@ -358,6 +402,33 @@ public partial class ActivitiesViewModel : ViewModelBase
         else
         {
             Dispatcher.UIThread.Post(AddToUi);
+        }
+    }
+
+    private void OnActivityUpdated(object? sender, ActivityRecord record)
+    {
+        void UpdateInUi()
+        {
+            var match = Activities.FirstOrDefault(a => a.Id == record.Id);
+            if (match != null)
+            {
+                match.UpdateFrom(record);
+            }
+            else
+            {
+                var item = new ActivityItemViewModel(record, openDetailsAction: OpenSyncDetails);
+                Activities.Insert(0, item);
+                ApplyFilter();
+            }
+        }
+
+        if (Dispatcher.UIThread.CheckAccess())
+        {
+            UpdateInUi();
+        }
+        else
+        {
+            Dispatcher.UIThread.Post(UpdateInUi);
         }
     }
 

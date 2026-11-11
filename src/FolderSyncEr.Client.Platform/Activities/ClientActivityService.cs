@@ -13,13 +13,18 @@ public record ActivityRecord
     public string Id { get; init; } = Guid.NewGuid().ToString("N");
     public string Activity { get; init; } = string.Empty;
     public DateTime TimestampUtc { get; init; } = DateTime.UtcNow;
+    public DateTime? TimestampEndUtc { get; init; }
+    public int RepeatCount { get; init; } = 1;
     public string? Category { get; init; }
     public SyncRunDetails? SyncDetails { get; init; }
+
+    public DateTime EffectiveTimestampUtc => TimestampEndUtc ?? TimestampUtc;
 }
 
 public interface IClientActivityService : IDisposable
 {
     event EventHandler<ActivityRecord>? ActivityAdded;
+    event EventHandler<ActivityRecord>? ActivityUpdated;
     IReadOnlyList<ActivityRecord> GetActivities();
     void LogActivity(string activity, string? category = null, DateTime? timestampUtc = null, SyncRunDetails? syncDetails = null);
     Task SaveAsync();
@@ -38,6 +43,7 @@ public class ClientActivityService : IClientActivityService
     private bool _isDisposed;
 
     public event EventHandler<ActivityRecord>? ActivityAdded;
+    public event EventHandler<ActivityRecord>? ActivityUpdated;
 
     public ClientActivityService(string? customFilePath = null)
     {
@@ -84,7 +90,7 @@ public class ClientActivityService : IClientActivityService
                 if (items != null)
                 {
                     _activities.Clear();
-                    _activities.AddRange(items.OrderByDescending(a => a.TimestampUtc).Take(MaxActivityRetention));
+                    _activities.AddRange(items.OrderByDescending(a => a.EffectiveTimestampUtc).Take(MaxActivityRetention));
                 }
             }
             catch
@@ -111,7 +117,30 @@ public class ClientActivityService : IClientActivityService
 
         lock (_lock)
         {
-            // Debounce duplicate events within 3 seconds, unless distinct sync run details are attached
+            // If the latest activity is a sync event with identical text, collapse by updating TimestampEndUtc and RepeatCount
+            var isSyncEvent = string.Equals(category, "Sync", StringComparison.OrdinalIgnoreCase) || syncDetails != null;
+            if (isSyncEvent && _activities.Count > 0)
+            {
+                var latest = _activities[0];
+                var isLatestSync = string.Equals(latest.Category, "Sync", StringComparison.OrdinalIgnoreCase) || latest.SyncDetails != null;
+                if (isLatestSync && string.Equals(latest.Activity, activity.Trim(), StringComparison.OrdinalIgnoreCase))
+                {
+                    var updated = latest with
+                    {
+                        TimestampEndUtc = now,
+                        RepeatCount = latest.RepeatCount + 1,
+                        SyncDetails = syncDetails ?? latest.SyncDetails
+                    };
+                    _activities[0] = updated;
+                    _lastLoggedActivity = activity;
+                    _lastLoggedUtc = now;
+                    ActivityUpdated?.Invoke(this, updated);
+                    ScheduleSave();
+                    return;
+                }
+            }
+
+            // Debounce duplicate non-sync events within 3 seconds
             if (syncDetails == null &&
                 string.Equals(_lastLoggedActivity, activity, StringComparison.OrdinalIgnoreCase) &&
                 (now - _lastLoggedUtc).TotalSeconds < 3.0)
@@ -126,6 +155,8 @@ public class ClientActivityService : IClientActivityService
             {
                 Activity = activity.Trim(),
                 TimestampUtc = now,
+                TimestampEndUtc = null,
+                RepeatCount = 1,
                 Category = category,
                 SyncDetails = syncDetails
             };

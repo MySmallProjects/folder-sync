@@ -299,4 +299,79 @@ public class ActivitiesViewModelTests
             }
         }
     }
+
+    [Fact]
+    public void ClientActivityService_CollapsesConsecutiveSyncEventsWithEndTimestampAndRepeatCount()
+    {
+        var tempFile = Path.Combine(Path.GetTempPath(), $"act_collapse_{Guid.NewGuid():N}.json");
+        try
+        {
+            using var service = new ClientActivityService(tempFile);
+            var vm = new ActivitiesViewModel(service);
+
+            var t0 = new DateTime(2026, 11, 10, 21, 0, 0, DateTimeKind.Utc);
+            var t1 = t0.AddMinutes(1);
+            var t2 = t0.AddMinutes(2);
+
+            var details0 = new SyncRunDetails { TimestampUtc = t0, DurationSeconds = 0.2 };
+            var details1 = new SyncRunDetails { TimestampUtc = t1, DurationSeconds = 0.15 };
+            var details2 = new SyncRunDetails { TimestampUtc = t2, DurationSeconds = 0.18 };
+
+            // 1st sync
+            service.LogActivity("Sync successful (37 items)", "Sync", t0, details0);
+            Assert.Single(vm.Activities);
+            var item = vm.Activities[0];
+            Assert.Equal(1, item.RepeatCount);
+            Assert.False(item.HasRepeatCount);
+            Assert.Null(item.TimestampEndUtc);
+            Assert.Equal(t0, item.TimestampUtc);
+
+            // 2nd identical sync
+            service.LogActivity("Sync successful (37 items)", "Sync", t1, details1);
+            Assert.Single(vm.Activities);
+            Assert.Equal(2, item.RepeatCount);
+            Assert.True(item.HasRepeatCount);
+            Assert.Equal("x2", item.RepeatCountText);
+            Assert.Equal(t1, item.TimestampEndUtc);
+            Assert.Equal(t1, item.EffectiveTimestampUtc);
+
+            // 3rd identical sync
+            service.LogActivity("Sync successful (37 items)", "Sync", t2, details2);
+            Assert.Single(vm.Activities);
+            Assert.Equal(3, item.RepeatCount);
+            Assert.Equal("x3", item.RepeatCountText);
+            Assert.Equal(t2, item.TimestampEndUtc);
+
+            // Verify details dialog gets start time and repeat count
+            item.OpenDetailsCommand.Execute(null);
+            Assert.NotNull(vm.SelectedSyncDetails);
+            Assert.Equal(3, vm.SelectedSyncDetails.RepeatCount);
+            Assert.Equal(t0, vm.SelectedSyncDetails.TimestampStartUtc);
+            Assert.True(vm.SelectedSyncDetails.HasDateRange);
+            Assert.Equal("3 runs", vm.SelectedSyncDetails.RunsCountText);
+
+            // When a different activity happens (e.g. file edit)
+            var t3 = t0.AddMinutes(3);
+            service.LogActivity("You modified notes.txt", "File", t3);
+            Assert.Equal(2, vm.Activities.Count);
+            Assert.Equal("You modified notes.txt", vm.Activities[0].Activity);
+            Assert.Equal("Sync successful (37 items)", vm.Activities[1].Activity);
+
+            // When another sync happens, it starts a fresh entry above the file edit
+            var t4 = t0.AddMinutes(4);
+            var details4 = new SyncRunDetails { TimestampUtc = t4 };
+            service.LogActivity("Sync successful (37 items)", "Sync", t4, details4);
+            Assert.Equal(3, vm.Activities.Count);
+            Assert.Equal("Sync successful (37 items)", vm.Activities[0].Activity);
+            Assert.Equal(1, vm.Activities[0].RepeatCount);
+            Assert.False(vm.Activities[0].HasRepeatCount);
+        }
+        finally
+        {
+            if (File.Exists(tempFile))
+            {
+                try { File.Delete(tempFile); } catch { }
+            }
+        }
+    }
 }
