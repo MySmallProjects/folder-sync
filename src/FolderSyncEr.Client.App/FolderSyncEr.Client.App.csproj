@@ -12,7 +12,7 @@
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
     <VersionMajor>1</VersionMajor>
-    <VersionMinor>4</VersionMinor>
+    <VersionMinor>5</VersionMinor>
     <RuntimeIdentifiers>linux-x64;win-x64</RuntimeIdentifiers>
     <BuildVersionFile>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\..\build.client.version'))</BuildVersionFile>
   </PropertyGroup>
